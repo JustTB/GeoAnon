@@ -25,7 +25,6 @@ import org.openstreetmap.josm.data.gpx.GpxRoute;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.WayPoint;
-import org.openstreetmap.josm.gui.preferences.GPXSettingsPanel;
 import org.openstreetmap.josm.io.GpxReader;
 import org.openstreetmap.josm.io.GpxWriter;
 import org.xml.sax.SAXException;
