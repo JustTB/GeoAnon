@@ -10,7 +10,10 @@ import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
+import org.openstreetmap.josm.data.gpx.ImmutableGpxTrack;
+import org.openstreetmap.josm.data.gpx.ImmutableGpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.WayPoint;
+import org.openstreetmap.josm.gui.preferences.GPXSettingsPanel;
 
 
 public class GridMatrix extends Matrix<Integer, Bounds> {
@@ -49,6 +52,45 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		generateTracks();
 	}
 	public void generateTracks() {
+		connectPoints();
+		buildTracks();
+		
+	}
+	private void buildTracks() {
+		LinkedList<MergedWayPoint> mergedWayPointsList = new LinkedList<MergedWayPoint>(mergedWaypoints.values());
+		List<List<MergedWayPoint>> segs;
+		List<GpxTrack> resultTracks;
+		segs=createSegments(mergedWayPointsList);
+		
+	}
+	private List<List<MergedWayPoint>> createSegments(LinkedList<MergedWayPoint> mergedWayPointsList) {
+		List<List<MergedWayPoint>> segs= new LinkedList<List<MergedWayPoint>>();
+		List<MergedWayPoint> list = new LinkedList<MergedWayPoint>();
+		MergedWayPoint temp = mergedWayPointsList.getFirst();
+		MergedWayPoint neighbor;
+		while(!mergedWayPointsList.isEmpty()){
+			list.add(temp);
+			neighbor = temp.getOneNotMarkedNeighbor();
+			if(neighbor==null){
+				mergedWayPointsList.remove(temp);
+				if(list.size()>1){//no one point seqs
+					segs.add(list);
+				}
+				if(mergedWayPointsList.isEmpty()){
+					break;
+				}else{
+					temp=mergedWayPointsList.getFirst();
+					list = new LinkedList<MergedWayPoint>();
+				}
+			}else{
+				temp.colorConnection(neighbor);
+				temp=neighbor;
+			}
+		}
+		//TODO
+		return segs;
+	}
+	private void connectPoints() {
 		for (int i = 0; i < widthSize; i++) {//count X
 			for (int j = 0; j < heightSize; j++) {//count Y
 				if(j+1<heightSize){//up
@@ -65,12 +107,10 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 				}
 			}
 		}
-		
 	}
 	private void connectSameTracks(int x, int y, int x2, int y2) {
 		//get merged points
-		MergedWayPoint firstOne = getMergedPoint(x,y);
-		MergedWayPoint secondOne = getMergedPoint(x2,y2);
+		getMergedPoint(x,y).connectSameTracks(getMergedPoint(x2,y2));
 	}
 	private MergedWayPoint getMergedPoint(int x, int y) {
 		return mergedWaypoints.getValue(getValue(x, y));
