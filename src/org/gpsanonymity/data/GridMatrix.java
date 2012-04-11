@@ -23,6 +23,8 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	private LatLon downLeftCorner;
 	private Bounds holeGrid;
 	private BiMap<Bounds,MergedWayPoint> mergedWaypoints = new BiMap<Bounds, MergedWayPoint>();
+	private boolean follow;
+	private List<GpxTrack> tracks;
 	/**
 	 * 
 	 * @param ts MUST BE a Collection from type WayPoint or GpxTrack
@@ -31,13 +33,14 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	 * IMPORTANT: through performance reasons we only check the first element of the collection,
 	 * if the collection has not only GpxTracks or not only WayPoints this will bring DOOM!!!!!
 	 */
-	public GridMatrix(List<GpxTrack> ts, double distance) {
-		initWithTracks(ts, distance);
+	public GridMatrix(List<GpxTrack> ts,int k, double distance, boolean follow) {
+		this.follow=follow;
+		initWithTracks(ts,k, distance);
 	}
 	public GridMatrix(double distance, Collection<WayPoint> wps) {
 		initWithWayPoints(wps, distance);
 	}
-	private void initWithTracks(Collection<GpxTrack> ts, double distance){
+	private void initWithTracks(Collection<GpxTrack> ts,int k, double distance){
 		Bounds newBounds=null;
 		for (Iterator<GpxTrack> iterator = ts.iterator(); iterator.hasNext();) {
 			GpxTrack gpxTrack = (GpxTrack) iterator.next();
@@ -49,7 +52,16 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		}
 		initialize(newBounds,distance);
 		addTracks(ts);
+		eliminateLowerGrades(k);
 		generateTracks();
+	}
+	private void eliminateLowerGrades(int k) {
+		for (MergedWayPoint mwp : mergedWaypoints.values()) {
+			if(mwp.getGrade()<k){
+				mergedWaypoints.removeValue(mwp);
+			}
+		}
+		
 	}
 	public void generateTracks() {
 		connectPoints();
@@ -59,9 +71,19 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	private void buildTracks() {
 		LinkedList<MergedWayPoint> mergedWayPointsList = new LinkedList<MergedWayPoint>(mergedWaypoints.values());
 		List<List<MergedWayPoint>> segs;
-		List<GpxTrack> resultTracks;
+		tracks = new LinkedList<GpxTrack>();
+		Collection<Collection<WayPoint>> virtualSeq;
 		segs=createSegments(mergedWayPointsList);
+		for (List<MergedWayPoint> seg : segs) {
+			virtualSeq = new LinkedList<Collection<WayPoint>>();
+			//FIXME: not type safe but should be fast
+			virtualSeq.add((List<WayPoint>)(List)seg);
+			tracks.add(new ImmutableGpxTrack(virtualSeq,null));
+		}
 		
+	}
+	public List<GpxTrack> getTracks() {
+		return tracks;
 	}
 	private List<List<MergedWayPoint>> createSegments(LinkedList<MergedWayPoint> mergedWayPointsList) {
 		List<List<MergedWayPoint>> segs= new LinkedList<List<MergedWayPoint>>();
@@ -87,7 +109,6 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 				temp=neighbor;
 			}
 		}
-		//TODO
 		return segs;
 	}
 	private void connectPoints() {
@@ -110,7 +131,11 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	}
 	private void connectSameTracks(int x, int y, int x2, int y2) {
 		//get merged points
-		getMergedPoint(x,y).connectSameTracks(getMergedPoint(x2,y2));
+		MergedWayPoint mwp1 = getMergedPoint(x, y);
+		MergedWayPoint mwp2 = getMergedPoint(x2, y2);
+		if(mwp1!=null && mwp2!=null){
+			mwp1.connectSameTracks(mwp2, follow);
+		}
 	}
 	private MergedWayPoint getMergedPoint(int x, int y) {
 		return mergedWaypoints.getValue(getValue(x, y));
@@ -140,7 +165,7 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		for (Iterator<WayPoint> wp = wps.iterator(); wp.hasNext();) {
 			WayPoint wayPoint = (WayPoint) wp.next();
 			temp= addWayPoint(wayPoint);
-			temp.addSegment(s);
+			temp.addSegment(s,wayPoint);
 		}
 		
 	}
@@ -154,8 +179,8 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 			for (Iterator<WayPoint> wp = wps.iterator(); wp.hasNext();) {
 				WayPoint wayPoint = (WayPoint) wp.next();
 				temp= addWayPoint(wayPoint);
-				temp.addSegment(gpxTrackSegment);
-				temp.addTrack(t);
+				temp.addSegment(gpxTrackSegment,wayPoint);
+				temp.addTrack(t,wayPoint);
 			}
 		}
 	}

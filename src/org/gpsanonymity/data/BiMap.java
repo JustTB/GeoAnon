@@ -40,6 +40,13 @@ public class BiMap<E,D> {
 	public boolean containsValue(D value) {
 		return valueKey.containsKey(value);
 	}
-	
+	public void removeKey(E key){
+		valueKey.remove(keyValue.get(key));
+		keyValue.remove(key);
+	}
+	public void removeValue(D value){
+		keyValue.remove(valueKey.get(value));
+		valueKey.remove(value);
+	}
 	
 }

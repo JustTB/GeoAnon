@@ -64,7 +64,10 @@ public class Main {
 		GridMatrix gridMatrix = new GridMatrix(gridSize, waypoints);
 		return MergeGPS.eliminateLowerGrades(gridMatrix.getMergedWaypoints(), k);
 	}
-	public static List<GpxTrack> mergingTracksOnGrid(List<GpxTrack> tracks,int k , double gridSize) {
+	public static List<GpxTrack> mergingTracksOnGrid(List<GpxTrack> tracks,int k , double gridSize, boolean follow) {
+		GridMatrix gridMatrix = new GridMatrix(tracks,k, gridSize,follow);
+		gridMatrix.getTracks();
+		//TODO
 		return null;
 	}
 
