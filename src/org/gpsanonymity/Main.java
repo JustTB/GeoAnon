@@ -1,5 +1,6 @@
 package org.gpsanonymity;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import org.gpsanonymity.data.GridMatrix;
 import org.gpsanonymity.io.IOFunctions;
 import org.gpsanonymity.merge.MergeGPS;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
+import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.WayPoint;
 import org.openstreetmap.josm.io.GpxReader;
 
@@ -42,33 +44,80 @@ public class Main {
 		}
 		
 	}
+	/**
+	 * Imports all WayPoints from a gpx file, path given by filePath
+	 * @param filePath path of the gpx file
+	 * @return waypoints from the file
+	 */
 	public static List<WayPoint> importWayPoints(String filePath) {
 		return IOFunctions.getAllWaypoints(
 				IOFunctions.importGPX(filePath));
 	}
+	/**
+	 * Imports all tracks from a gpx file, path given by filePath
+	 * @param filePath path of the gpx file
+	 * @return tracks from the file
+	 */
 	public static List<GpxTrack> importTracks(String filePath) {
 		return new LinkedList<GpxTrack>(IOFunctions.importGPX(
 				filePath).data.tracks);
 	}
-
+	/**
+	 * Merging waypoints in a given radius to one point
+	 * @param waypoints waypoints wich should merged
+	 * @param k a merged point has to guarantee k points in the mergedpoint
+	 * @param pointRadius radius around the first point
+	 * @return list of all merged points
+	 */
 	public static List<WayPoint> merginWayPoints(List<WayPoint> waypoints,int k , double pointRadius) {
 		return MergeGPS.eliminateLowerGrades(
 				MergeGPS.mergeWaypoints(waypoints,
 						pointRadius),
 				k);
 	}
+	/**
+	 * merges given Tracks
+	 * @param tracks given Tracks
+	 * @param k factor for k-anonymity
+	 * @param pointRadius radius around the points
+	 * @param TrackDistance distance between to tracks
+	 * @return new merged Tracks
+	 * @see Main#merginWayPoints(List, int, double)
+	 */
 	public static List<GpxTrack> mergingTracks(List<GpxTrack> tracks,int k , double pointRadius, double TrackDistance) {
-		return null;
-	}
-	public static List<WayPoint> mergingWaypointsOnGrid(List<WayPoint> waypoints,int k , double gridSize) {
-		GridMatrix gridMatrix = new GridMatrix(gridSize, waypoints);
-		return MergeGPS.eliminateLowerGrades(gridMatrix.getMergedWaypoints(), k);
-	}
-	public static List<GpxTrack> mergingTracksOnGrid(List<GpxTrack> tracks,int k , double gridSize, boolean follow) {
-		GridMatrix gridMatrix = new GridMatrix(tracks,k, gridSize,follow);
-		gridMatrix.getTracks();
 		//TODO
 		return null;
+	}
+	/**
+	 * Merges Waypoints with a grid over the map. WayPoints in the same grid coordinates will be merged. 
+	 * @param waypoints given waypoints
+	 * @param k factor for k-anonymity
+	 * @param gridSize sitelength of a grid coordinate in meter
+	 * @return merged waypoints
+	 */
+	public static List<WayPoint> mergingWaypointsOnGrid(List<WayPoint> waypoints,int k , double gridSize) {
+		GridMatrix gridMatrix = new GridMatrix(gridSize, waypoints);
+		return MergeGPS.eliminateLowerGrades(
+				gridMatrix.getMergedWaypoints(), k);
+	}
+	/**
+	 * Merges
+	 * @param tracks
+	 * @param k
+	 * @param gridSize
+	 * @param follow
+	 * @return
+	 * @see Main#mergingWaypointsOnGrid(List, int, double)
+	 */
+	public static List<GpxTrack> mergingTracksOnGrid(List<GpxTrack> tracks,int k , double gridSize, boolean follow) {
+		for (GpxTrack gpxTrack : tracks) {
+			Collection<GpxTrackSegment> segs = gpxTrack.getSegments();
+			for (GpxTrackSegment gpxTrackSegment : segs) {
+				MergeGPS.createMoreWaypoints(segs, gridSize);
+			}	
+		}
+		GridMatrix gridMatrix = new GridMatrix(tracks,k, gridSize,follow);
+		return gridMatrix.getTracks();
 	}
 
 }

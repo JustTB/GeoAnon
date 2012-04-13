@@ -165,7 +165,7 @@ public class MergeGPS {
 		}
 		return result;
 	}
-	public static void createMoreWaypoints(LinkedList<GpxTrackSegment> sourceSeg, int maxdistance) {
+	public static void createMoreWaypoints(Collection<GpxTrackSegment> sourceSeg, double maxdistance) {
 		for (GpxTrackSegment gpxTrackSegment : sourceSeg) {
 			LinkedList<WayPoint> tempWaypoints = new LinkedList<WayPoint>(gpxTrackSegment.getWayPoints());
 			for (int i = 1; i < tempWaypoints.size(); i++) {
