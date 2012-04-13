@@ -155,9 +155,11 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 			}
 		}
 		initialize(newBounds,distance);
+		addWayPoints(wps);
 	}
-	private LatLon addNorthernDistance(LatLon p, double distance){
-		return new LatLon(p.getY()+distance/110574, p.getX()); 
+	public static LatLon addNorthernDistance(LatLon p, double distance){
+		return new LatLon(p.getY()+(180/Math.PI)*(distance/6378137),p.getX());
+		//return new LatLon(p.getY()+distance/110574,p.getX()); 
 	}
 	public void addSegment(GpxTrackSegment s) {
 		Collection<WayPoint> wps = s.getWayPoints();
@@ -192,28 +194,39 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		}
 		
 	}
+	public void addWayPoints(Collection<WayPoint> wps) {
+		for (WayPoint wp : wps) {
+			addWayPoint(wp);
+		}
+	}
 	public MergedWayPoint addWayPoint(WayPoint p) {
 		Bounds bounds = findField(p);
-		if (mergedWaypoints.containsKey(bounds)){
+		if(bounds==null){
+			return null;
+		}else if (mergedWaypoints.containsKey(bounds)){
 			mergedWaypoints.getValue(bounds).addWayPoint(p);
 			return mergedWaypoints.getValue(bounds);
 		}else{
-			return null;
+			MergedWayPoint newMWP = new MergedWayPoint(p);
+			mergedWaypoints.putKeyValue(bounds, newMWP);
+			return newMWP;
 		}
 	}
-	private LatLon addWesternDistance(LatLon p, double distance){
-		return new LatLon(p.getY(),p.getX()+distance/111320*Math.cos(p.getY()));
+	public static LatLon addWesternDistance(LatLon p, double distance){
+		return new LatLon(p.getY(),p.getX()+(180/Math.PI)*(distance/6378137)/Math.cos(Math.toRadians(p.getY())));
 	}
 	public Bounds findField(WayPoint wp){
 		if (holeGrid.contains(wp.getCoor())){
-			int x = (int)Math.ceil(wp.getCoor().getX()/distance)-1;
-			int y = (int)Math.ceil(wp.getCoor().getY()/distance)-1;
+			LatLon referX = new LatLon(wp.getCoor().getY(),holeGrid.getMin().getX());
+			LatLon referY = new LatLon(holeGrid.getMin().getY(),wp.getCoor().getX());
+
+			int x = (int)Math.ceil(referX.greatCircleDistance(wp.getCoor())/distance);
+			int y = (int)Math.ceil(referY.greatCircleDistance(wp.getCoor())/distance);
 			Bounds result= getValue(x, y);
 			if (result.contains(wp.getCoor())){
 				return result;
 			}else{
-				new Error("Assumption failure!");
-				return null;
+				throw new Error("Assumption failure!");
 			}
 		}else{
 			return null;
@@ -229,7 +242,7 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 			uRCorner = addWesternDistance(uRCorner, distance);
 			for (int j = 0; j < heightSize; j++) {//count Y
 				dLCorner = addNorthernDistance(dLCorner, distance);
-				uRCorner = addNorthernDistance(dLCorner, distance);
+				uRCorner = addNorthernDistance(uRCorner, distance);
 				put(i,j, new Bounds(dLCorner, uRCorner));
 			}
 			//set Y to -1
@@ -263,10 +276,10 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 				.greatCircleDistance(rightDownCorner));
 		this.widthSize = (int)Math.ceil(
 				border.getMin()
-				.greatCircleDistance(rightDownCorner)/distance);
+				.greatCircleDistance(rightDownCorner)/distance)+1;
 		this.heightSize = (int)Math.ceil(
 				border.getMax()
-				.greatCircleDistance(rightDownCorner)/distance);
+				.greatCircleDistance(rightDownCorner)/distance)+1;
 		downLeftCorner=border.getMin();
 		generateGrid();
 	}
