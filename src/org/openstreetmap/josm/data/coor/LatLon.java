@@ -282,7 +282,9 @@ public class LatLon extends Coordinate {
      * @return rounded value
      */
     public static double roundToOsmPrecision(double value) {
-        return Math.round(value / MAX_SERVER_PRECISION) * MAX_SERVER_PRECISION; // causes tiny rounding errors (see LatLonTest)
+        //return Math.round(value / MAX_SERVER_PRECISION) * MAX_SERVER_PRECISION; // causes tiny rounding errors (see LatLonTest)
+    	//in my project should not be rounded
+    	return value;
     }
 
     /**
