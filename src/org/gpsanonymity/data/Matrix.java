@@ -36,7 +36,7 @@ public abstract class Matrix<E,F> {
 		
 		@Override
 		public int hashCode() {
-			return x.hashCode()+y.hashCode();
+			return x.hashCode()*5+y.hashCode()*7;
 		}
 		@Override
 		public boolean equals(Object o) {

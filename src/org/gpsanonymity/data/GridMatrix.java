@@ -19,7 +19,7 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	private int heightSize;
 	private double distance;
 	private LatLon downLeftCorner;
-	private Bounds holeGrid;
+	private Bounds wholeGrid;
 	private BiMap<Bounds,MergedWayPoint> mergedWaypoints = new BiMap<Bounds, MergedWayPoint>();
 	private boolean follow;
 	private List<GpxTrack> tracks;
@@ -198,7 +198,7 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		}
 	}
 	public MergedWayPoint addWayPoint(WayPoint p) {
-		Bounds bounds = findFieldSimple(p);
+		Bounds bounds = findField(p);
 		if(bounds==null){
 			return null;
 		}else if (mergedWaypoints.containsKey(bounds)){
@@ -215,24 +215,27 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	}
 	@Deprecated
 	public Bounds findField(WayPoint wp){
-		if (holeGrid.contains(wp.getCoor())){
-			LatLon referH = new LatLon(wp.getCoor().getY(),holeGrid.getMin().getX());
-			LatLon referW = new LatLon(holeGrid.getMin().getY(),wp.getCoor().getX());
+		if (wholeGrid.contains(wp.getCoor())){
+			LatLon referH = new LatLon(wp.getCoor().getY(),wholeGrid.getMin().getX());
+			LatLon referW = new LatLon(wholeGrid.getMin().getY(),wp.getCoor().getX());
 			//distance between referenceWidth to wp is height
-			int h = (int)Math.ceil(referW.greatCircleDistance(wp.getCoor())/distance);
+			int h = (int)Math.floor(
+					referW.greatCircleDistance(wp.getCoor())/distance);
 			//distance between referenceHeight to wp is width
-			int w = (int)Math.ceil(referH.greatCircleDistance(wp.getCoor())/distance);
+			int w = (int)Math.floor(referH.greatCircleDistance(wp.getCoor())/distance);
 			
 			Bounds result= getValue(w, h);
 			Bounds correctResult = findFieldSimple(wp);
-			if (result.contains(wp.getCoor()) && correctResult.contains(wp.getCoor())){
-				System.out.println("In Both!!!!");
-			}
-			System.out.println("Differenz:");
-			System.out.println("X:"+(getKey(correctResult).getX()-getKey(result).getX()));
-			System.out.println("Y:"+(getKey(correctResult).getY()-getKey(result).getY()));
-			if(result.equals(correctResult)){
-				System.out.println("Calculated is CORRECT!!");
+			if(!result.equals(correctResult)){
+				System.out.println("Difference:");
+				System.out.println("X:"+(getKey(correctResult).getX()-getKey(result).getX()));
+				System.out.println("Y:"+(getKey(correctResult).getY()-getKey(result).getY()));
+				System.out.println("Calculation is INCORRECT!!");
+				if(result.contains(wp.getCoor()) 
+						&& correctResult.contains(wp.getCoor())
+						){
+					System.out.println("...NOT!");
+				}
 			}
 			if (result.contains(wp.getCoor())){
 				return result;
@@ -258,21 +261,24 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	}
 	private void generateGrid() {
 		//initial Bounds lying on (-1,-1)
-		LatLon uRCorner=downLeftCorner;
-		LatLon dLCorner = addWesternDistance(addNorthernDistance(uRCorner, -distance), -distance);
+		LatLon uRCornerStart,dLCornerStart;
+		LatLon dLCorner=dLCornerStart=downLeftCorner; 
+		LatLon uRCorner=uRCornerStart=addWesternDistance(addNorthernDistance(dLCornerStart, distance), distance);
 		for (int w = 0; w < widthSize; w++) {//count X
-			dLCorner = addWesternDistance(dLCorner, distance);
-			uRCorner = addWesternDistance(uRCorner, distance);
 			for (int h = 0; h < heightSize; h++) {//count Y
-				dLCorner = addNorthernDistance(dLCorner, distance);
-				uRCorner = addNorthernDistance(uRCorner, distance);
+				dLCorner = addNorthernDistance(
+						addWesternDistance(dLCornerStart, w*distance),
+						h*distance);
+				uRCorner = addNorthernDistance(
+						addWesternDistance(uRCornerStart, w*distance),
+						h*distance);
 				put(w,h, new Bounds(dLCorner, uRCorner));
 			}
 			//set Y to -1
-			dLCorner = addNorthernDistance(dLCorner, -heightSize*distance);
-			uRCorner = addNorthernDistance(uRCorner, -heightSize*distance);
+			dLCorner = new LatLon(dLCornerStart.getY(),dLCorner.getX());//addNorthernDistance(dLCorner, -heightSize*distance);
+			uRCorner = new LatLon(uRCornerStart.getY(),uRCorner.getX());
 		}
-		holeGrid = new Bounds(downLeftCorner,getValue(widthSize-1, heightSize-1).getMax());
+		wholeGrid = new Bounds(downLeftCorner,getValue(widthSize-1, heightSize-1).getMax());
 	}
 	public double getDistance() {
 		return distance;
