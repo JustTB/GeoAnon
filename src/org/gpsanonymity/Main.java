@@ -1,6 +1,7 @@
 package org.gpsanonymity;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import org.gpsanonymity.io.IOFunctions;
 import org.gpsanonymity.merge.MergeGPS;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
+import org.openstreetmap.josm.data.gpx.ImmutableGpxTrack;
 import org.openstreetmap.josm.data.gpx.WayPoint;
 import org.openstreetmap.josm.io.GpxReader;
 
@@ -110,13 +112,11 @@ public class Main {
 	 * @see Main#mergingWaypointsOnGrid(List, int, double)
 	 */
 	public static List<GpxTrack> mergingTracksOnGrid(List<GpxTrack> tracks,int k , double gridSize, boolean follow) {
+		List<GpxTrack> newTracks= new LinkedList<GpxTrack>();
 		for (GpxTrack gpxTrack : tracks) {
-			Collection<GpxTrackSegment> segs = gpxTrack.getSegments();
-			for (GpxTrackSegment gpxTrackSegment : segs) {
-				MergeGPS.createMoreWaypoints(segs, gridSize);
-			}	
+			newTracks.add(MergeGPS.createMoreWaypoints(gpxTrack, gridSize));
 		}
-		GridMatrix gridMatrix = new GridMatrix(tracks,k, gridSize,follow);
+		GridMatrix gridMatrix = new GridMatrix(newTracks,k, gridSize,follow);
 		return gridMatrix.getTracks();
 	}
 

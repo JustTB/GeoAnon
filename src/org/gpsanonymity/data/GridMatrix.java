@@ -156,8 +156,13 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		addWayPoints(wps);
 	}
 	public static LatLon addNorthernDistance(LatLon p, double distance){
-		return new LatLon(p.getY()+(180/Math.PI)*(distance/6378137),p.getX());
+		return new LatLon(p.getY()+(180/Math.PI)*(distance/6378135),p.getX());
 		//return new LatLon(p.getY()+distance/110574,p.getX()); 
+	}
+	public static LatLon addDistance(LatLon p, double northernDistance, double westernDistance){
+		double y = p.getY()+(180/Math.PI)*(northernDistance/6378135);
+		double x = p.getX()+(180/Math.PI)*(westernDistance/6378135)/Math.cos(Math.toRadians(p.getY()));
+		return new LatLon(y,x);
 	}
 	public void addSegment(GpxTrackSegment s) {
 		Collection<WayPoint> wps = s.getWayPoints();
@@ -211,7 +216,7 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		}
 	}
 	public static LatLon addWesternDistance(LatLon p, double distance){
-		return new LatLon(p.getY(),p.getX()+(180/Math.PI)*(distance/6378137)/Math.cos(Math.toRadians(p.getY())));
+		return new LatLon(p.getY(),p.getX()+(180/Math.PI)*(distance/6378135)/Math.cos(Math.toRadians(p.getY())));
 	}
 	@Deprecated
 	public Bounds findField(WayPoint wp){
@@ -219,30 +224,22 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 			LatLon referH = new LatLon(wp.getCoor().getY(),wholeGrid.getMin().getX());
 			LatLon referW = new LatLon(wholeGrid.getMin().getY(),wp.getCoor().getX());
 			//distance between referenceWidth to wp is height
+			double hDistance=referW.greatCircleDistance(wp.getCoor());
 			int h = (int)Math.floor(
-					referW.greatCircleDistance(wp.getCoor())/distance);
+					hDistance/distance);
 			//distance between referenceHeight to wp is width
-			int w = (int)Math.floor(referH.greatCircleDistance(wp.getCoor())/distance);
+			double wDistance=referH.greatCircleDistance(wp.getCoor());
+			int w = (int)Math.floor(wDistance/distance);
 			
-			Bounds result= getValue(w, h);
-			Bounds correctResult = findFieldSimple(wp);
-			if(!result.equals(correctResult)){
-				System.out.println("Difference:");
-				System.out.println("X:"+(getKey(correctResult).getX()-getKey(result).getX()));
-				System.out.println("Y:"+(getKey(correctResult).getY()-getKey(result).getY()));
-				System.out.println("Calculation is INCORRECT!!");
-				if(result.contains(wp.getCoor()) 
-						&& correctResult.contains(wp.getCoor())
-						){
-					System.out.println("...NOT!");
+			Bounds correctedResult,result= getValue(w, h);
+			if(!result.contains(wp.getCoor())){
+				correctedResult=getValue(w+1, h);
+				if(!correctedResult.contains(wp.getCoor())){
+					correctedResult=findFieldSimple(wp);
 				}
-			}
-			if (result.contains(wp.getCoor())){
-				return result;
-			}else{
-				//TODO: delete this
-				return result;//throw new Error("Assumption failure!");
-			}
+				return correctedResult;
+			} 
+			return result;
 		}else{
 			return null;
 		}
@@ -263,15 +260,15 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		//initial Bounds lying on (-1,-1)
 		LatLon uRCornerStart,dLCornerStart;
 		LatLon dLCorner=dLCornerStart=downLeftCorner; 
-		LatLon uRCorner=uRCornerStart=addWesternDistance(addNorthernDistance(dLCornerStart, distance), distance);
+		LatLon uRCorner=uRCornerStart=addDistance(dLCornerStart, distance, distance);
 		for (int w = 0; w < widthSize; w++) {//count X
 			for (int h = 0; h < heightSize; h++) {//count Y
-				dLCorner = addNorthernDistance(
-						addWesternDistance(dLCornerStart, w*distance),
-						h*distance);
-				uRCorner = addNorthernDistance(
-						addWesternDistance(uRCornerStart, w*distance),
-						h*distance);
+				dLCorner = addDistance(dLCornerStart
+						,h*distance
+						,w*distance);
+				uRCorner = addDistance(uRCornerStart
+						,h*distance,
+						w*distance);
 				put(w,h, new Bounds(dLCorner, uRCorner));
 			}
 			//set Y to -1
@@ -303,10 +300,10 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 				.greatCircleDistance(rightDownCorner));
 		System.out.println("Height in m:"+ border.getMax()
 				.greatCircleDistance(rightDownCorner));
-		this.widthSize = (int)Math.floor(
+		this.widthSize =1+ (int)Math.floor(
 				border.getMin()
 				.greatCircleDistance(rightDownCorner)/distance);
-		this.heightSize = (int)Math.floor(
+		this.heightSize =1+ (int)Math.floor(
 				border.getMax()
 				.greatCircleDistance(rightDownCorner)/distance);
 		downLeftCorner=border.getMin();

@@ -14,12 +14,20 @@ public class MainTest {
 				"output/GPXMergeTest.gpx");
 	}
 	@Test
-	public void testMergetracksOnGrid(){
+	public void testMergetracksOnGrid1(){
+		IOFunctions.exportTracks(
+				Main.mergingTracksOnGrid(
+						Main.importTracks("leipzig_track_example.gpx"),
+						1, 2, false),
+				"output/GPXMergeTracksOnGrid.1.2.false.gpx");
+	}
+	@Test
+	public void testMergetracksOnGrid2(){
 		IOFunctions.exportTracks(
 				Main.mergingTracksOnGrid(
 						Main.importTracks("leipzig_track_example.gpx"),
 						1, 2, true),
-				"output/GPXMergeTestTracks.gpx");
+				"output/GPXMergeTracksOnGrid.1.2.true.gpx");
 	}
 
 }

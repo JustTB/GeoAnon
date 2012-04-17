@@ -12,6 +12,9 @@ import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.WayPoint;
+import org.openstreetmap.josm.data.osm.Way;
+import org.openstreetmap.josm.gui.preferences.display.GPXSettingsPanel;
+import org.openstreetmap.josm.io.GpxWriter;
 
 
 public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
@@ -108,12 +111,18 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		return establish;
 	}
 	private boolean isFollowing(MergedWayPoint neighbor, GpxTrack onTrack) {
-		if (sourceTracks.get(onTrack).compareTo(neighbor.sourceTracks.get(onTrack))>0){
+		WayPoint sourcePoint = sourceTracks.get(onTrack);
+		WayPoint neighborSourcePoint = neighbor.sourceTracks.get(onTrack);
+		System.out.println(Math.abs((sourcePoint.time-neighborSourcePoint.time)));
+		//FIXME: 1 is a value i choosed. could cause errors
+		if (0<(sourcePoint.time-neighborSourcePoint.time)&&(sourcePoint.time-neighborSourcePoint.time)<1){
 			return true;
 		}else{
 			return false;
 		}
 	}
+
+
 
 	public void colorConnection(MergedWayPoint neighbor){
 		if(connections.containsKey(neighbor)){

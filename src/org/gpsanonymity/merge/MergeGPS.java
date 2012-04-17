@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,7 +13,10 @@ import org.gpsanonymity.data.MergedWayPoint;
 import org.gpsanonymity.data.comparator.WayPointComparator;
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
+import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
+import org.openstreetmap.josm.data.gpx.ImmutableGpxTrack;
+import org.openstreetmap.josm.data.gpx.ImmutableGpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.WayPoint;
 
 
@@ -165,32 +169,37 @@ public class MergeGPS {
 		}
 		return result;
 	}
-	public static void createMoreWaypoints(Collection<GpxTrackSegment> sourceSeg, double maxdistance) {
-		for (GpxTrackSegment gpxTrackSegment : sourceSeg) {
-			LinkedList<WayPoint> tempWaypoints = new LinkedList<WayPoint>(gpxTrackSegment.getWayPoints());
-			for (int i = 1; i < tempWaypoints.size(); i++) {
-				WayPoint firstWP = tempWaypoints.get(i-1);
-				WayPoint secondWP = tempWaypoints.get(i-1);
-				LatLon firstLL = tempWaypoints.get(i-1).getCoor();
-				LatLon secondLL = tempWaypoints.get(i).getCoor();
-				if (firstLL
-						.greatCircleDistance(
-								secondLL)
-								>maxdistance){
-					WayPoint tempWayPoint = new WayPoint(
-							new LatLon(
-									secondLL
-									.getCenter(
-											firstLL)
-											)
-							);
-					tempWayPoint.time=(firstWP.time+secondWP.time)/2;
-					tempWaypoints.add(i, tempWayPoint);
-					i--;
-				}
-				gpxTrackSegment.setWayPoints(tempWaypoints);
+	public static GpxTrack createMoreWaypoints(GpxTrack gpxTrack, double maxdistance) {
+		LinkedList<WayPoint> mergedSegments=new LinkedList<WayPoint>();
+		for (GpxTrackSegment gpxTrackSegment : gpxTrack.getSegments()) {
+			mergedSegments.addAll(gpxTrackSegment.getWayPoints());
+		}
+		LinkedList<WayPoint> tempWaypoints = mergedSegments;
+		for (int i = 1; i < tempWaypoints.size(); i++) {
+			WayPoint firstWP = tempWaypoints.get(i-1);
+			WayPoint secondWP = tempWaypoints.get(i);
+			LatLon firstLL = tempWaypoints.get(i-1).getCoor();
+			LatLon secondLL = tempWaypoints.get(i).getCoor();
+			if (firstLL
+					.greatCircleDistance(
+							secondLL)
+							>maxdistance){
+				WayPoint tempWayPoint = new WayPoint(
+						new LatLon(
+								secondLL
+								.getCenter(
+										firstLL)
+										)
+						);
+				tempWayPoint.time=(firstWP.time+secondWP.time)/2;
+				tempWaypoints.add(i, tempWayPoint);
+				i--;
 			}
 		}
+		LinkedList<WayPoint> resultseq = tempWaypoints;
+		LinkedList<Collection<WayPoint>> tracklist= new LinkedList<Collection<WayPoint>>();
+		tracklist.add(resultseq);
+		return new ImmutableGpxTrack(tracklist, new HashMap<String, Object>());
 	}
 	/**
 	 * Simple approach
