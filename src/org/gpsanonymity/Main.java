@@ -71,24 +71,23 @@ public class Main {
 	 * @param pointRadius radius around the first point
 	 * @return list of all merged points
 	 */
-	public static List<WayPoint> merginWayPoints(List<WayPoint> waypoints,int k , double pointRadius) {
-		return MergeGPS.eliminateLowerGrades(
-				MergeGPS.mergeWaypoints(waypoints,
-						pointRadius),
-				k);
+	public static List<WayPoint> mergingWaypoints(List<WayPoint> waypoints,int k , double pointRadius) {
+		return MergeGPS.mergeWaypoints(waypoints,
+						pointRadius,k);
 	}
 	/**
 	 * merges given Tracks
 	 * @param tracks given Tracks
 	 * @param k factor for k-anonymity
 	 * @param pointRadius radius around the points
-	 * @param TrackDistance distance between to tracks
+	 * @param trackDistance distance between to tracks
 	 * @return new merged Tracks
 	 * @see Main#merginWayPoints(List, int, double)
 	 */
-	public static List<GpxTrack> mergingTracks(List<GpxTrack> tracks,int k , double pointRadius, double TrackDistance) {
-		//TODO
-		return null;
+	public static List<GpxTrack> mergingTracks(List<GpxTrack> tracks,int k , double pointRadius, double trackDistance) {
+		List<GpxTrack> morePointTracks = MergeGPS.createMoreWaypointsOnTracks(tracks, pointRadius);
+		TrackCloud tc= new TrackCloud(morePointTracks,k,pointRadius,trackDistance);
+		return tc.getMergedTracks();
 	}
 	/**
 	 * Merges Waypoints with a grid over the map. WayPoints in the same grid coordinates will be merged. 
@@ -113,10 +112,7 @@ public class Main {
 	 * @see Main#mergingWaypointsOnGrid(List, int, double)
 	 */
 	public static List<GpxTrack> mergingTracksOnGrid(List<GpxTrack> tracks,int k , double gridSize, double minimalSpeed) {
-		List<GpxTrack> newTracks= new LinkedList<GpxTrack>();
-		for (GpxTrack gpxTrack : tracks) {
-			newTracks.add(MergeGPS.createMoreWaypoints(gpxTrack, gridSize));
-		}
+		List<GpxTrack> newTracks= MergeGPS.createMoreWaypointsOnTracks(tracks, gridSize);
 		GridMatrix gridMatrix = new GridMatrix(newTracks,k, gridSize,minimalSpeed);
 		return gridMatrix.getTracks();
 	}

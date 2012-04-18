@@ -21,7 +21,7 @@ import org.openstreetmap.josm.data.gpx.WayPoint;
 
 
 public class MergeGPS {
-	static public List<WayPoint> mergeWaypoints(LinkedList<WayPoint> givenWaypoints, double accuracy, int grade){
+	static public List<WayPoint> mergeWaypoints(List<WayPoint> givenWaypoints, double accuracy, int grade){
 		return eliminateLowerGrades(mergeWaypoints(givenWaypoints, accuracy),grade);
 	}
 	public static List<WayPoint> eliminateLowerGrades(
@@ -55,10 +55,11 @@ public class MergeGPS {
 			WayPointComparator wpc = new WayPointComparator();
 			wpc.setReferencePoint(tempWaypoints.getFirst());
 			Collections.sort(tempWaypoints, wpc);
-			for (int i = 1; i < tempWaypoints.size() && (tempWaypoints.get(i).getCoor()
-					.greatCircleDistance(
-							tempWaypoints.getFirst().getCoor()
-							)<=accuracy) ; i++) {
+			for (int i = 1; i < tempWaypoints.size() 
+					&& (tempWaypoints.get(i).getCoor()
+							.greatCircleDistance(
+									tempWaypoints.getFirst().getCoor()
+					)<=accuracy) ; i++) {
 				mwp.addWayPoint(tempWaypoints.get(i));
 				tempWaypoints.remove(i);
 				i--;// correct index cause we removed the point
@@ -169,7 +170,14 @@ public class MergeGPS {
 		}
 		return result;
 	}
-	public static GpxTrack createMoreWaypoints(GpxTrack gpxTrack, double maxdistance) {
+	public static List<GpxTrack> createMoreWaypointsOnTracks(Collection<GpxTrack> tracks, double maxdistance){
+		List<GpxTrack> newTracks= new LinkedList<GpxTrack>();
+		for (GpxTrack gpxTrack : tracks) {
+			newTracks.add(MergeGPS.createMoreWaypointsOnTrack(gpxTrack, maxdistance));
+		}
+		return newTracks;
+	}
+	public static GpxTrack createMoreWaypointsOnTrack(GpxTrack gpxTrack, double maxdistance) {
 		LinkedList<WayPoint> mergedSegments=new LinkedList<WayPoint>();
 		for (GpxTrackSegment gpxTrackSegment : gpxTrack.getSegments()) {
 			mergedSegments.addAll(gpxTrackSegment.getWayPoints());
@@ -238,6 +246,7 @@ public class MergeGPS {
 			}
 			mergedTrackSegments.set(j, mwp);
 		}
+		//TODO
 		return null;
 	}
 	static public Double hausDorffDistance(Collection<? extends WayPoint> trackSeqs1, Collection<? extends WayPoint> trackSeqs2) {

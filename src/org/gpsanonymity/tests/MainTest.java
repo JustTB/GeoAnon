@@ -11,23 +11,31 @@ public class MainTest {
 				Main.mergingWaypointsOnGrid(
 						Main.importWayPoints("leipzig_track_example.gpx"),
 						1, 2),
-				"output/GPXMergeTest.gpx");
+				"output/GPXMergeWaypointsOnGrid_1_2.gpx");
 	}
 	@Test
-	public void testMergetracksOnGrid1(){
+	public void testMergeWayPoints(){
+		IOFunctions.exportWayPoints(
+				Main.mergingWaypoints(
+						Main.importWayPoints("leipzig_track_example.gpx"),
+						1, 2),
+				"output/GPXMergeWaypoint_1_2.gpx");
+	}
+	@Test
+	public void testMergeTracksOnGrid(){
 		IOFunctions.exportTracks(
 				Main.mergingTracksOnGrid(
 						Main.importTracks("leipzig_track_example.gpx"),
 						1, 2,0.5),
-				"output/GPXMergeTracksOnGrid.1.2.false.gpx");
+				"output/GPXMergeTracksOnGrid_1_2_0.5.gpx");
 	}
 	@Test
-	public void testMergetracksOnGrid2(){
+	public void testMergeTracks(){
 		IOFunctions.exportTracks(
-				Main.mergingTracksOnGrid(
+				Main.mergingTracks(
 						Main.importTracks("leipzig_track_example.gpx"),
-						1, 2,0.5),
-				"output/GPXMergeTracksOnGrid.1.2.true.gpx");
+						1, 2,2),
+				"output/GPXMergeTracks_1_2_2.gpx");
 	}
 
 }
