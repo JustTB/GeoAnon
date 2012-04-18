@@ -108,15 +108,16 @@ public class Main {
 	 * @param k
 	 * @param gridSize
 	 * @param follow
+	 * @param minimalSpeed 
 	 * @return
 	 * @see Main#mergingWaypointsOnGrid(List, int, double)
 	 */
-	public static List<GpxTrack> mergingTracksOnGrid(List<GpxTrack> tracks,int k , double gridSize, boolean follow) {
+	public static List<GpxTrack> mergingTracksOnGrid(List<GpxTrack> tracks,int k , double gridSize, double minimalSpeed) {
 		List<GpxTrack> newTracks= new LinkedList<GpxTrack>();
 		for (GpxTrack gpxTrack : tracks) {
 			newTracks.add(MergeGPS.createMoreWaypoints(gpxTrack, gridSize));
 		}
-		GridMatrix gridMatrix = new GridMatrix(newTracks,k, gridSize,follow);
+		GridMatrix gridMatrix = new GridMatrix(newTracks,k, gridSize,minimalSpeed);
 		return gridMatrix.getTracks();
 	}
 

@@ -64,6 +64,8 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 	}
 	public void addWayPoint(WayPoint p) {
 		sourceWaypoints.add(p);
+		calculateNewCoordinates();
+		calculateNewDate();
 	}
 	public void addWayPoints(LinkedList<WayPoint> wp) {
 		sourceWaypoints.addAll(wp);
@@ -87,14 +89,14 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 	public String toString() {
 		return "WayPoint {"+ new LatLon(this.lat, this.lon).toString() + "time="+gpxDate+" grade:"+getGrade()+"}";
 	}
-	public boolean connectSameTracks(MergedWayPoint neighbor, boolean follow){
+	public boolean connectSameTracks(MergedWayPoint neighbor, double distance, double minimalSpeed){
 		boolean establish=false;
 
 		for (Iterator<GpxTrack> trackIter = sourceTracks.keySet().iterator(); trackIter.hasNext();) {
 			GpxTrack thisTrack = (GpxTrack) trackIter.next();
 			for (Iterator<GpxTrack> trackIter2 = neighbor.sourceTracks.keySet().iterator(); trackIter2.hasNext();) {
 				GpxTrack neigborTrack = (GpxTrack) trackIter2.next();
-				if (neigborTrack.equals(thisTrack)&&(!follow || isFollowing(neighbor,thisTrack))){
+				if (neigborTrack.equals(thisTrack)&&(isRealNeighbor(neighbor,thisTrack, distance, minimalSpeed))){
 					establish=true;
 					break;
 				}
@@ -110,12 +112,13 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 
 		return establish;
 	}
-	private boolean isFollowing(MergedWayPoint neighbor, GpxTrack onTrack) {
+	private boolean isRealNeighbor(MergedWayPoint neighbor, GpxTrack onTrack, double distance, double minimalSpeed) {
 		WayPoint sourcePoint = sourceTracks.get(onTrack);
 		WayPoint neighborSourcePoint = neighbor.sourceTracks.get(onTrack);
-		System.out.println(Math.abs((sourcePoint.time-neighborSourcePoint.time)));
-		//FIXME: 1 is a value i choosed. could cause errors
-		if (0<(sourcePoint.time-neighborSourcePoint.time)&&(sourcePoint.time-neighborSourcePoint.time)<1){
+		//heuristic example for minimalSpeed=0.5:
+		//0.5m/s -->for two fields maximum: 2*distance/0.5=maxTimedifference in s
+		double maxTimeDifference = (2*distance)/minimalSpeed;
+		if (0<Math.abs(sourcePoint.time-neighborSourcePoint.time)&&Math.abs(sourcePoint.time-neighborSourcePoint.time)<maxTimeDifference){
 			return true;
 		}else{
 			return false;

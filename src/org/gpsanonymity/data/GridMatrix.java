@@ -21,8 +21,8 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	private LatLon downLeftCorner;
 	private Bounds wholeGrid;
 	private BiMap<Bounds,MergedWayPoint> mergedWaypoints = new BiMap<Bounds, MergedWayPoint>();
-	private boolean follow;
 	private List<GpxTrack> tracks;
+	private double minimalSpeed;
 	/**
 	 * 
 	 * @param ts MUST BE a Collection from type WayPoint or GpxTrack
@@ -31,8 +31,8 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	 * IMPORTANT: through performance reasons we only check the first element of the collection,
 	 * if the collection has not only GpxTracks or not only WayPoints this will bring DOOM!!!!!
 	 */
-	public GridMatrix(List<GpxTrack> ts,int k, double distance, boolean follow) {
-		this.follow=follow;
+	public GridMatrix(List<GpxTrack> ts,int k, double distance, double minimalSpeed) {
+		this.minimalSpeed=minimalSpeed;
 		initWithTracks(ts,k, distance);
 	}
 	public GridMatrix(double distance, Collection<WayPoint> wps) {
@@ -54,11 +54,15 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		generateTracks();
 	}
 	private void eliminateLowerGrades(int k) {
+		int size = mergedWaypoints.values().size();
+		int counter=0;
 		for (MergedWayPoint mwp : mergedWaypoints.values()) {
 			if(mwp.getGrade()<k){
 				mergedWaypoints.removeValue(mwp);
+				counter++;
 			}
 		}
+		System.out.println("Pointsremoved:"+counter+"/"+size);
 		
 	}
 	public void generateTracks() {
@@ -132,7 +136,7 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		MergedWayPoint mwp1 = getMergedPoint(x, y);
 		MergedWayPoint mwp2 = getMergedPoint(x2, y2);
 		if(mwp1!=null && mwp2!=null){
-			mwp1.connectSameTracks(mwp2, follow);
+			mwp1.connectSameTracks(mwp2, distance, minimalSpeed);
 		}
 	}
 	private MergedWayPoint getMergedPoint(int x, int y) {

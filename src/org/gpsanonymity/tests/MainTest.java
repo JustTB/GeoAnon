@@ -18,7 +18,7 @@ public class MainTest {
 		IOFunctions.exportTracks(
 				Main.mergingTracksOnGrid(
 						Main.importTracks("leipzig_track_example.gpx"),
-						1, 2, false),
+						1, 2,0.5),
 				"output/GPXMergeTracksOnGrid.1.2.false.gpx");
 	}
 	@Test
@@ -26,7 +26,7 @@ public class MainTest {
 		IOFunctions.exportTracks(
 				Main.mergingTracksOnGrid(
 						Main.importTracks("leipzig_track_example.gpx"),
-						1, 2, true),
+						1, 2,0.5),
 				"output/GPXMergeTracksOnGrid.1.2.true.gpx");
 	}
 
