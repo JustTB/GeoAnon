@@ -9,7 +9,7 @@ import org.openstreetmap.josm.data.Bounds;
 
 public class ImmutableGpxTrackSegment implements GpxTrackSegment {
 
-    private Collection<WayPoint> wayPoints;
+    protected Collection<WayPoint> wayPoints;
     private final Bounds bounds;
     private final double length;
 

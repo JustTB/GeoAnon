@@ -256,30 +256,39 @@ public class MergeGPS {
 		//get min
 		LinkedList<Double> allDiffs1 = new LinkedList<Double>();
 		LinkedList<Double> allDiffs2 = new LinkedList<Double>();
-		//TODO: folgendes durch matrizenberechnung ersetzen
+		//FIXME: here dynamic programming? maybe only for bigger segments
 		for (WayPoint wayPoint : tempList1) {
-			sort(wayPoint,tempList2);
-			allDiffs1.add(wayPoint
-					.getCoor()
-					.greatCircleDistance(
-							tempList2
-							.getFirst()
-							.getCoor()));
+			allDiffs1.add(getMaxDifference(wayPoint,tempList2));
 		}
 		for (WayPoint wayPoint : tempList1) {
 			sort(wayPoint,tempList1);
-			allDiffs2.add(wayPoint
-					.getCoor()
-					.greatCircleDistance(
-							tempList1
-							.getFirst()
-							.getCoor()));
+			allDiffs2.add(getMaxDifference(wayPoint,tempList2));
 		}
-		Collections.sort(allDiffs1);
-		Collections.sort(allDiffs2);
-		return Math.max(allDiffs1.getFirst(),allDiffs2.getFirst());
+		double max1=getMax(allDiffs1);
+		double max2=getMax(allDiffs2);
+		return Math.max(max1,max2);
 	}
 	
+	private static double getMax(LinkedList<Double> allDiffs1) {
+		double result=0;
+		for (Double double1 : allDiffs1) {
+			if(double1>result){
+				result=double1;
+			}
+		}
+		return result;
+	}
+	private static Double getMaxDifference(WayPoint wayPoint,
+			LinkedList<WayPoint> tempList2) {
+		double result=0;
+		for (WayPoint wayPoint2 : tempList2) {
+			double distance = wayPoint.getCoor().greatCircleDistance(wayPoint2.getCoor());
+			if(distance>result){
+				result=distance;
+			}
+		}
+		return result;
+	}
 	static private void sort(WayPoint wayPoint, LinkedList<WayPoint> tempList2) {
 		WayPointComparator wpc = new WayPointComparator();
 		wpc.setReferencePoint(wayPoint);

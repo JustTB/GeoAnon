@@ -34,7 +34,7 @@ public class MainTest {
 		IOFunctions.exportTracks(
 				Main.mergingTracks(
 						Main.importTracks("leipzig_track_example.gpx"),
-						1, 2,2),
+						1, 2,2,2),
 				"output/GPXMergeTracks_1_2_2.gpx");
 	}
 

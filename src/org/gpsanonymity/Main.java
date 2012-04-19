@@ -81,12 +81,13 @@ public class Main {
 	 * @param k factor for k-anonymity
 	 * @param pointRadius radius around the points
 	 * @param trackDistance distance between to tracks
+	 * @param segmentLength 
 	 * @return new merged Tracks
 	 * @see Main#merginWayPoints(List, int, double)
 	 */
-	public static List<GpxTrack> mergingTracks(List<GpxTrack> tracks,int k , double pointRadius, double trackDistance) {
+	public static List<GpxTrack> mergingTracks(List<GpxTrack> tracks,int k , double pointRadius, double trackDistance, int segmentLength) {
 		List<GpxTrack> morePointTracks = MergeGPS.createMoreWaypointsOnTracks(tracks, pointRadius);
-		TrackCloud tc= new TrackCloud(morePointTracks,k,pointRadius,trackDistance);
+		TrackCloud tc= new TrackCloud(morePointTracks,k,pointRadius,trackDistance, segmentLength);
 		return tc.getMergedTracks();
 	}
 	/**
