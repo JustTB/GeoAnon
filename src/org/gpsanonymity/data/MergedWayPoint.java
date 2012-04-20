@@ -63,9 +63,11 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		}
 	}
 	public void addWayPoint(WayPoint p) {
-		sourceWaypoints.add(p);
-		calculateNewCoordinates();
-		calculateNewDate();
+		if (!sourceWaypoints.contains(p)){
+			sourceWaypoints.add(p);
+			calculateNewCoordinates();
+			calculateNewDate();
+		}
 	}
 	public void addWayPoints(LinkedList<WayPoint> wp) {
 		sourceWaypoints.addAll(wp);
@@ -165,6 +167,15 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 
 	public int getNeighborCount() {
 		return connections.size();
+	}
+
+	public void removeIfExist(WayPoint wayPoint) {
+		if (sourceWaypoints.contains(wayPoint)) {
+			sourceWaypoints.remove(wayPoint);
+			calculateNewCoordinates();
+			calculateNewDate();
+		}
+		
 	}
 	
 

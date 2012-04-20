@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import org.gpsanonymity.data.MergedWayPoint;
 import org.gpsanonymity.data.comparator.WayPointComparator;
@@ -223,7 +224,82 @@ public class MergeGPS {
 		return null;//mergedWaypoints;
 	
 	}
-	
+	public static List<MergedWayPoint> mergeWithKMeans(List<WayPoint> list, int k){
+		Bounds bounds=getBounds(list);
+		List<WayPoint> oldClusterPoints,clusterPoints=getRandomPoints(list,list.size()/k);
+		List<MergedWayPoint> cluster;
+		do{
+			cluster= makeCluster(clusterPoints, list);
+			oldClusterPoints=clusterPoints;
+			clusterPoints=(List<WayPoint>)(List)cluster;
+		}while(!haveSameCoord(oldClusterPoints,clusterPoints));
+		return cluster;
+				
+	}
+	private static List<WayPoint> getRandomPoints(List<WayPoint> list,
+			int clusterNumber) {
+		if (clusterNumber<list.size()){
+			List<WayPoint> result = new LinkedList<WayPoint>();
+			Random generator= new Random();
+			while(result.size()< clusterNumber) {
+				int index =generator.nextInt(list.size());
+				WayPoint randomWayPoint = list.get(index);
+				if(!result.contains(randomWayPoint)){
+					result.add(list.get(index));
+				}
+
+			}
+			return result;
+		}else{
+			return null;
+		}
+	}
+	/**
+	 * 
+	 * @param clusterPoints points representing the cluster
+	 * @param list list of all WayPoints which should be clustered
+	 * @return clusterPoints with new coordinates; centroids of the cluster
+	 */
+	private static List<MergedWayPoint> makeCluster(
+			List<WayPoint> clusterPoints, List<WayPoint> list) {
+		List<MergedWayPoint> result= new LinkedList<MergedWayPoint>();
+		for (int i = 0; i < list.size(); i++) {
+			result.add(new MergedWayPoint(list.get(i)));
+		}
+		for (WayPoint wayPoint : list) {
+			int index =findNearestPointIndex(wayPoint,list);
+			MergedWayPoint clusterPoint = result.get(index);
+			clusterPoint.addWayPoint(wayPoint);
+			if(clusterPoint.getGrade()<2){
+				clusterPoint.removeIfExist(list.get(index));
+			}
+		}
+		return result;
+	}
+	private static int findNearestPointIndex(WayPoint wayPoint, List<WayPoint> list) {
+		double distance=Double.MAX_VALUE;
+		int result=-1;
+		for (int i = 0; i < list.size(); i++) {
+			double currentDistance = list.get(i).getCoor().greatCircleDistance(wayPoint.getCoor());
+			if (currentDistance<distance){
+				distance=currentDistance;
+				result=i;
+			}
+		}
+		return result;
+	}
+	private static boolean haveSameCoord(List<WayPoint> oldClusterPoints,
+			List<WayPoint> clusterPoints) {
+		if(clusterPoints.size()==oldClusterPoints.size()){
+			for (int i = 0; i < clusterPoints.size(); i++) {
+				if (!clusterPoints.get(i).getCoor().equals(oldClusterPoints.get(i).getCoor())){
+					return false;
+				}
+			}
+		}
+			
+		return true;
+	}
 	private static LinkedList<MergedWayPoint> mergeTrackSegments(
 			LinkedList<WayPoint> trackSeqs1,
 			LinkedList<WayPoint> trackSeqs2, double pointAccuracy) {
@@ -315,12 +391,15 @@ public class MergeGPS {
 		
 		
 	}
-	private static Bounds getBounds(LinkedList<WayPoint> waypoints) {
-		Bounds result = new Bounds(waypoints.getFirst().getCoor());
-		for (WayPoint wayPoint : waypoints) {
+	private static Bounds getBounds(List<WayPoint> list) {
+		if (list!=null){
+		Bounds result = new Bounds(list.get(0).getCoor());
+		for (WayPoint wayPoint : list) {
 			result.extend(wayPoint.getCoor());
 		}
 		return result;
+		}else
+			return null;
 	}
 	
 	
