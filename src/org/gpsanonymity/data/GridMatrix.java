@@ -51,7 +51,7 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		initialize(newBounds,distance);
 		addTracks(ts);
 		eliminateLowerGrades(k);
-		generateTracks();
+		generateTracks(k);
 	}
 	private void eliminateLowerGrades(int k) {
 		int size = mergedWaypoints.values().size();
@@ -65,17 +65,17 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		System.out.println("Pointsremoved:"+counter+"/"+size);
 		
 	}
-	public void generateTracks() {
-		connectPoints();
-		buildTracks();
+	public void generateTracks(int k) {
+		connectPoints(k);
+		buildTracks(k);
 		
 	}
-	private void buildTracks() {
+	private void buildTracks(int k) {
 		LinkedList<MergedWayPoint> mergedWayPointsList = new LinkedList<MergedWayPoint>(mergedWaypoints.values());
 		List<List<MergedWayPoint>> segs;
 		tracks = new LinkedList<GpxTrack>();
 		Collection<Collection<WayPoint>> virtualSeq;
-		segs=createSegments(mergedWayPointsList);
+		segs=createSegments(mergedWayPointsList, k);
 		for (List<MergedWayPoint> seg : segs) {
 			virtualSeq = new LinkedList<Collection<WayPoint>>();
 			//FIXME: not type safe but should be fast
@@ -87,14 +87,14 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	public List<GpxTrack> getTracks() {
 		return tracks;
 	}
-	private List<List<MergedWayPoint>> createSegments(LinkedList<MergedWayPoint> mergedWayPointsList) {
+	private List<List<MergedWayPoint>> createSegments(LinkedList<MergedWayPoint> mergedWayPointsList, int k) {
 		List<List<MergedWayPoint>> segs= new LinkedList<List<MergedWayPoint>>();
 		List<MergedWayPoint> list = new LinkedList<MergedWayPoint>();
 		MergedWayPoint temp = mergedWayPointsList.getFirst();
 		MergedWayPoint neighbor;
 		while(!mergedWayPointsList.isEmpty()){
 			list.add(temp);
-			neighbor = temp.getOneNotMarkedNeighbor();
+			neighbor = temp.getOneNotMarkedNeighbor(k);
 			if(neighbor==null){
 				mergedWayPointsList.remove(temp);
 				if(list.size()>1){//no one point seqs
@@ -113,30 +113,30 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		}
 		return segs;
 	}
-	private void connectPoints() {
+	private void connectPoints(int k) {
 		for (int i = 0; i < widthSize; i++) {//count X
 			for (int j = 0; j < heightSize; j++) {//count Y
 				if(j+1<heightSize){//up
-					connectSameTracks(i,j,i,j+1);
+					connectSameTracks(i,j,i,j+1,k);
 					if(i-1>=0){//upperleft
-						connectSameTracks(i,j,i-1,j+1);
+						connectSameTracks(i,j,i-1,j+1, k);
 					}
 					if(i+1<widthSize){//upperright
-						connectSameTracks(i,j,i+1,j+1);
+						connectSameTracks(i,j,i+1,j+1, k);
 					}
 				}
 				if(i+1<widthSize){//right
-					connectSameTracks(i,j,i+1,j);
+					connectSameTracks(i,j,i+1,j, k);
 				}
 			}
 		}
 	}
-	private void connectSameTracks(int x, int y, int x2, int y2) {
+	private void connectSameTracks(int x, int y, int x2, int y2, int k) {
 		//get merged points
 		MergedWayPoint mwp1 = getMergedPoint(x, y);
 		MergedWayPoint mwp2 = getMergedPoint(x2, y2);
 		if(mwp1!=null && mwp2!=null){
-			mwp1.connectSameTracks(mwp2, distance, minimalSpeed);
+			mwp1.connectSameTracks(mwp2, distance, minimalSpeed,k);
 		}
 	}
 	private MergedWayPoint getMergedPoint(int x, int y) {
