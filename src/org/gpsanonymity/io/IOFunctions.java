@@ -147,5 +147,16 @@ public class IOFunctions {
 	public static List<GpxTrack> getAllTracks(GpxReader reader) {
 		return new LinkedList<GpxTrack>(reader.data.tracks);
 	}
+	public static List<WayPoint> getAllWaypointsFromTrack(List<GpxTrack> tracks) {
+		List<WayPoint> result = new LinkedList<WayPoint>();
+		for (GpxTrack gpxTrack : tracks) {
+			for (GpxTrackSegment seg : gpxTrack.getSegments()) {
+				for (WayPoint wayPoint : seg.getWayPoints()) {
+					result.add(wayPoint);
+				}
+			}
+		}
+		return result;
+	}
 
 }

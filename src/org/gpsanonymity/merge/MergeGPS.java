@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import org.gpsanonymity.data.DistanceMatrix;
 import org.gpsanonymity.data.MergedWayPoint;
 import org.gpsanonymity.data.comparator.WayPointComparator;
 import org.openstreetmap.josm.data.Bounds;
@@ -81,101 +82,108 @@ public class MergeGPS {
 
 	}
 
-	public static LatLon calculateCentroid(LinkedList<WayPoint> sourceWaypoints) {
+	public static LatLon calculateCentroid(List<WayPoint> tempList2) {
+		if (tempList2.isEmpty()){
+			return null;
+		}
 		double lat =0;
 		double lon = 0;
-		for (Iterator<WayPoint> iterator = sourceWaypoints.iterator(); iterator.hasNext();) {
+		for (Iterator<WayPoint> iterator = tempList2.iterator(); iterator.hasNext();) {
 			WayPoint wp = (WayPoint) iterator.next();
 			lat+=wp.getCoor().getY();//Lat
 			lon+=wp.getCoor().getX();//Lon
 		}
-		return new LatLon(lat/sourceWaypoints.size(),lon/sourceWaypoints.size());
+		return new LatLon(lat/tempList2.size(),lon/tempList2.size());
 	}
 
 	public static String simpleGeneralizeDate(LinkedList<WayPoint> sourceWaypoints) {
+		//FIXME:something goes wrong
 		//sort by Date
-		Collections.sort(sourceWaypoints);
-		Date first = sourceWaypoints.getFirst().getTime();
-		Date last = sourceWaypoints.getLast().getTime();
-		SimpleDateFormat dateFormatYear = new SimpleDateFormat("yyyy");
-		SimpleDateFormat dateFormatMonth = new SimpleDateFormat("MM");
-		SimpleDateFormat dateFormatDay = new SimpleDateFormat("dd");
-		SimpleDateFormat dateFormatHour = new SimpleDateFormat("HH");
-		SimpleDateFormat dateFormatMinute = new SimpleDateFormat("mm");
-		SimpleDateFormat dateFormatSecond = new SimpleDateFormat("ss");
-		SimpleDateFormat dateFormatMilli = new SimpleDateFormat("SSS");
-		String result = new String();
-		//Year
-		if (	dateFormatYear.format(first)
-				.compareTo(
-						dateFormatYear.format(last))
-						==0
-						){
-			result+=dateFormatYear.format(last)+":";
-		}else{
-			result+="XXXX:";
+		if (!sourceWaypoints.isEmpty()){
+			Collections.sort(sourceWaypoints);
+			Date first = sourceWaypoints.getFirst().getTime();
+			Date last = sourceWaypoints.getLast().getTime();
+			SimpleDateFormat dateFormatYear = new SimpleDateFormat("yyyy");
+			SimpleDateFormat dateFormatMonth = new SimpleDateFormat("MM");
+			SimpleDateFormat dateFormatDay = new SimpleDateFormat("dd");
+			SimpleDateFormat dateFormatHour = new SimpleDateFormat("HH");
+			SimpleDateFormat dateFormatMinute = new SimpleDateFormat("mm");
+			SimpleDateFormat dateFormatSecond = new SimpleDateFormat("ss");
+			SimpleDateFormat dateFormatMilli = new SimpleDateFormat("SSS");
+			String result = new String();
+			//Year
+			if (	dateFormatYear.format(first)
+					.compareTo(
+							dateFormatYear.format(last))
+							==0
+					){
+				result+=dateFormatYear.format(last)+":";
+			}else{
+				result+="XXXX:";
+			}
+			//Month
+			if (	dateFormatMonth.format(first)
+					.compareTo(
+							dateFormatMonth.format(last))
+							==0
+					){
+				result+=dateFormatMonth.format(last)+":";
+			}else{
+				result+="XX:";
+			}
+			//Day
+			if (	dateFormatDay.format(first)
+					.compareTo(
+							dateFormatDay.format(last))
+							==0
+					){
+				result+=dateFormatDay.format(last)+":";
+			}else{
+				result+="XX:";
+			}
+			//Hour
+			if (	dateFormatHour.format(first)
+					.compareTo(
+							dateFormatHour.format(last))
+							==0
+					){
+				result+=dateFormatHour.format(last)+":";
+			}else{
+				result+="XX:";
+			}				
+			//Minute
+			if (	dateFormatMinute.format(first)
+					.compareTo(
+							dateFormatMinute.format(last))
+							==0
+					){
+				result+=dateFormatMinute.format(last)+":";
+			}else{
+				result+="XX:";
+			}
+			//Second
+			if (	dateFormatSecond.format(first)
+					.compareTo(
+							dateFormatSecond.format(last))
+							==0
+					){
+				result+=dateFormatSecond.format(last)+":";
+			}else{
+				result+="XX:";
+			}
+			//Milli
+			if (	dateFormatMilli.format(first)
+					.compareTo(
+							dateFormatMilli.format(last))
+							==0
+					){
+				result+=dateFormatMilli.format(last)+":";
+			}else{
+				result+="XXX";
+			}
+			return result;
 		}
-		//Month
-		if (	dateFormatMonth.format(first)
-				.compareTo(
-						dateFormatMonth.format(last))
-						==0
-						){
-			result+=dateFormatMonth.format(last)+":";
-		}else{
-			result+="XX:";
-		}
-		//Day
-		if (	dateFormatDay.format(first)
-				.compareTo(
-						dateFormatDay.format(last))
-						==0
-						){
-			result+=dateFormatDay.format(last)+":";
-		}else{
-			result+="XX:";
-		}
-		//Hour
-		if (	dateFormatHour.format(first)
-				.compareTo(
-						dateFormatHour.format(last))
-						==0
-						){
-			result+=dateFormatHour.format(last)+":";
-		}else{
-			result+="XX:";
-		}				
-		//Minute
-		if (	dateFormatMinute.format(first)
-				.compareTo(
-						dateFormatMinute.format(last))
-						==0
-						){
-			result+=dateFormatMinute.format(last)+":";
-		}else{
-			result+="XX:";
-		}
-		//Second
-		if (	dateFormatSecond.format(first)
-				.compareTo(
-						dateFormatSecond.format(last))
-						==0
-						){
-			result+=dateFormatSecond.format(last)+":";
-		}else{
-			result+="XX:";
-		}
-		//Milli
-		if (	dateFormatMilli.format(first)
-				.compareTo(
-						dateFormatMilli.format(last))
-						==0
-						){
-			result+=dateFormatMilli.format(last)+":";
-		}else{
-			result+="XXX";
-		}
-		return result;
+		return null;
 	}
 	public static List<GpxTrack> createMoreWaypointsOnTracks(Collection<GpxTrack> tracks, double maxdistance){
 		List<GpxTrack> newTracks= new LinkedList<GpxTrack>();
@@ -232,15 +240,40 @@ public class MergeGPS {
 	}
 	public static List<MergedWayPoint> mergeWithKMeans(List<WayPoint> list, int k){
 		Bounds bounds=getBounds(list);
-		List<WayPoint> oldClusterPoints,clusterPoints=getRandomPoints(list,list.size()/k);
-		List<MergedWayPoint> cluster;
+		List<WayPoint> oldClusterPoints,clusterPoints=getRandomPoints(list,k);
+		List<WayPoint> cluster;
+		DistanceMatrix distanceMartix = new DistanceMatrix(list, list);
 		do{
-			cluster= makeCluster(clusterPoints, list);
+			cluster= makeCluster(clusterPoints, list,distanceMartix);
 			oldClusterPoints=clusterPoints;
-			clusterPoints=(List<WayPoint>)(List)cluster;
+			clusterPoints=cluster;
 		}while(!haveSameCoord(oldClusterPoints,clusterPoints));
-		return cluster;
+		return makeMergeCluster(clusterPoints,list);
 				
+	}
+	/**
+	 * Gives better clusters of the waypoints of list back
+	 * starting by clusterPoints (if clusterPoints is not the best)
+	 * NOTE: for faster calculations {@link MergeGPS.makeCluster}
+	 * @param clusterPoints starting clusterPoints
+	 * @param list list of all points
+	 * @param distanceMartix distancematrix for all distances
+	 * @return new clusterPoints with sourcePoints in it 
+	 */
+	private static List<MergedWayPoint> makeMergeCluster(
+			List<WayPoint> clusterPoints, List<WayPoint> list) {
+		List<MergedWayPoint> result= new LinkedList<MergedWayPoint>();
+		//initialize result
+		for (int i = 0; i < clusterPoints.size(); i++) {
+			result.add(new MergedWayPoint(clusterPoints.get(i)));
+		}
+		for (WayPoint wayPoint : list) {
+			//for each waypoint find nearest cluster point
+			int index =findNearestPointIndex(wayPoint,clusterPoints);
+			MergedWayPoint resultPoint = result.get(index);
+			resultPoint.addWayPoint(wayPoint);
+		}
+		return result;
 	}
 	private static List<WayPoint> getRandomPoints(List<WayPoint> list,
 			int clusterNumber) {
@@ -261,25 +294,31 @@ public class MergeGPS {
 		}
 	}
 	/**
-	 * 
-	 * @param clusterPoints points representing the cluster
-	 * @param list list of all WayPoints which should be clustered
-	 * @return clusterPoints with new coordinates; centroids of the cluster
+	 * Gives better clusters of the waypoints of list back
+	 * starting by clusterPoints (if clusterPoints is not the best)
+	 * @param clusterPoints starting clusterPoints
+	 * @param list list of all points
+	 * @param distanceMartix distancematrix for all distances
+	 * @return new clusterPoints 
 	 */
-	private static List<MergedWayPoint> makeCluster(
-			List<WayPoint> clusterPoints, List<WayPoint> list) {
-		List<MergedWayPoint> result= new LinkedList<MergedWayPoint>();
+	private static List<WayPoint> makeCluster(
+			List<WayPoint> clusterPoints, List<WayPoint> list, DistanceMatrix distanceMartix) {
+		List<List<WayPoint>> temp= new LinkedList<List<WayPoint>>();
 		//initialize result
 		for (int i = 0; i < clusterPoints.size(); i++) {
-			result.add(new MergedWayPoint(clusterPoints.get(i)));
+			temp.add(new LinkedList<WayPoint>());
 		}
 		for (WayPoint wayPoint : list) {
 			//for each waypoint find nearest cluster point
 			int index =findNearestPointIndex(wayPoint,clusterPoints);
-			MergedWayPoint resultPoint = result.get(index);
-			resultPoint.addWayPoint(wayPoint);
-			if(resultPoint.getGrade()<3){//remove initial Point
-				resultPoint.removeIfExist(clusterPoints.get(index));
+			List<WayPoint> tempList = temp.get(index);
+			tempList.add(wayPoint);
+		}
+		LinkedList<WayPoint> result = new LinkedList<WayPoint>();
+		
+		for (List<WayPoint> tempList : temp) {
+			if(!tempList.isEmpty()){
+				result.add(new WayPoint(MergeGPS.calculateCentroid(tempList)));
 			}
 		}
 		return result;
@@ -288,7 +327,16 @@ public class MergeGPS {
 		double distance=Double.MAX_VALUE;
 		int result=-1;
 		for (int i = 0; i < list.size(); i++) {
-			double currentDistance = list.get(i).getCoor().greatCircleDistance(wayPoint.getCoor());
+			Double currentDistance;
+			/*
+			if (distanceMartix!=null){
+				currentDistance = distanceMartix.getValue(list.get(i), wayPoint);
+				if(currentDistance==null){
+					currentDistance = list.get(i).getCoor().greatCircleDistance(wayPoint.getCoor());
+				}
+			}else{*/
+				currentDistance = list.get(i).getCoor().greatCircleDistance(wayPoint.getCoor());
+			/*}*/
 			if (currentDistance<distance){
 				distance=currentDistance;
 				result=i;
@@ -300,7 +348,9 @@ public class MergeGPS {
 			List<WayPoint> clusterPoints) {
 		if(clusterPoints.size()==oldClusterPoints.size()){
 			for (int i = 0; i < clusterPoints.size(); i++) {
-				if (!clusterPoints.get(i).getCoor().equals(oldClusterPoints.get(i).getCoor())){
+				LatLon point=clusterPoints.get(i).getCoor();
+				LatLon point2=oldClusterPoints.get(i).getCoor();
+				if (!point.equals(point2)){
 					return false;
 				}
 			}

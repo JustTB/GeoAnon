@@ -86,8 +86,11 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 			return false;
 		}
 	}
-	public void addWayPoint(WayPoint p) {
-		if(MergedWayPoint.class.isInstance(p)){
+	public void addWayPoint(WayPoint p){
+		addWayPoint(p, false);
+	}
+	public void addWayPoint(WayPoint p, boolean forceAsWayPoint) {
+		if(MergedWayPoint.class.isInstance(p) && !forceAsWayPoint){
 			mergeWith((MergedWayPoint)p);
 		}else{
 			if (!sourceWaypoints.contains(p)){
@@ -99,7 +102,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 	}
 	public void mergeWith(MergedWayPoint mwp){
 		
-		addWayPoint((WayPoint)mwp);
+		addWayPoint((WayPoint)mwp,true);
 		mwp.sourceWaypoints.addAll(mwp.sourceWaypoints);
 		sourceSegments.putAll(mwp.sourceSegments);
 		sourceTracks.putAll(mwp.sourceTracks);
