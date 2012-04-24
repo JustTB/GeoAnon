@@ -25,10 +25,16 @@ public class MergeGPS {
 	static public List<WayPoint> mergeWaypoints(List<WayPoint> givenWaypoints, double accuracy, int grade){
 		return eliminateLowerGrades(mergeWaypoints(givenWaypoints, accuracy),grade);
 	}
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static List<WayPoint> eliminateLowerGrades(
 			List<MergedWayPoint> mergeWaypoints
+			,int grade){
+		return (List<WayPoint>)(List)eliminateLowerGradesMerged(mergeWaypoints, grade);
+	}
+	public static List<MergedWayPoint> eliminateLowerGradesMerged(
+			List<MergedWayPoint> mergeWaypoints
 			,int grade) {
-		LinkedList<WayPoint> resultlist = new LinkedList<WayPoint>();
+		LinkedList<MergedWayPoint> resultlist = new LinkedList<MergedWayPoint>();
 		for (MergedWayPoint mergedWayPoint : mergeWaypoints) {
 			if (mergedWayPoint.getGrade() >= grade){
 				resultlist.add(mergedWayPoint);
@@ -263,15 +269,17 @@ public class MergeGPS {
 	private static List<MergedWayPoint> makeCluster(
 			List<WayPoint> clusterPoints, List<WayPoint> list) {
 		List<MergedWayPoint> result= new LinkedList<MergedWayPoint>();
-		for (int i = 0; i < list.size(); i++) {
-			result.add(new MergedWayPoint(list.get(i)));
+		//initialize result
+		for (int i = 0; i < clusterPoints.size(); i++) {
+			result.add(new MergedWayPoint(clusterPoints.get(i)));
 		}
 		for (WayPoint wayPoint : list) {
-			int index =findNearestPointIndex(wayPoint,list);
-			MergedWayPoint clusterPoint = result.get(index);
-			clusterPoint.addWayPoint(wayPoint);
-			if(clusterPoint.getGrade()<2){
-				clusterPoint.removeIfExist(list.get(index));
+			//for each waypoint find nearest cluster point
+			int index =findNearestPointIndex(wayPoint,clusterPoints);
+			MergedWayPoint resultPoint = result.get(index);
+			resultPoint.addWayPoint(wayPoint);
+			if(resultPoint.getGrade()<3){//remove initial Point
+				resultPoint.removeIfExist(clusterPoints.get(index));
 			}
 		}
 		return result;
@@ -400,6 +408,47 @@ public class MergeGPS {
 		return result;
 		}else
 			return null;
+	}
+	public static List<List<MergedWayPoint>> createSegments(List<MergedWayPoint> mergedWayPoints, int k) {
+		List<List<MergedWayPoint>> segs= new LinkedList<List<MergedWayPoint>>();
+		LinkedList<MergedWayPoint> mergedWayPointsList = new LinkedList<MergedWayPoint>(mergedWayPoints);
+		List<MergedWayPoint> list = new LinkedList<MergedWayPoint>();
+		MergedWayPoint temp = mergedWayPointsList.getFirst();
+		MergedWayPoint neighbor;
+		while(!mergedWayPointsList.isEmpty()){
+			list.add(temp);
+			neighbor = temp.getOneNotMarkedNeighbor(k);
+			if(neighbor==null){
+				mergedWayPointsList.remove(temp);
+				if(list.size()>1){//no one point seqs
+					segs.add(list);
+				}
+				if(mergedWayPointsList.isEmpty()){
+					break;
+				}else{
+					temp=mergedWayPointsList.getFirst();
+					list = new LinkedList<MergedWayPoint>();
+				}
+			}else{
+				temp.colorConnection(neighbor);
+				temp=neighbor;
+			}
+		}
+		return segs;
+	}
+	public static List<GpxTrack> buildTracks(List<MergedWayPoint> mergedWayPointsList, int k) {
+		List<List<MergedWayPoint>> segs;
+		LinkedList<GpxTrack> tracks = new LinkedList<GpxTrack>();
+		Collection<Collection<WayPoint>> virtualSeq;
+		segs=createSegments(mergedWayPointsList, k);
+		for (List<MergedWayPoint> seg : segs) {
+			virtualSeq = new LinkedList<Collection<WayPoint>>();
+			//FIXME: not type safe but should be fast
+			virtualSeq.add((List<WayPoint>)(List)seg);
+			tracks.add(new ImmutableGpxTrack(virtualSeq,new HashMap<String, Object>()));
+		}
+		return tracks;
+		
 	}
 	
 	

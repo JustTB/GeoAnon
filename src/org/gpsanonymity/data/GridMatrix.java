@@ -1,16 +1,15 @@
 package org.gpsanonymity.data;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.gpsanonymity.merge.MergeGPS;
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
-import org.openstreetmap.josm.data.gpx.ImmutableGpxTrack;
 import org.openstreetmap.josm.data.gpx.WayPoint;
 
 
@@ -67,51 +66,11 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	}
 	public void generateTracks(int k) {
 		connectPoints(k);
-		buildTracks(k);
-		
-	}
-	private void buildTracks(int k) {
-		LinkedList<MergedWayPoint> mergedWayPointsList = new LinkedList<MergedWayPoint>(mergedWaypoints.values());
-		List<List<MergedWayPoint>> segs;
-		tracks = new LinkedList<GpxTrack>();
-		Collection<Collection<WayPoint>> virtualSeq;
-		segs=createSegments(mergedWayPointsList, k);
-		for (List<MergedWayPoint> seg : segs) {
-			virtualSeq = new LinkedList<Collection<WayPoint>>();
-			//FIXME: not type safe but should be fast
-			virtualSeq.add((List<WayPoint>)(List)seg);
-			tracks.add(new ImmutableGpxTrack(virtualSeq,new HashMap<String, Object>()));
-		}
+		tracks=MergeGPS.buildTracks(new LinkedList<MergedWayPoint>(mergedWaypoints.values()),k);
 		
 	}
 	public List<GpxTrack> getTracks() {
 		return tracks;
-	}
-	private List<List<MergedWayPoint>> createSegments(LinkedList<MergedWayPoint> mergedWayPointsList, int k) {
-		List<List<MergedWayPoint>> segs= new LinkedList<List<MergedWayPoint>>();
-		List<MergedWayPoint> list = new LinkedList<MergedWayPoint>();
-		MergedWayPoint temp = mergedWayPointsList.getFirst();
-		MergedWayPoint neighbor;
-		while(!mergedWayPointsList.isEmpty()){
-			list.add(temp);
-			neighbor = temp.getOneNotMarkedNeighbor(k);
-			if(neighbor==null){
-				mergedWayPointsList.remove(temp);
-				if(list.size()>1){//no one point seqs
-					segs.add(list);
-				}
-				if(mergedWayPointsList.isEmpty()){
-					break;
-				}else{
-					temp=mergedWayPointsList.getFirst();
-					list = new LinkedList<MergedWayPoint>();
-				}
-			}else{
-				temp.colorConnection(neighbor);
-				temp=neighbor;
-			}
-		}
-		return segs;
 	}
 	private void connectPoints(int k) {
 		for (int i = 0; i < widthSize; i++) {//count X

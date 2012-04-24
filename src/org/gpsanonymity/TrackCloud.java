@@ -25,6 +25,8 @@ public class TrackCloud {
 	private HashMap<GpxTrackSegment,List<GpxTrackSegment>> similarSegments;
 	private List<GpxTrackSegment> segments;
 	private HalfMatrix<GpxTrackSegment, Double> segmentDistanceMatrix;
+	private Object tracks;
+	private List<MergedWayPoint> mergedWayPoints;
 
 	public TrackCloud(List<GpxTrack> morePointTracks, int k,
 			double pointRadius, double trackDistance, int segmentLength) {
@@ -48,21 +50,19 @@ public class TrackCloud {
 	}
 
 	private void mergeSimilarSegments() {
-		similarSegments=null;
 		List<WayPoint> tempWPs=new LinkedList<WayPoint>();
 		for (List<GpxTrackSegment> list : similarSegments.values()) {
 			for (GpxTrackSegment gpxTrackSegment : list) {
 				tempWPs.addAll(gpxTrackSegment.getWayPoints());
 			}
+			List<MergedWayPoint> newWps = MergeGPS.mergeWithKMeans(tempWPs, segmentLength);
+			newWps = MergeGPS.eliminateLowerGradesMerged(newWps, k);
+			mergedWayPoints.addAll(newWps);
 		}
-		List<MergedWayPoint> newWps = MergeGPS.mergeWithKMeans(tempWPs, segmentLength);
-		//TODO: connect neighbor Wps
 	}
 
 	private void buildTracks() {
-		//TODO: , connect segments
-		
-		
+		tracks=MergeGPS.buildTracks(mergedWayPoints , k);
 	}
 
 	private void eliminateLowerGrades() {
