@@ -75,7 +75,7 @@ public class TrackCloud {
 	}
 
 	private void findSimilarSegments() {
-		
+		System.out.println("Status: Find similar segments...");
 		for (Iterator<GpxTrackSegment> gpxIterator = segments.iterator(); gpxIterator.hasNext();) {
 			GpxTrackSegment seg = (GpxTrackSegment) gpxIterator.next();
 			for (Iterator<GpxTrackSegment> gpxIterator2 = segments.iterator(); gpxIterator2.hasNext();) {
@@ -83,13 +83,13 @@ public class TrackCloud {
 				if (seg!=seg2){
 					Double distance = getDistance(seg, seg2);
 					//boolean similarAngles=haveSimilarVectors(seg,seg2);
-					System.out.println("Distance:"+distance+" m");
 					if(distance<trackDistance){
 						addSimilarSegments(seg,seg2);
 					}
 				}
 			}
 		}
+		System.out.println("Status: ... similar segments found.");
 		
 	}
 	@Deprecated
@@ -156,7 +156,7 @@ public class TrackCloud {
 			List<GpxTrackSegment> seglist) {
 		List<GpxTrackSegment> result = new LinkedList<GpxTrackSegment>();
 		for (GpxTrackSegment gpxTrackSegment : seglist) {
-			if (getDistance(seg,gpxTrackSegment)<trackDistance){
+			if (isDistanceShorter(seg,gpxTrackSegment,trackDistance)){
 				result.add(gpxTrackSegment);
 			}
 		}
@@ -169,13 +169,19 @@ public class TrackCloud {
 
 	private double getDistance(GpxTrackSegment seg,
 			GpxTrackSegment seg2) {
-		Double distance =segmentDistanceMatrix.getValue(seg, seg2);
+		Double distance =null;//segmentDistanceMatrix.getValue(seg, seg2);
 		if (distance==null){
 			distance=MergeGPS.hausDorffDistance(seg.getWayPoints()
 							,seg2.getWayPoints());
-			segmentDistanceMatrix.put(seg, seg2,distance		);
+			//segmentDistanceMatrix.put(seg, seg2,distance		);
 		}
 		return distance;
+	}
+	private boolean isDistanceShorter(GpxTrackSegment seg,
+			GpxTrackSegment seg2,double trackDistance) {
+		return MergeGPS.isHausDorffDistanceShorter(seg.getWayPoints()
+				,seg2.getWayPoints()
+				,trackDistance);
 	}
 
 	private void buildSegments() {

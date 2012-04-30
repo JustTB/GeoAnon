@@ -2,8 +2,11 @@ package org.gpsanonymity;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.swing.text.html.MinimalHTMLWriter;
 
 import org.gpsanonymity.data.GridMatrix;
 import org.gpsanonymity.io.IOFunctions;
@@ -16,6 +19,43 @@ import org.openstreetmap.josm.io.GpxReader;
 
 public class Main {
 	public static int n = 5;
+	public static List<Integer> kList;
+	public static double minSpeed=0.5;
+	public static List<Double> gridDistanceList;
+	public static List<String> inputFileList;
+	public static String inputFolder="input/";
+	
+	public static void initialize(){
+		kList=new LinkedList<Integer>();
+		kList.add(1);
+		kList.add(2);
+		kList.add(3);
+		kList.add(4);
+		kList.add(5);
+		kList.add(10);
+		kList.add(20);
+		kList.add(50);
+		kList.add(100);
+		kList.add(200);
+		gridDistanceList=new LinkedList<Double>();
+		gridDistanceList.add(0.5);
+		gridDistanceList.add(1.0);
+		gridDistanceList.add(2.0);
+		gridDistanceList.add(4.0);
+		gridDistanceList.add(5.0);
+		gridDistanceList.add(6.0);
+		gridDistanceList.add(7.0);
+		gridDistanceList.add(8.0);
+		gridDistanceList.add(10.0);
+		gridDistanceList.add(20.0);
+		inputFileList = new LinkedList<String>();
+		inputFileList.add("Berlin.gpx");
+		inputFileList.add(inputFolder+"Leipzig.gpx");
+		inputFileList.add(inputFolder+"Toronto.gpx");
+		inputFileList.add(inputFolder+"Tokyo.gpx");
+		inputFileList.add(inputFolder+"Prignitz.gpx");
+		inputFileList.add(inputFolder+"Dolomites.gpx");
+	}
 	/**
 	 * @param args
 	 */
@@ -28,6 +68,22 @@ public class Main {
 		
 		IOFunctions.exportWayPoints(mergingWaypointsOnGrid(waypoints, k, gridSize), "output/PointGridMergeTest.gpx");
 		//IOFunctions.exportTracks(mergingTracksOnGrid(tracks, k, gridSize), "/Distance/output/TrackGridMergeTest.gpx");
+	}
+	public static void simulateTrackGridMerge(){
+		initialize();
+		for (Integer k : kList) {
+			for (Double gridDistance : gridDistanceList){
+				for (String inputFile : inputFileList){
+					String exportFile= inputFile+"_"+k+"_"+gridDistance+".gpx";
+					IOFunctions.exportTracks(
+							mergingTracksOnGrid(importTracks(inputFolder+inputFile+".gpx"),
+									k,
+									gridDistance,
+									minSpeed),
+							exportFile);
+				}
+			}
+		}
 	}
 	/**
 	 * This function only prints and does not sort

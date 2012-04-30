@@ -1,17 +1,13 @@
 package org.gpsanonymity.tests;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-
-import junit.framework.Assert;
 
 import org.gpsanonymity.data.MergedWayPoint;
 import org.gpsanonymity.io.IOFunctions;
 import org.gpsanonymity.merge.MergeGPS;
 import org.junit.Test;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
-import org.openstreetmap.josm.data.gpx.ImmutableGpxTrack;
 import org.openstreetmap.josm.data.gpx.WayPoint;
 
 public class MergeGPSTest {

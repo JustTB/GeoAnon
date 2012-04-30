@@ -500,6 +500,33 @@ public class MergeGPS {
 		return tracks;
 		
 	}
+	public static boolean isHausDorffDistanceShorter(
+			Collection<? extends WayPoint> trackSeqs1, Collection<? extends WayPoint> trackSeqs2,
+			double trackDistance) {
+		LinkedList<WayPoint> tempList1= new LinkedList<WayPoint>(trackSeqs1);
+		LinkedList<WayPoint> tempList2= new LinkedList<WayPoint>(trackSeqs2);
+		//get min
+		LinkedList<Double> allDiffs1 = new LinkedList<Double>();
+		LinkedList<Double> allDiffs2 = new LinkedList<Double>();
+		//FIXME: here dynamic programming? maybe only for bigger segments
+		for (WayPoint wayPoint : tempList1) {
+			double wpMax =getMaxDifference(wayPoint,tempList2);
+			if(wpMax>trackDistance){
+				return false;
+			}
+			allDiffs1.add(wpMax);
+		}
+		for (WayPoint wayPoint : tempList2) {
+			double wpMax = getMaxDifference(wayPoint,tempList2);
+			if (wpMax>trackDistance){
+				return false;
+			}
+			allDiffs2.add(wpMax);
+		}
+		double max1=getMax(allDiffs1);
+		double max2=getMax(allDiffs2);
+		return Math.max(max1,max2)<trackDistance;
+	}
 	
 	
 
