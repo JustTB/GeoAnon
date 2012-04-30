@@ -24,6 +24,17 @@ public class MergeGPSTest {
 		IOFunctions.exportWayPoints((List<WayPoint>)(List)mwps, "output/TestkMeans.gpx");
 	}
 	@Test
+	public void createMorePointsTest(){
+		List<GpxTrack> tracks = IOFunctions.getAllTracks(IOFunctions.importGPX("leipzig_track_example.gpx"));
+		List<GpxTrack> newTracks = new LinkedList<GpxTrack>(); 
+		for (GpxTrack gpxTrack : tracks) {
+			GpxTrack newTrack = MergeGPS.createMoreWaypointsOnTrack(
+					gpxTrack,2);
+			newTracks.add(newTrack);
+		}
+		IOFunctions.exportTracks(newTracks, "output/TestCreateMorePoints.gpx");
+	}
+	@Test
 	public void kMeansMoreWayPointsTest(){
 		List<GpxTrack> tracks = IOFunctions.getAllTracks(
 				IOFunctions.importGPX("leipzig_track_example.gpx"));
@@ -34,17 +45,6 @@ public class MergeGPSTest {
 		List<MergedWayPoint> mwps = MergeGPS.mergeWithKMeans(wps, wps.size()/3);
 		//Assert.assertTrue(mwps.size()==wps.size()/3);
 		IOFunctions.exportWayPoints((List<WayPoint>)(List)mwps, "output/TestkMeansMoreWayPoints.gpx");
-	}
-	@Test
-	public void createMorePointsTest(){
-		List<GpxTrack> tracks = IOFunctions.getAllTracks(IOFunctions.importGPX("leipzig_track_example.gpx"));
-		List<GpxTrack> newTracks = new LinkedList<GpxTrack>(); 
-		for (GpxTrack gpxTrack : tracks) {
-			GpxTrack newTrack = MergeGPS.createMoreWaypointsOnTrack(
-					gpxTrack,2);
-			newTracks.add(newTrack);
-		}
-		IOFunctions.exportTracks(newTracks, "output/TestCreateMorePoints.gpx");
 	}
 
 }
