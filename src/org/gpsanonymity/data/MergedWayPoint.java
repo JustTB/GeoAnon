@@ -12,10 +12,6 @@ import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.WayPoint;
-import org.openstreetmap.josm.data.osm.OsmPrimitive;
-import org.openstreetmap.josm.data.osm.Way;
-import org.openstreetmap.josm.gui.preferences.display.GPXSettingsPanel;
-import org.openstreetmap.josm.io.GpxWriter;
 
 
 public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
