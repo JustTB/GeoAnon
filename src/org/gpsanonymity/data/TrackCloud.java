@@ -1,15 +1,12 @@
-package org.gpsanonymity;
+package org.gpsanonymity.data;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.gpsanonymity.data.HalfMatrix;
-import org.gpsanonymity.data.MergedWayPoint;
-import org.gpsanonymity.io.IOFunctions;
 import org.gpsanonymity.merge.MergeGPS;
+import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.ImmutableGpxTrackSegment;
@@ -25,7 +22,7 @@ public class TrackCloud {
 	private HashMap<GpxTrackSegment,List<GpxTrackSegment>> similarSegments;
 	private List<GpxTrackSegment> segments;
 	private HalfMatrix<GpxTrackSegment, Double> segmentDistanceMatrix;
-	private Object tracks;
+	private List<GpxTrack> tracks;
 	private List<MergedWayPoint> mergedWayPoints;
 
 	public TrackCloud(List<GpxTrack> morePointTracks, int k,
@@ -38,6 +35,7 @@ public class TrackCloud {
 		segments = new LinkedList<GpxTrackSegment>();
 		similarSegments= new HashMap<GpxTrackSegment, List<GpxTrackSegment>>();
 		segmentDistanceMatrix = new HalfMatrix<GpxTrackSegment, Double>();
+		mergedWayPoints = new LinkedList<MergedWayPoint>();
 		initialize();
 	}
 
@@ -66,11 +64,18 @@ public class TrackCloud {
 	}
 
 	private void eliminateLowerGrades() {
-		for (GpxTrackSegment segment : similarSegments.keySet()) {
-			if(similarSegments.get(segment).size()<k){
-				similarSegments.remove(segment);
+		List<GpxTrackSegment> keySet = new LinkedList<GpxTrackSegment>(similarSegments.keySet());
+		
+		for (GpxTrackSegment segment : keySet) {
+			try{
+				if(similarSegments.get(segment).size()<k){
+					similarSegments.remove(segment);
+				}
+			}catch (Exception e) {
+				System.out.println();
 			}
 		}
+		
 		
 	}
 
@@ -78,9 +83,10 @@ public class TrackCloud {
 		System.out.println("Status: Find similar segments...");
 		for (Iterator<GpxTrackSegment> gpxIterator = segments.iterator(); gpxIterator.hasNext();) {
 			GpxTrackSegment seg = (GpxTrackSegment) gpxIterator.next();
+			Bounds areaAroundSeg = MergeGPS.getBoundsWithSpace(seg.getBounds(),trackDistance);
 			for (Iterator<GpxTrackSegment> gpxIterator2 = segments.iterator(); gpxIterator2.hasNext();) {
 				GpxTrackSegment seg2 = (GpxTrackSegment) gpxIterator2.next();
-				if (seg!=seg2){
+				if (seg!=seg2 && areaAroundSeg.intersects(seg2.getBounds())){
 					Double distance = getDistance(seg, seg2);
 					//boolean similarAngles=haveSimilarVectors(seg,seg2);
 					if(distance<trackDistance){
@@ -145,11 +151,11 @@ public class TrackCloud {
 			segEntry.add(seg2);
 			similarSegments.put(seg2, getSimilarSegments(seg2,segEntry));
 		}else{
+			segEntry.add(seg2);
+			seg2Entry.add(seg);
 			similarSegments.put(seg, getSimilarSegments(seg,seg2Entry));
 			similarSegments.put(seg2, getSimilarSegments(seg2,segEntry));
 		}
-		
-		
 	}
 
 	private List<GpxTrackSegment> getSimilarSegments(GpxTrackSegment seg,
@@ -251,8 +257,7 @@ public class TrackCloud {
 	}
 
 	public List<GpxTrack> getMergedTracks() {
-		// TODO Auto-generated method stub
-		return null;
+		return tracks;
 	}
 
 }

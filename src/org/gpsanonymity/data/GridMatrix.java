@@ -55,7 +55,8 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	private void eliminateLowerGrades(int k) {
 		int size = mergedWaypoints.values().size();
 		int counter=0;
-		for (MergedWayPoint mwp : mergedWaypoints.values()) {
+		Collection<MergedWayPoint> values = new LinkedList<MergedWayPoint>(mergedWaypoints.values());
+		for (MergedWayPoint mwp : values) {
 			if(mwp.getGrade()<k){
 				mergedWaypoints.removeValue(mwp);
 				counter++;
@@ -121,11 +122,6 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	public static LatLon addNorthernDistance(LatLon p, double distance){
 		return new LatLon(p.getY()+(180/Math.PI)*(distance/6378135),p.getX());
 		//return new LatLon(p.getY()+distance/110574,p.getX()); 
-	}
-	public static LatLon addDistance(LatLon p, double northernDistance, double westernDistance){
-		double y = p.getY()+(180/Math.PI)*(northernDistance/6378135);
-		double x = p.getX()+(180/Math.PI)*(westernDistance/6378135)/Math.cos(Math.toRadians(p.getY()));
-		return new LatLon(y,x);
 	}
 	public void addSegment(GpxTrackSegment s) {
 		Collection<WayPoint> wps = s.getWayPoints();
@@ -223,13 +219,13 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		//initial Bounds lying on (-1,-1)
 		LatLon uRCornerStart,dLCornerStart;
 		LatLon dLCorner=dLCornerStart=downLeftCorner; 
-		LatLon uRCorner=uRCornerStart=addDistance(dLCornerStart, distance, distance);
+		LatLon uRCorner=uRCornerStart=MergeGPS.addDistance(dLCornerStart, distance, distance);
 		for (int w = 0; w < widthSize; w++) {//count X
 			for (int h = 0; h < heightSize; h++) {//count Y
-				dLCorner = addDistance(dLCornerStart
+				dLCorner = MergeGPS.addDistance(dLCornerStart
 						,h*distance
 						,w*distance);
-				uRCorner = addDistance(uRCornerStart
+				uRCorner = MergeGPS.addDistance(uRCornerStart
 						,h*distance,
 						w*distance);
 				put(w,h, new Bounds(dLCorner, uRCorner));

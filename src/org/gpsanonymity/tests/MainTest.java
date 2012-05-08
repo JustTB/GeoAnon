@@ -10,7 +10,7 @@ public class MainTest {
 		IOFunctions.exportWayPoints(
 				Main.mergingWaypointsOnGrid(
 						Main.importWayPoints("leipzig_track_example.gpx"),
-						1, 2),
+						3, 2),
 				"output/GPXMergeWaypointsOnGrid_1_2.gpx");
 	}
 	@Test
@@ -18,7 +18,7 @@ public class MainTest {
 		IOFunctions.exportWayPoints(
 				Main.mergingWaypoints(
 						Main.importWayPoints("leipzig_track_example.gpx"),
-						1, 2),
+						3, 2),
 				"output/GPXMergeWaypoint_1_2.gpx");
 	}
 	@Test
@@ -26,7 +26,7 @@ public class MainTest {
 		IOFunctions.exportTracks(
 				Main.mergingTracksOnGrid(
 						Main.importTracks("leipzig_track_example.gpx"),
-						1, 2,0.5),
+						3, 2,0.5),
 				"output/GPXMergeTracksOnGrid_1_2_0.5.gpx");
 	}
 	@Test
@@ -34,8 +34,8 @@ public class MainTest {
 		IOFunctions.exportTracks(
 				Main.mergingTracks(
 						Main.importTracks("leipzig_track_example.gpx"),
-						1, 2,0.5,2),
-				"output/GPXMergeTracks_1_2_2.gpx");
+						2, 2,1.5,2),
+				"output/GPXMergeTracks_2_2_2.gpx");
 	}
 
 }

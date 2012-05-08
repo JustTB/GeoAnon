@@ -13,6 +13,7 @@ import java.util.Random;
 import org.gpsanonymity.data.DistanceMatrix;
 import org.gpsanonymity.data.MergedWayPoint;
 import org.gpsanonymity.data.comparator.WayPointComparator;
+import org.openstreetmap.josm.actions.AddNodeAction;
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
@@ -242,9 +243,9 @@ public class MergeGPS {
 		Bounds bounds=getBounds(list);
 		List<WayPoint> oldClusterPoints,clusterPoints=getRandomPoints(list,k);
 		List<WayPoint> cluster;
-		DistanceMatrix distanceMartix = new DistanceMatrix(list, list);
+		//DistanceMatrix distanceMartix = new DistanceMatrix(list, list);
 		do{
-			cluster= makeCluster(clusterPoints, list,distanceMartix);
+			cluster= makeCluster(clusterPoints, list);
 			oldClusterPoints=clusterPoints;
 			clusterPoints=cluster;
 		}while(!haveSameCoord(oldClusterPoints,clusterPoints));
@@ -302,7 +303,7 @@ public class MergeGPS {
 	 * @return new clusterPoints 
 	 */
 	private static List<WayPoint> makeCluster(
-			List<WayPoint> clusterPoints, List<WayPoint> list, DistanceMatrix distanceMartix) {
+			List<WayPoint> clusterPoints, List<WayPoint> list) {
 		List<List<WayPoint>> temp= new LinkedList<List<WayPoint>>();
 		//initialize result
 		for (int i = 0; i < clusterPoints.size(); i++) {
@@ -394,9 +395,8 @@ public class MergeGPS {
 		for (WayPoint wayPoint : tempList1) {
 			allDiffs1.add(getMaxDifference(wayPoint,tempList2));
 		}
-		for (WayPoint wayPoint : tempList1) {
-			sort(wayPoint,tempList1);
-			allDiffs2.add(getMaxDifference(wayPoint,tempList2));
+		for (WayPoint wayPoint : tempList2) {
+			allDiffs2.add(getMaxDifference(wayPoint,tempList1));
 		}
 		double max1=getMax(allDiffs1);
 		double max2=getMax(allDiffs2);
@@ -526,6 +526,15 @@ public class MergeGPS {
 		double max1=getMax(allDiffs1);
 		double max2=getMax(allDiffs2);
 		return Math.max(max1,max2)<trackDistance;
+	}
+	public static Bounds getBoundsWithSpace(Bounds bounds, double distance) {
+		return new Bounds(addDistance(bounds.getMin(), -distance, -distance),
+				addDistance(bounds.getMax(), distance, distance));
+	}
+	public static LatLon addDistance(LatLon p, double northernDistance, double westernDistance){
+		double y = p.getY()+(180/Math.PI)*(northernDistance/6378135);
+		double x = p.getX()+(180/Math.PI)*(westernDistance/6378135)/Math.cos(Math.toRadians(p.getY()));
+		return new LatLon(y,x);
 	}
 	
 	

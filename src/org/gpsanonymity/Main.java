@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.text.html.MinimalHTMLWriter;
 
 import org.gpsanonymity.data.GridMatrix;
+import org.gpsanonymity.data.TrackCloud;
 import org.gpsanonymity.io.IOFunctions;
 import org.gpsanonymity.merge.MergeGPS;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
