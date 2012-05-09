@@ -137,6 +137,7 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		Collection<GpxTrackSegment> tss = t.getSegments();
 		Collection<WayPoint> wps;
 		MergedWayPoint temp;
+		MergedWayPoint neighbor = null;
 		for (Iterator<GpxTrackSegment> iterator = tss.iterator(); iterator.hasNext();) {
 			GpxTrackSegment gpxTrackSegment = (GpxTrackSegment) iterator.next();
 			wps = gpxTrackSegment.getWayPoints();
@@ -145,6 +146,11 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 				temp= addWayPoint(wayPoint);
 				temp.addSegment(gpxTrackSegment,wayPoint);
 				temp.addTrack(t,wayPoint);
+				//temp is not the first element in the track and not the same MergedWayPoint
+				if (neighbor!=null && neighbor!=temp){
+					temp.connect(neighbor);
+				}
+				neighbor=temp;
 			}
 		}
 	}
@@ -177,7 +183,6 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	public static LatLon addWesternDistance(LatLon p, double distance){
 		return new LatLon(p.getY(),p.getX()+(180/Math.PI)*(distance/6378135)/Math.cos(Math.toRadians(p.getY())));
 	}
-	@Deprecated
 	public Bounds findField(WayPoint wp){
 		if (wholeGrid.contains(wp.getCoor())){
 			LatLon referH = new LatLon(wp.getCoor().getY(),wholeGrid.getMin().getX());

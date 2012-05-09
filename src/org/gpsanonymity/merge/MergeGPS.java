@@ -83,18 +83,18 @@ public class MergeGPS {
 
 	}
 
-	public static LatLon calculateCentroid(List<WayPoint> tempList2) {
-		if (tempList2.isEmpty()){
+	public static LatLon calculateCentroid(List<WayPoint> cluster) {
+		if (cluster.isEmpty()){
 			return null;
 		}
 		double lat =0;
 		double lon = 0;
-		for (Iterator<WayPoint> iterator = tempList2.iterator(); iterator.hasNext();) {
+		for (Iterator<WayPoint> iterator = cluster.iterator(); iterator.hasNext();) {
 			WayPoint wp = (WayPoint) iterator.next();
 			lat+=wp.getCoor().getY();//Lat
 			lon+=wp.getCoor().getX();//Lon
 		}
-		return new LatLon(lat/tempList2.size(),lon/tempList2.size());
+		return new LatLon(lat/cluster.size(),lon/cluster.size());
 	}
 
 	public static String simpleGeneralizeDate(LinkedList<WayPoint> sourceWaypoints) {
@@ -240,7 +240,6 @@ public class MergeGPS {
 	
 	}
 	public static List<MergedWayPoint> mergeWithKMeans(List<WayPoint> list, int k){
-		Bounds bounds=getBounds(list);
 		List<WayPoint> oldClusterPoints,clusterPoints=getRandomPoints(list,k);
 		List<WayPoint> cluster;
 		//DistanceMatrix distanceMartix = new DistanceMatrix(list, list);
@@ -272,7 +271,7 @@ public class MergeGPS {
 			//for each waypoint find nearest cluster point
 			int index =findNearestPointIndex(wayPoint,clusterPoints);
 			MergedWayPoint resultPoint = result.get(index);
-			resultPoint.addWayPoint(wayPoint);
+			resultPoint.addWayPoint(wayPoint, true);
 		}
 		return result;
 	}
@@ -304,22 +303,22 @@ public class MergeGPS {
 	 */
 	private static List<WayPoint> makeCluster(
 			List<WayPoint> clusterPoints, List<WayPoint> list) {
-		List<List<WayPoint>> temp= new LinkedList<List<WayPoint>>();
+		List<List<WayPoint>> clusterGroups= new LinkedList<List<WayPoint>>();
 		//initialize result
 		for (int i = 0; i < clusterPoints.size(); i++) {
-			temp.add(new LinkedList<WayPoint>());
+			clusterGroups.add(new LinkedList<WayPoint>());
 		}
 		for (WayPoint wayPoint : list) {
 			//for each waypoint find nearest cluster point
 			int index =findNearestPointIndex(wayPoint,clusterPoints);
-			List<WayPoint> tempList = temp.get(index);
-			tempList.add(wayPoint);
+			List<WayPoint> cluster = clusterGroups.get(index);
+			cluster.add(wayPoint);
 		}
 		LinkedList<WayPoint> result = new LinkedList<WayPoint>();
-		
-		for (List<WayPoint> tempList : temp) {
-			if(!tempList.isEmpty()){
-				result.add(new WayPoint(MergeGPS.calculateCentroid(tempList)));
+		//for each clusterGroup find new centroid
+		for (List<WayPoint> cluster : clusterGroups) {
+			if(!cluster.isEmpty()){
+				result.add(new WayPoint(MergeGPS.calculateCentroid(cluster)));
 			}
 		}
 		return result;

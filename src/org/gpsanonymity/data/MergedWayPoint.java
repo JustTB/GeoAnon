@@ -122,6 +122,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		for(MergedWayPoint mwp : connectionGrades2.keySet()){
 			if(connectionGrades.containsKey(mwp)){
 				connectionGrades.put(mwp, connectionGrades.get(mwp)+connectionGrades2.get(mwp));
+				System.out.println(connectionGrades.get(mwp));
 			}else{
 				connectionGrades.put(mwp, connectionGrades2.get(mwp));
 			}
@@ -194,6 +195,8 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 	public void connect(MergedWayPoint neighbor){
 		if (connectionGrades.containsKey(neighbor)){
 			connect(neighbor,connectionGrades.get(neighbor)+1);
+		}else{
+			connect(neighbor, 1);
 		}
 	}
 	private void connect(MergedWayPoint neighbor, int grade){
@@ -301,6 +304,10 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 			calculateNewDate();
 		}
 		
+	}
+
+	public boolean containsNeighbor(MergedWayPoint mwp) {
+		return connections.containsKey(mwp);
 	}
 	
 
