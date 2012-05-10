@@ -5,13 +5,13 @@ import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.WayPoint;
 
 
-public class WayPointComparator implements Comparator<WayPoint> {
+public class ReferenceWayPointComparator implements Comparator<WayPoint> {
 
 	WayPoint referencePoint=new WayPoint(new LatLon(0, 0));
-	public WayPointComparator() {
+	public ReferenceWayPointComparator() {
 		super();
 	}
-	public WayPointComparator(WayPoint referencePoint) {
+	public ReferenceWayPointComparator(WayPoint referencePoint) {
 		super();
 		this.referencePoint = new WayPoint(referencePoint);
 	}

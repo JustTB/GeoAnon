@@ -31,14 +31,14 @@ public class MainTest {
 	}
 	@Test
 	public void testMergeTracks(){
-		int k=1;
+		int k=2;
 		int segmentLenght=2;
-		double pointDensity = 5;
+		double pointDensity=2;
 		double trackDistance=4;
 		
 		IOFunctions.exportTracks(
 				Main.mergingTracks(
-						Main.importTracks("leipzig_track_example.gpx"),
+						Main.importTracks("input/leipzig.gpx"),
 						k, pointDensity,trackDistance,segmentLenght),
 				"output/GPXMergeTracks_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
 	}

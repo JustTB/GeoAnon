@@ -1,10 +1,12 @@
 package org.gpsanonymity.data;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.gpsanonymity.data.comparator.CoordinateWayPointComparator;
 import org.gpsanonymity.merge.MergeGPS;
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
@@ -44,19 +46,58 @@ public class TrackCloud {
 		eliminateLowerGrades();
 		System.out.println("Status:Merge similar Segments");
 		mergeSimilarSegments();
+		System.out.println("Status:Delete big distances");
+		deleteBigDistances();
 		System.out.println("Status:Build tracks!!");
 		buildTracks();
+		System.out.println("Status:Delete short tracks");
+		deleteShortTracks();
+	}
+
+	private void deleteBigDistances() {
+		for(MergedWayPoint mwp : mergedWayPoints){
+			mwp.deleteDistantNeighbors(trackDistance);
+		}
+		
+	}
+
+	private void deleteShortTracks() {
+		LinkedList<GpxTrack> tempTracks = new LinkedList<GpxTrack>(tracks);
+		for(GpxTrack track : tempTracks){
+			if(track.length()<6){
+				tracks.remove(track);
+			}
+		}
+		
 	}
 
 	private void mergeSimilarSegments() {
-		List<WayPoint> tempWPs;
+		List<WayPoint> maxWPs,minWPs;
 		for (List<GpxTrackSegment> list : similarSegments.values()) {
-			tempWPs =new LinkedList<WayPoint>();
+			maxWPs =new LinkedList<WayPoint>();
+			minWPs =new LinkedList<WayPoint>();
+			//this only works with segmentsLength=2
+			CoordinateWayPointComparator cwpc= new CoordinateWayPointComparator();
 			for (GpxTrackSegment gpxTrackSegment : list) {
-				tempWPs.addAll(gpxTrackSegment.getWayPoints());
+				List<WayPoint> wps = new LinkedList<WayPoint>(gpxTrackSegment.getWayPoints());
+				Collections.sort(wps,cwpc);
+				maxWPs.add(wps.get(0));
+				minWPs.add(wps.get(1));
 			}
-			List<MergedWayPoint> newWps = MergeGPS.mergeWithKMeans(tempWPs, segmentLength);
+			List<MergedWayPoint> newWps = MergeGPS.mergeWithKMeans(maxWPs, 1);
+			newWps.addAll(MergeGPS.mergeWithKMeans(minWPs, 1));
 			newWps = MergeGPS.eliminateLowerGradesMerged(newWps, k);
+			MergedWayPoint ancessor=null;
+			for (Iterator iterator = newWps.iterator(); iterator.hasNext();) {
+				MergedWayPoint mwp = (MergedWayPoint) iterator
+						.next();
+				if (ancessor!=null){
+					mwp.connect(ancessor,list.size());
+				}
+				ancessor=mwp;
+				
+			}
+			System.out.println("NeighborGrade: "+newWps.get(0).getNeighborGrade(newWps.get(newWps.size()-1)));
 			mergedWayPoints.addAll(newWps);
 		}
 	}
@@ -89,7 +130,11 @@ public class TrackCloud {
 			Bounds areaAroundSeg = MergeGPS.getBoundsWithSpace(seg.getBounds(),trackDistance);
 			for (Iterator<GpxTrackSegment> gpxIterator2 = segments.iterator(); gpxIterator2.hasNext();) {
 				GpxTrackSegment seg2 = (GpxTrackSegment) gpxIterator2.next();
-				if (seg!=seg2 && areaAroundSeg.intersects(seg2.getBounds())){
+				if (seg!=seg2 
+						&& areaAroundSeg.intersects(seg2.getBounds())
+						&& MergeGPS.haveNotTheSamePoints(seg,seg2)
+						&& MergeGPS.differenceInAngleIsLowerThan(seg,seg2,0.3*Math.PI)
+						&& !MergeGPS.haveSameTracks(seg.getWayPoints(),seg2.getWayPoints())){
 					Double distance = getDistance(seg, seg2);
 					//boolean similarAngles=haveSimilarVectors(seg,seg2);
 					if(distance<trackDistance){
@@ -193,7 +238,7 @@ public class TrackCloud {
 	}
 
 	private void buildSegments() {
-		//initalize tempWps
+		//initalize overlappingSegments
 		List<List<WayPoint>> overlappingSegments= new LinkedList<List<WayPoint>>();
 		for(int n=0;n<segmentLength;n++){
 			overlappingSegments.add(new LinkedList<WayPoint>());
@@ -229,16 +274,17 @@ public class TrackCloud {
 					if(antecessor!=null && !antecessor.containsNeighbor(mwp)){
 						antecessor.connect(mwp);
 					}
-					for (int index=0;index<overlappingSegments.size();index++) {
+					for (int index=0;index<1;index++) {
+					//for (int index=0;index<overlappingSegments.size();index++) {
 						List<WayPoint> currentSegment = overlappingSegments.get(index);
 						//in first run dont feed all lists
 						//example: segmentlength=3
-						//index 0:-> [1,,][,,][,,] not [1,,][1,,]
-						//index 1:-> [1,2,][2,,][,,]
-						//index 2:-> [1,2,3][2,3,][3,,]
+						//wp 0:-> [1,,][,,][,,] not [1,,][1,,]
+						//wp 1:-> [1,2,][2,,][,,]
+						//wp 2:-> [1,2,3][2,3,][3,,]
 						if(index>0 
 								&& currentSegment.isEmpty()
-								&& overlappingSegments.get(index-1).size()>index){
+								&& (overlappingSegments.get(index-1).size())%segmentLength!=2%segmentLength){
 							//do not add
 						}else{
 							currentSegment.add(mwp);

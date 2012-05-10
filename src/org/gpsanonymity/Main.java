@@ -143,7 +143,13 @@ public class Main {
 	 * @see Main#merginWayPoints(List, int, double)
 	 */
 	public static List<GpxTrack> mergingTracks(List<GpxTrack> tracks,int k , double pointDensity, double trackDistance, int segmentLength) {
-		List<GpxTrack> morePointTracks = MergeGPS.createMoreWaypointsOnTracks(tracks, pointDensity);
+		List<GpxTrack> morePointTracks;
+		if (pointDensity!=0){
+			System.out.println("Status: Create more Waypoints");
+			morePointTracks = MergeGPS.createMoreWaypointsOnTracks(tracks, pointDensity);
+		}else{
+			morePointTracks = new LinkedList<GpxTrack>(tracks);
+		}
 		TrackCloud tc= new TrackCloud(morePointTracks,k,trackDistance, segmentLength);
 		return tc.getMergedTracks();
 	}

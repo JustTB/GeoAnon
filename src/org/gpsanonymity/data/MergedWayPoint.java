@@ -199,7 +199,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 			connect(neighbor, 1);
 		}
 	}
-	private void connect(MergedWayPoint neighbor, int grade){
+	public void connect(MergedWayPoint neighbor, int grade){
 		connections.put(neighbor,false);
 		connectionGrades.put(neighbor, grade);
 		neighbor.connections.put(this,false);
@@ -308,6 +308,37 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 
 	public boolean containsNeighbor(MergedWayPoint mwp) {
 		return connections.containsKey(mwp);
+	}
+
+	public int getNeighborGrade(MergedWayPoint mergedWayPoint) {
+		if(mergedWayPoint!=null){
+			Integer entry = connectionGrades.get(mergedWayPoint);
+			if (entry!=null){
+				return entry;
+			}
+		}
+		return 0;
+	}
+
+	public boolean hasSameTracks(MergedWayPoint mwp2) {
+		for(GpxTrack track : sourceTracks.keySet()){
+			for(GpxTrack track2 : mwp2.sourceTracks.keySet()){
+				if(track==track2){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public void deleteDistantNeighbors(double distance) {
+		LinkedList<MergedWayPoint> keySet = new LinkedList<MergedWayPoint>(connections.keySet());
+		for(MergedWayPoint neighbor: keySet){
+			if(neighbor.getCoor().greatCircleDistance(this.getCoor())>distance){
+				disconnect(neighbor);
+			}
+		}
+		
 	}
 	
 
