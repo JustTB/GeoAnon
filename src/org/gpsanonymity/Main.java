@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.text.html.MinimalHTMLWriter;
 
 import org.gpsanonymity.data.GridMatrix;
+import org.gpsanonymity.data.TrackCloud;
 import org.gpsanonymity.io.IOFunctions;
 import org.gpsanonymity.merge.MergeGPS;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
@@ -135,15 +136,21 @@ public class Main {
 	 * merges given Tracks
 	 * @param tracks given Tracks
 	 * @param k factor for k-anonymity
-	 * @param pointRadius radius around the points
+	 * @param pointDensity radius around the points
 	 * @param trackDistance distance between to tracks
 	 * @param segmentLength 
 	 * @return new merged Tracks
 	 * @see Main#merginWayPoints(List, int, double)
 	 */
-	public static List<GpxTrack> mergingTracks(List<GpxTrack> tracks,int k , double pointRadius, double trackDistance, int segmentLength) {
-		List<GpxTrack> morePointTracks = MergeGPS.createMoreWaypointsOnTracks(tracks, pointRadius);
-		TrackCloud tc= new TrackCloud(morePointTracks,k,pointRadius,trackDistance, segmentLength);
+	public static List<GpxTrack> mergingTracks(List<GpxTrack> tracks,int k , double pointDensity, double trackDistance, int segmentLength) {
+		List<GpxTrack> morePointTracks;
+		if (pointDensity!=0){
+			System.out.println("Status: Create more Waypoints");
+			morePointTracks = MergeGPS.createMoreWaypointsOnTracks(tracks, pointDensity);
+		}else{
+			morePointTracks = new LinkedList<GpxTrack>(tracks);
+		}
+		TrackCloud tc= new TrackCloud(morePointTracks,k,trackDistance, segmentLength);
 		return tc.getMergedTracks();
 	}
 	/**
