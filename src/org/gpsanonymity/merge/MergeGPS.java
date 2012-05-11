@@ -12,7 +12,8 @@ import java.util.Random;
 
 import org.gpsanonymity.data.DistanceMatrix;
 import org.gpsanonymity.data.MergedWayPoint;
-import org.gpsanonymity.data.comparator.WayPointComparator;
+import org.gpsanonymity.data.comparator.ReferenceWayPointComparator;
+import org.openstreetmap.josm.actions.AddNodeAction;
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
@@ -60,7 +61,7 @@ public class MergeGPS {
 				procents--;
 			}
 			MergedWayPoint mwp = new MergedWayPoint(tempWaypoints.getFirst());
-			WayPointComparator wpc = new WayPointComparator();
+			ReferenceWayPointComparator wpc = new ReferenceWayPointComparator();
 			wpc.setReferencePoint(tempWaypoints.getFirst());
 			Collections.sort(tempWaypoints, wpc);
 			for (int i = 1; i < tempWaypoints.size() 
@@ -82,18 +83,18 @@ public class MergeGPS {
 
 	}
 
-	public static LatLon calculateCentroid(List<WayPoint> tempList2) {
-		if (tempList2.isEmpty()){
+	public static LatLon calculateCentroid(List<WayPoint> cluster) {
+		if (cluster.isEmpty()){
 			return null;
 		}
 		double lat =0;
 		double lon = 0;
-		for (Iterator<WayPoint> iterator = tempList2.iterator(); iterator.hasNext();) {
+		for (Iterator<WayPoint> iterator = cluster.iterator(); iterator.hasNext();) {
 			WayPoint wp = (WayPoint) iterator.next();
 			lat+=wp.getCoor().getY();//Lat
 			lon+=wp.getCoor().getX();//Lon
 		}
-		return new LatLon(lat/tempList2.size(),lon/tempList2.size());
+		return new LatLon(lat/cluster.size(),lon/cluster.size());
 	}
 
 	public static String simpleGeneralizeDate(LinkedList<WayPoint> sourceWaypoints) {
@@ -239,12 +240,13 @@ public class MergeGPS {
 	
 	}
 	public static List<MergedWayPoint> mergeWithKMeans(List<WayPoint> list, int k){
-		Bounds bounds=getBounds(list);
 		List<WayPoint> oldClusterPoints,clusterPoints=getRandomPoints(list,k);
 		List<WayPoint> cluster;
-		DistanceMatrix distanceMartix = new DistanceMatrix(list, list);
+		//DistanceMatrix distanceMartix = new DistanceMatrix(list, list);
+		int count=0;
 		do{
-			cluster= makeCluster(clusterPoints, list,distanceMartix);
+			count++;
+			cluster= makeCluster(clusterPoints, list);
 			oldClusterPoints=clusterPoints;
 			clusterPoints=cluster;
 		}while(!haveSameCoord(oldClusterPoints,clusterPoints));
@@ -302,23 +304,23 @@ public class MergeGPS {
 	 * @return new clusterPoints 
 	 */
 	private static List<WayPoint> makeCluster(
-			List<WayPoint> clusterPoints, List<WayPoint> list, DistanceMatrix distanceMartix) {
-		List<List<WayPoint>> temp= new LinkedList<List<WayPoint>>();
+			List<WayPoint> clusterPoints, List<WayPoint> list) {
+		List<List<WayPoint>> clusterGroups= new LinkedList<List<WayPoint>>();
 		//initialize result
 		for (int i = 0; i < clusterPoints.size(); i++) {
-			temp.add(new LinkedList<WayPoint>());
+			clusterGroups.add(new LinkedList<WayPoint>());
 		}
 		for (WayPoint wayPoint : list) {
 			//for each waypoint find nearest cluster point
 			int index =findNearestPointIndex(wayPoint,clusterPoints);
-			List<WayPoint> tempList = temp.get(index);
-			tempList.add(wayPoint);
+			List<WayPoint> cluster = clusterGroups.get(index);
+			cluster.add(wayPoint);
 		}
 		LinkedList<WayPoint> result = new LinkedList<WayPoint>();
-		
-		for (List<WayPoint> tempList : temp) {
-			if(!tempList.isEmpty()){
-				result.add(new WayPoint(MergeGPS.calculateCentroid(tempList)));
+		//for each clusterGroup find new centroid
+		for (List<WayPoint> cluster : clusterGroups) {
+			if(!cluster.isEmpty()){
+				result.add(new WayPoint(MergeGPS.calculateCentroid(cluster)));
 			}
 		}
 		return result;
@@ -365,7 +367,7 @@ public class MergeGPS {
 		LinkedList<WayPoint> tempTrackSegments= new LinkedList<WayPoint>(trackSeqs2);
 		MergedWayPoint mwp;
 		//sorting content of second List
-		WayPointComparator wpc = new WayPointComparator();
+		ReferenceWayPointComparator wpc = new ReferenceWayPointComparator();
 		for (int j = 0; j < mergedTrackSegments.size(); j++) {
 			mwp = new MergedWayPoint(mergedTrackSegments.get(j));
 			wpc.setReferencePoint(mergedTrackSegments.get(j));
@@ -394,9 +396,8 @@ public class MergeGPS {
 		for (WayPoint wayPoint : tempList1) {
 			allDiffs1.add(getMaxDifference(wayPoint,tempList2));
 		}
-		for (WayPoint wayPoint : tempList1) {
-			sort(wayPoint,tempList1);
-			allDiffs2.add(getMaxDifference(wayPoint,tempList2));
+		for (WayPoint wayPoint : tempList2) {
+			allDiffs2.add(getMaxDifference(wayPoint,tempList1));
 		}
 		double max1=getMax(allDiffs1);
 		double max2=getMax(allDiffs2);
@@ -424,7 +425,7 @@ public class MergeGPS {
 		return result;
 	}
 	static private void sort(WayPoint wayPoint, LinkedList<WayPoint> tempList2) {
-		WayPointComparator wpc = new WayPointComparator();
+		ReferenceWayPointComparator wpc = new ReferenceWayPointComparator();
 		wpc.setReferencePoint(wayPoint);
 		Collections.sort(tempList2, wpc);
 		
@@ -526,6 +527,61 @@ public class MergeGPS {
 		double max1=getMax(allDiffs1);
 		double max2=getMax(allDiffs2);
 		return Math.max(max1,max2)<trackDistance;
+	}
+	public static Bounds getBoundsWithSpace(Bounds bounds, double distance) {
+		return new Bounds(addDistance(bounds.getMin(), -distance, -distance),
+				addDistance(bounds.getMax(), distance, distance));
+	}
+	public static LatLon addDistance(LatLon p, double northernDistance, double westernDistance){
+		double y = p.getY()+(180/Math.PI)*(northernDistance/6378135);
+		double x = p.getX()+(180/Math.PI)*(westernDistance/6378135)/Math.cos(Math.toRadians(p.getY()));
+		return new LatLon(y,x);
+	}
+	public static boolean haveNotTheSamePoints(GpxTrackSegment seg,
+			GpxTrackSegment seg2) {
+		for(WayPoint wp1 : seg.getWayPoints()){
+			for(WayPoint wp2 : seg2.getWayPoints()){
+				if (wp1.equals(wp2)){
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	public static boolean differenceInAngleIsLowerThan(GpxTrackSegment seg,
+			GpxTrackSegment seg2, double maxAngle) {
+		LinkedList<WayPoint> wps1 = new LinkedList<WayPoint>(seg.getWayPoints());
+		LinkedList<WayPoint> wps2 = new LinkedList<WayPoint>(seg2.getWayPoints());
+		double latVector1=wps1.get(0).getCoor().getY()
+					-wps1.get(wps1.size()-1).getCoor().getY();
+		double lonVector1=wps1.get(0).getCoor().getX()
+					-wps1.get(wps1.size()-1).getCoor().getX();
+		double latVector2=wps2.get(0).getCoor().getY()
+					-wps2.get(wps2.size()-1).getCoor().getY();
+		double lonVector2=wps2.get(0).getCoor().getX()
+					-wps2.get(wps2.size()-1).getCoor().getX();
+		double cosinusAlpha=(latVector1*latVector2+lonVector1*lonVector2)
+					/(Math.sqrt(latVector1*latVector1+lonVector1*lonVector1)
+							*(Math.sqrt(latVector2*latVector2+lonVector2*lonVector2)));
+		double alpha = Math.acos(cosinusAlpha);
+		return alpha<maxAngle;
+	}
+	public static boolean haveSameTracks(Collection<WayPoint> wayPoints,
+			Collection<WayPoint> wayPoints2) {
+		for (WayPoint wp1 : wayPoints) {
+			if(MergedWayPoint.class.isInstance(wp1)){
+				for (WayPoint wp2 : wayPoints2) {
+					if(MergedWayPoint.class.isInstance(wp2)){
+						MergedWayPoint mwp1 = (MergedWayPoint)wp1;
+						MergedWayPoint mwp2 = (MergedWayPoint)wp2;
+						if (mwp1.hasSameTracks(mwp2)){
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 	
 	
