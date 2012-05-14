@@ -53,8 +53,8 @@ public class MergeGPS {
 	static public List<MergedWayPoint> mergeWaypoints(Collection<WayPoint> waypoints, double accuracy) {
 		LinkedList<WayPoint> tempWaypoints = new LinkedList<WayPoint>(waypoints);
 		LinkedList<MergedWayPoint> mergedWaypoints = new LinkedList<MergedWayPoint>();
-		int procentBlocks = Math.round(tempWaypoints.size()/100);
-		int procents=100;
+		double procentBlocks = tempWaypoints.size()/100;
+		double procents=100;
 		while(!tempWaypoints.isEmpty()){
 			if(Math.round(tempWaypoints.size()/procentBlocks)==procents){
 				System.out.println("WayPoints Merged: "+ procents + "%");
@@ -73,8 +73,8 @@ public class MergeGPS {
 				tempWaypoints.remove(i);
 				i--;// correct index cause we removed the point
 			}
-			mwp.calculateNewCoordinates();
-			mwp.calculateNewDate();
+			//mwp.calculateNewCoordinates();
+			//mwp.calculateNewDate();
 			tempWaypoints.removeFirst();
 			mergedWaypoints.add(mwp);
 		}
@@ -83,7 +83,7 @@ public class MergeGPS {
 
 	}
 
-	public static LatLon calculateCentroid(List<WayPoint> cluster) {
+	public static LatLon calculateCentroid(Collection<WayPoint> cluster) {
 		if (cluster.isEmpty()){
 			return null;
 		}
@@ -97,94 +97,94 @@ public class MergeGPS {
 		return new LatLon(lat/cluster.size(),lon/cluster.size());
 	}
 
-	public static String simpleGeneralizeDate(LinkedList<WayPoint> sourceWaypoints) {
+	public static String simpleGeneralizeDate(Collection<WayPoint> sourceWaypoints) {
 		//FIXME:something goes wrong
 		//sort by Date
-		if (!sourceWaypoints.isEmpty()){
-			Collections.sort(sourceWaypoints);
-			Date first = sourceWaypoints.getFirst().getTime();
-			Date last = sourceWaypoints.getLast().getTime();
-			SimpleDateFormat dateFormatYear = new SimpleDateFormat("yyyy");
-			SimpleDateFormat dateFormatMonth = new SimpleDateFormat("MM");
-			SimpleDateFormat dateFormatDay = new SimpleDateFormat("dd");
-			SimpleDateFormat dateFormatHour = new SimpleDateFormat("HH");
-			SimpleDateFormat dateFormatMinute = new SimpleDateFormat("mm");
-			SimpleDateFormat dateFormatSecond = new SimpleDateFormat("ss");
-			SimpleDateFormat dateFormatMilli = new SimpleDateFormat("SSS");
-			String result = new String();
-			//Year
-			if (	dateFormatYear.format(first)
-					.compareTo(
-							dateFormatYear.format(last))
-							==0
-					){
-				result+=dateFormatYear.format(last)+":";
-			}else{
-				result+="XXXX:";
-			}
-			//Month
-			if (	dateFormatMonth.format(first)
-					.compareTo(
-							dateFormatMonth.format(last))
-							==0
-					){
-				result+=dateFormatMonth.format(last)+":";
-			}else{
-				result+="XX:";
-			}
-			//Day
-			if (	dateFormatDay.format(first)
-					.compareTo(
-							dateFormatDay.format(last))
-							==0
-					){
-				result+=dateFormatDay.format(last)+":";
-			}else{
-				result+="XX:";
-			}
-			//Hour
-			if (	dateFormatHour.format(first)
-					.compareTo(
-							dateFormatHour.format(last))
-							==0
-					){
-				result+=dateFormatHour.format(last)+":";
-			}else{
-				result+="XX:";
-			}				
-			//Minute
-			if (	dateFormatMinute.format(first)
-					.compareTo(
-							dateFormatMinute.format(last))
-							==0
-					){
-				result+=dateFormatMinute.format(last)+":";
-			}else{
-				result+="XX:";
-			}
-			//Second
-			if (	dateFormatSecond.format(first)
-					.compareTo(
-							dateFormatSecond.format(last))
-							==0
-					){
-				result+=dateFormatSecond.format(last)+":";
-			}else{
-				result+="XX:";
-			}
-			//Milli
-			if (	dateFormatMilli.format(first)
-					.compareTo(
-							dateFormatMilli.format(last))
-							==0
-					){
-				result+=dateFormatMilli.format(last)+":";
-			}else{
-				result+="XXX";
-			}
-			return result;
-		}
-		return null;
+//		if (!sourceWaypoints.isEmpty()){
+//			Collections.sort(sourceWaypoints);
+//			Date first = sourceWaypoints.getFirst().getTime();
+//			Date last = sourceWaypoints.getLast().getTime();
+//			SimpleDateFormat dateFormatYear = new SimpleDateFormat("yyyy");
+//			SimpleDateFormat dateFormatMonth = new SimpleDateFormat("MM");
+//			SimpleDateFormat dateFormatDay = new SimpleDateFormat("dd");
+//			SimpleDateFormat dateFormatHour = new SimpleDateFormat("HH");
+//			SimpleDateFormat dateFormatMinute = new SimpleDateFormat("mm");
+//			SimpleDateFormat dateFormatSecond = new SimpleDateFormat("ss");
+//			SimpleDateFormat dateFormatMilli = new SimpleDateFormat("SSS");
+//			String result = new String();
+//			//Year
+//			if (	dateFormatYear.format(first)
+//					.compareTo(
+//							dateFormatYear.format(last))
+//							==0
+//					){
+//				result+=dateFormatYear.format(last)+":";
+//			}else{
+//				result+="XXXX:";
+//			}
+//			//Month
+//			if (	dateFormatMonth.format(first)
+//					.compareTo(
+//							dateFormatMonth.format(last))
+//							==0
+//					){
+//				result+=dateFormatMonth.format(last)+":";
+//			}else{
+//				result+="XX:";
+//			}
+//			//Day
+//			if (	dateFormatDay.format(first)
+//					.compareTo(
+//							dateFormatDay.format(last))
+//							==0
+//					){
+//				result+=dateFormatDay.format(last)+":";
+//			}else{
+//				result+="XX:";
+//			}
+//			//Hour
+//			if (	dateFormatHour.format(first)
+//					.compareTo(
+//							dateFormatHour.format(last))
+//							==0
+//					){
+//				result+=dateFormatHour.format(last)+":";
+//			}else{
+//				result+="XX:";
+//			}				
+//			//Minute
+//			if (	dateFormatMinute.format(first)
+//					.compareTo(
+//							dateFormatMinute.format(last))
+//							==0
+//					){
+//				result+=dateFormatMinute.format(last)+":";
+//			}else{
+//				result+="XX:";
+//			}
+//			//Second
+//			if (	dateFormatSecond.format(first)
+//					.compareTo(
+//							dateFormatSecond.format(last))
+//							==0
+//					){
+//				result+=dateFormatSecond.format(last)+":";
+//			}else{
+//				result+="XX:";
+//			}
+//			//Milli
+//			if (	dateFormatMilli.format(first)
+//					.compareTo(
+//							dateFormatMilli.format(last))
+//							==0
+//					){
+//				result+=dateFormatMilli.format(last)+":";
+//			}else{
+//				result+="XXX";
+//			}
+//			return result;
+//		}
+		return "";
 	}
 	public static List<GpxTrack> createMoreWaypointsOnTracks(Collection<GpxTrack> tracks, double maxdistance){
 		List<GpxTrack> newTracks= new LinkedList<GpxTrack>();
@@ -239,8 +239,22 @@ public class MergeGPS {
 		return null;//mergedWaypoints;
 	
 	}
+	public static List<MergedWayPoint> mergeSegmentsWithKMeans(List<GpxTrackSegment> list, int k){
+		List<GpxTrackSegment> oldClusterSegs,clusterSegs=getRandomEntrys(list,k);
+		List<GpxTrackSegment> cluster;
+		//DistanceMatrix distanceMartix = new DistanceMatrix(list, list);
+		int count=0;
+		do{
+			count++;
+			cluster= makeSegmentsCluster(clusterSegs, list);
+			oldClusterSegs=clusterSegs;
+			clusterSegs=cluster;
+		}while(!haveSameCoord(oldClusterSegs,clusterSegs));
+		return makeMergeCluster(clusterSegs,list);
+				
+	}
 	public static List<MergedWayPoint> mergeWithKMeans(List<WayPoint> list, int k){
-		List<WayPoint> oldClusterPoints,clusterPoints=getRandomPoints(list,k);
+		List<WayPoint> oldClusterPoints,clusterPoints=getRandomEntrys(list,k);
 		List<WayPoint> cluster;
 		//DistanceMatrix distanceMartix = new DistanceMatrix(list, list);
 		int count=0;
@@ -277,14 +291,14 @@ public class MergeGPS {
 		}
 		return result;
 	}
-	private static List<WayPoint> getRandomPoints(List<WayPoint> list,
+	private static List getRandomEntrys(List list,
 			int clusterNumber) {
 		if (clusterNumber<list.size()){
-			List<WayPoint> result = new LinkedList<WayPoint>();
+			List result = new LinkedList();
 			Random generator= new Random();
 			while(result.size()< clusterNumber) {
 				int index =generator.nextInt(list.size());
-				WayPoint randomWayPoint = list.get(index);
+				Object randomWayPoint = list.get(index);
 				if(!result.contains(randomWayPoint)){
 					result.add(list.get(index));
 				}
@@ -294,6 +308,59 @@ public class MergeGPS {
 		}else{
 			return null;
 		}
+	}
+	private static List<GpxTrackSegment> makeSegmentCluster(
+			List<GpxTrackSegment> clusterSegs, List<GpxTrackSegment> list) {
+		List<List<GpxTrackSegment>> clusterGroups= new LinkedList<List<GpxTrackSegment>>();
+		//initialize result
+		for (int i = 0; i < clusterSegs.size(); i++) {
+			clusterGroups.add(new LinkedList<GpxTrackSegment>());
+		}
+		for (GpxTrackSegment seg : list) {
+			//for each waypoint find nearest cluster point
+			int index =findNearestSegmentIndex(seg,clusterSegs);
+			List<GpxTrackSegment> cluster = clusterGroups.get(index);
+			cluster.add(seg);
+		}
+		LinkedList<GpxTrackSegment> result = new LinkedList<GpxTrackSegment>();
+		//for each clusterGroup find new centroid
+		for (List<GpxTrackSegment> cluster : clusterGroups) {
+			if(!cluster.isEmpty()){
+				result.add(MergeGPS.calculateSegmentCentroid(cluster));
+			}
+		}
+		return result;
+	}
+	private static int findNearestSegmentIndex(GpxTrackSegment seg,
+			List<GpxTrackSegment> list) {
+		double distance=Double.MAX_VALUE;
+		int result=-1;
+		for (int i = 0; i < list.size(); i++) {
+			Double currentDistance;
+			/*
+			if (distanceMartix!=null){
+				currentDistance = distanceMartix.getValue(list.get(i), wayPoint);
+				if(currentDistance==null){
+					currentDistance = list.get(i).getCoor().greatCircleDistance(wayPoint.getCoor());
+				}
+			}else{*/
+				currentDistance = segmentDistance(list.get(i),seg);
+			/*}*/
+			if (currentDistance<distance){
+				distance=currentDistance;
+				result=i;
+			}
+		}
+		return result;
+	}
+	private static Double segmentDistance(GpxTrackSegment seg1,
+			GpxTrackSegment seg2) {
+		double distance = hausDorffDistance(seg1.getWayPoints(), seg2.getWayPoints());
+		double angle = calculateAngle(seg1, seg2);
+		double angleFactor=(-1)*((angle%Math.PI)/Math.PI-1);
+		//angle/(pi/2) * distance
+		return distance*angleFactor;
+		
 	}
 	/**
 	 * Gives better clusters of the waypoints of list back
@@ -548,8 +615,8 @@ public class MergeGPS {
 		}
 		return true;
 	}
-	public static boolean differenceInAngleIsLowerThan(GpxTrackSegment seg,
-			GpxTrackSegment seg2, double maxAngle) {
+	public static double calculateAngle(GpxTrackSegment seg,
+			GpxTrackSegment seg2) {
 		LinkedList<WayPoint> wps1 = new LinkedList<WayPoint>(seg.getWayPoints());
 		LinkedList<WayPoint> wps2 = new LinkedList<WayPoint>(seg2.getWayPoints());
 		double latVector1=wps1.get(0).getCoor().getY()
@@ -564,7 +631,11 @@ public class MergeGPS {
 					/(Math.sqrt(latVector1*latVector1+lonVector1*lonVector1)
 							*(Math.sqrt(latVector2*latVector2+lonVector2*lonVector2)));
 		double alpha = Math.acos(cosinusAlpha);
-		return alpha<maxAngle;
+		return alpha;
+	}
+	public static boolean differenceInAngleIsLowerThan(GpxTrackSegment seg,
+			GpxTrackSegment seg2, double maxAngle) {
+		return calculateAngle(seg,seg2)<maxAngle;
 	}
 	public static boolean haveSameTracks(Collection<WayPoint> wayPoints,
 			Collection<WayPoint> wayPoints2) {

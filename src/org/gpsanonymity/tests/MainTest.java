@@ -25,16 +25,16 @@ public class MainTest {
 	public void testMergeTracksOnGrid(){
 		IOFunctions.exportTracks(
 				Main.mergingTracksOnGrid(
-						Main.importTracks("leipzig_track_example.gpx"),
-						3, 2,0.5),
+						Main.importTracks("input/leipzig.gpx"),
+						3, 4,0.5),
 				"output/GPXMergeTracksOnGrid_1_2_0.5.gpx");
 	}
 	@Test
 	public void testMergeTracks(){
-		int k=2;
+		int k=5;
 		int segmentLenght=2;
-		double pointDensity=2;
-		double trackDistance=4;
+		double pointDensity=7;
+		double trackDistance=6;
 		
 		IOFunctions.exportTracks(
 				Main.mergingTracks(

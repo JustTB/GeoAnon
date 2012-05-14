@@ -43,7 +43,7 @@ public class MergeGPSTest {
 	}
 	@Test
 	public void createMorePointsTest(){
-		List<GpxTrack> tracks = IOFunctions.getAllTracks(IOFunctions.importGPX("leipzig_track_example.gpx"));
+		List<GpxTrack> tracks = IOFunctions.getAllTracks(IOFunctions.importGPX("input/leipzig.gpx"));
 		List<GpxTrack> newTracks = new LinkedList<GpxTrack>(); 
 		for (GpxTrack gpxTrack : tracks) {
 			GpxTrack newTrack = MergeGPS.createMoreWaypointsOnTrack(

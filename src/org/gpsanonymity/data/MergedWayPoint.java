@@ -2,6 +2,7 @@ package org.gpsanonymity.data;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,7 +20,7 @@ import org.openstreetmap.josm.io.GpxWriter;
 
 
 public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
-	private LinkedList<WayPoint> sourceWaypoints;
+	private HashSet<WayPoint> sourceWaypoints;
 	private HashMap<GpxTrackSegment,List<WayPoint>> sourceSegments;
 	private HashMap<GpxTrack,List<WayPoint>> sourceTracks;
 	private HashMap<MergedWayPoint,Boolean> connections;
@@ -28,7 +29,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 	private HashMap<MergedWayPoint,Integer> connectionGrades;
 	public MergedWayPoint(LinkedList<WayPoint> lp) {
 		super(new LatLon(0,0));
-		sourceWaypoints = new LinkedList<WayPoint>(lp);
+		sourceWaypoints = new HashSet<WayPoint>(lp);
 		sourceSegments = new HashMap<GpxTrackSegment, List<WayPoint>>();
 		sourceTracks = new HashMap<GpxTrack, List<WayPoint>>();
 		connections = new HashMap<MergedWayPoint,Boolean>();
@@ -40,7 +41,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 	
 	public MergedWayPoint(WayPoint p) {
 		super(p);
-		sourceWaypoints = new LinkedList<WayPoint>();
+		sourceWaypoints = new HashSet<WayPoint>();
 		sourceSegments = new HashMap<GpxTrackSegment, List<WayPoint>>();
 		sourceTracks = new HashMap<GpxTrack, List<WayPoint>>();
 		connections = new HashMap<MergedWayPoint,Boolean>();
@@ -122,7 +123,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		for(MergedWayPoint mwp : connectionGrades2.keySet()){
 			if(connectionGrades.containsKey(mwp)){
 				connectionGrades.put(mwp, connectionGrades.get(mwp)+connectionGrades2.get(mwp));
-				System.out.println(connectionGrades.get(mwp));
+				System.out.println("Connection Grade:" +connectionGrades.get(mwp));
 			}else{
 				connectionGrades.put(mwp, connectionGrades2.get(mwp));
 			}
