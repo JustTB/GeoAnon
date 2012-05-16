@@ -27,6 +27,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 	private LinkedList<GpxTrackSegment> mergedSegments;
 	private String gpxDate;
 	private HashMap<MergedWayPoint,Integer> connectionGrades;
+	private MergedWayPoint updateMergedWayPoint=this;
 	public MergedWayPoint(LinkedList<WayPoint> lp) {
 		super(new LatLon(0,0));
 		sourceWaypoints = new HashSet<WayPoint>(lp);
@@ -102,28 +103,44 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		}
 	}
 	public void mergeWith(MergedWayPoint mwp){
-		
-		addWayPoint((WayPoint)mwp,true);
+		if(mwp==this){
+			return;
+		}
+//		addWayPoint((WayPoint)mwp,true);
 		sourceWaypoints.addAll(mwp.sourceWaypoints);
 		mergeSourceSegments(mwp.sourceSegments);
 		mergeSourceTracks(mwp.sourceTracks);
 		connections.putAll(mwp.connections);
 		mergeConnectionGrades(mwp.connectionGrades);
-		LinkedList<MergedWayPoint> keySet = new LinkedList<MergedWayPoint>(connections.keySet());
-		for (MergedWayPoint neighbor : keySet) {
-			neighbor.disconnect(mwp);
-			connect(neighbor);
+		LinkedList<MergedWayPoint> keySet = new LinkedList<MergedWayPoint>(mwp.connections.keySet());
+		for (MergedWayPoint mwpNeighbor : keySet) {
+			mwpNeighbor.disconnect(mwp);
+			connect(mwpNeighbor);
 		}
+		if(getNeighborGrade(mwp)!=0){
+			disconnect(mwp);
+		}
+		mwp.update(this);
 		calculateNewCoordinates();
 		calculateNewDate();
 		
 	}
+	private void update(MergedWayPoint mergedWayPoint) {
+		updateMergedWayPoint =mergedWayPoint;	
+	}
+	public boolean needsUpdate(){
+		return updateMergedWayPoint!=this;
+	}
+	public WayPoint update(){
+		return updateMergedWayPoint;
+	}
+
 	private void mergeConnectionGrades(
 			HashMap<MergedWayPoint, Integer> connectionGrades2) {
 		for(MergedWayPoint mwp : connectionGrades2.keySet()){
 			if(connectionGrades.containsKey(mwp)){
 				connectionGrades.put(mwp, connectionGrades.get(mwp)+connectionGrades2.get(mwp));
-				System.out.println("Connection Grade:" +connectionGrades.get(mwp));
+				//System.out.println("Connection Grade:" +connectionGrades.get(mwp));
 			}else{
 				connectionGrades.put(mwp, connectionGrades2.get(mwp));
 			}
@@ -194,6 +211,9 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		return "WayPoint {"+ new LatLon(this.lat, this.lon).toString() + "time="+gpxDate+" grade:"+getGrade()+"}";
 	}
 	public void connect(MergedWayPoint neighbor){
+		if(neighbor==this){
+			return;
+		}
 		if (connectionGrades.containsKey(neighbor)){
 			connect(neighbor,connectionGrades.get(neighbor)+1);
 		}else{

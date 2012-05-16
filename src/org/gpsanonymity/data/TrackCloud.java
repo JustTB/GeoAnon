@@ -18,15 +18,16 @@ import org.openstreetmap.josm.data.gpx.WayPoint;
 
 public class TrackCloud {
 
-	private List<GpxTrack> sourceTracks;
-	private int k;
-	private double trackDistance;
-	private int segmentLength;
-	private HashMap<GpxTrackSegment,List<GpxTrackSegment>> similarSegments;
-	private List<GpxTrackSegment> segments;
-	private List<GpxTrack> tracks;
-	private List<MergedWayPoint> mergedWayPoints;
-	private HashMap<GpxTrackSegment,HashSet<GpxTrack>> tracksOfSimilarSegments;
+	protected List<GpxTrack> sourceTracks;
+	protected int k;
+	protected double trackDistance;
+	protected int segmentLength;
+	protected HashMap<GpxTrackSegment,HashSet<GpxTrackSegment>> similarSegments;
+	protected List<GpxTrackSegment> segments;
+	protected List<GpxTrack> tracks;
+	protected List<MergedWayPoint> mergedWayPoints;
+	protected HashMap<GpxTrackSegment,HashSet<GpxTrack>> tracksOfSimilarSegments;
+	private List<GpxTrackSegment> segmentCluster;
 
 	public TrackCloud(List<GpxTrack> morePointTracks, int k, double trackDistance, int segmentLength) {
 		this.sourceTracks=new LinkedList<GpxTrack>(morePointTracks);
@@ -34,7 +35,7 @@ public class TrackCloud {
 		this.trackDistance=trackDistance;
 		this.segmentLength=segmentLength;
 		segments = new LinkedList<GpxTrackSegment>();
-		similarSegments= new HashMap<GpxTrackSegment, List<GpxTrackSegment>>();
+		similarSegments= new HashMap<GpxTrackSegment, HashSet<GpxTrackSegment>>();
 		mergedWayPoints = new LinkedList<MergedWayPoint>();
 		tracksOfSimilarSegments = new HashMap<GpxTrackSegment, HashSet<GpxTrack>>();
 		initialize();
@@ -43,6 +44,8 @@ public class TrackCloud {
 	private void initialize() {
 		System.out.println("Status:Build segments.");
 		buildSegments();
+		System.out.println("Status: Find Segmentcluster");
+		findSegmentCluster();
 		System.out.println("Status:Find Similar Segments");
 		findSimilarSegments();
 		System.out.println("Status:Eliminate similar segments with grade<"+k);
@@ -56,6 +59,11 @@ public class TrackCloud {
 		buildTracks();
 		System.out.println("Status:Delete short tracks");
 		//deleteShortTracks();
+	}
+
+	private void findSegmentCluster() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	private void mergeNearWayPoints() {
@@ -90,33 +98,55 @@ public class TrackCloud {
 
 	private void mergeSimilarSegments() {
 		List<WayPoint> maxWPs,minWPs;
-		for (List<GpxTrackSegment> list : similarSegments.values()) {
+		while(!similarSegments.isEmpty()) {
+			LinkedList<HashSet<GpxTrackSegment>> hashSetList = new LinkedList<HashSet<GpxTrackSegment>>(similarSegments.values());
+			HashSet<GpxTrackSegment> list = hashSetList.get(0);
 			maxWPs =new LinkedList<WayPoint>();
 			minWPs =new LinkedList<WayPoint>();
 			//this only works with segmentsLength=2
-			CoordinateWayPointComparator cwpc= new CoordinateWayPointComparator();
-			for (GpxTrackSegment gpxTrackSegment : list) {
-				List<WayPoint> wps = new LinkedList<WayPoint>(gpxTrackSegment.getWayPoints());
-				Collections.sort(wps,cwpc);
-				maxWPs.add(wps.get(0));
-				minWPs.add(wps.get(1));
+			boolean maxMin = false;
+			List<MergedWayPoint> newMwps;
+			if(maxMin){
+				CoordinateWayPointComparator cwpc= new CoordinateWayPointComparator();
+				for (GpxTrackSegment gpxTrackSegment : list) {
+					similarSegments.remove(gpxTrackSegment);
+					List<WayPoint> wps = new LinkedList<WayPoint>(gpxTrackSegment.getWayPoints());
+					Collections.sort(wps,cwpc);
+					maxWPs.add(wps.get(0));
+					minWPs.add(wps.get(1));
+				}
+				newMwps = MergeGPS.mergeWithKMeans(maxWPs, 1);
+				newMwps.addAll(MergeGPS.mergeWithKMeans(minWPs, 1));
+			}else{
+				LinkedList<WayPoint> wps = new LinkedList<WayPoint>();
+				for (GpxTrackSegment gpxTrackSegment : list) {
+					similarSegments.remove(gpxTrackSegment);
+					wps.addAll(gpxTrackSegment.getWayPoints());
+				}
+				LinkedList<WayPoint> newWps = new LinkedList<WayPoint>();
+				for (WayPoint wp : wps) {
+					MergedWayPoint mwp = (MergedWayPoint) wp;
+					if(mwp.needsUpdate()){
+						newWps.add(mwp.update());
+					}else{
+						newWps.add(wp);
+					}
+				}
+				newMwps=MergeGPS.mergeWithKMeans(newWps, segmentLength);
 			}
-			List<MergedWayPoint> newWps = MergeGPS.mergeWithKMeans(maxWPs, 1);
-			newWps.addAll(MergeGPS.mergeWithKMeans(minWPs, 1));
-			//TODO:
-			//newWps = MergeGPS.eliminateLowerGradesMerged(newWps, k);
+			newMwps = MergeGPS.eliminateLowerGradesMerged(newMwps, k);
 			MergedWayPoint ancessor=null;
-			for (Iterator iterator = newWps.iterator(); iterator.hasNext();) {
+			for (Iterator iterator = newMwps.iterator(); iterator.hasNext();) {
 				MergedWayPoint mwp = (MergedWayPoint) iterator
 						.next();
-				if (ancessor!=null){
+				if (ancessor!=null && mwp.getNeighborGrade(ancessor)==0){
 					mwp.connect(ancessor,list.size());
 				}
 				ancessor=mwp;
 				
 			}
-			System.out.println("NeighborGrade: "+newWps.get(0).getNeighborGrade(newWps.get(newWps.size()-1)));
-			mergedWayPoints.addAll(newWps);
+			//System.out.println("NeighborGrade: "+newWps.get(0).getNeighborGrade(newWps.get(newWps.size()-1)));
+			mergedWayPoints.addAll(newMwps);
 		}
 	}
 
@@ -127,7 +157,8 @@ public class TrackCloud {
 	private void eliminateLowerGrades() {
 		List<GpxTrackSegment> keySet = new LinkedList<GpxTrackSegment>(similarSegments.keySet());
 		int size=keySet.size();
-		int count=0,grade=0,averageGrade=0,highestGrade=0;
+		int count=0,grade=0,highestGrade=0;
+		double averageGrade=0;
 		for (GpxTrackSegment segment : keySet) {
 			try{
 				grade=similarSegments.get(segment).size();
@@ -145,21 +176,28 @@ public class TrackCloud {
 		}
 		System.out.println("Segments removed: " + count+"\\" +size);
 		System.out.println("Average Grade: " + averageGrade/size);
-		System.out.println("Highest Grade: " + averageGrade/size);
+		System.out.println("Highest Grade: " + highestGrade);
 		
 	}
 
 	private void findSimilarSegments() {
-		for (Iterator<GpxTrackSegment> gpxIterator = segments.iterator(); gpxIterator.hasNext();) {
+		for (Iterator<GpxTrackSegment> gpxIterator = segmentCluster.iterator(); gpxIterator.hasNext();) {
 			GpxTrackSegment seg = (GpxTrackSegment) gpxIterator.next();
 			Bounds areaAroundSeg = MergeGPS.getBoundsWithSpace(seg.getBounds(),trackDistance);
 			for (Iterator<GpxTrackSegment> gpxIterator2 = segments.iterator(); gpxIterator2.hasNext();) {
 				GpxTrackSegment seg2 = (GpxTrackSegment) gpxIterator2.next();
+				Bounds seg2Bounds = seg2.getBounds();
 				if (seg!=seg2 
-						&& areaAroundSeg.intersects(seg2.getBounds())
-						&& MergeGPS.haveNotTheSamePoints(seg,seg2)
-						&& MergeGPS.differenceInAngleIsLowerThan(seg,seg2,0.3*Math.PI)
-						&& haveNoTrackInCommon(seg,seg2)){
+						&& (areaAroundSeg.intersects(seg2Bounds) 
+								|| (areaAroundSeg.contains(seg2Bounds.getMax())
+										&& areaAroundSeg.contains(seg2Bounds.getMin())
+									)
+							)
+//						&& MergeGPS.haveNotTheSamePoints(seg,seg2)
+						&& (MergeGPS.calculateAngle(seg, seg2)<0.3*Math.PI 
+								|| MergeGPS.calculateAngle(seg, seg2)>0.7*Math.PI) 
+						&& haveNoTrackInCommon(seg,seg2)
+						){
 					Double distance = getDistance(seg, seg2);
 					//boolean similarAngles=haveSimilarVectors(seg,seg2);
 					if(distance<trackDistance){
@@ -168,16 +206,17 @@ public class TrackCloud {
 				}
 			}
 		}
-		
 	}
 	private boolean haveNoTrackInCommon(GpxTrackSegment seg, GpxTrackSegment seg2) {
-		for (GpxTrack track :tracksOfSimilarSegments.get(seg)){
-			for (GpxTrack track2 :tracksOfSimilarSegments.get(seg2)){
-				if(track==track2){
-					return false;
+//		if(tracksOfSimilarSegments.get(seg).size()<2 && tracksOfSimilarSegments.get(seg2).size()<2){
+			for (GpxTrack track :tracksOfSimilarSegments.get(seg)){
+				for (GpxTrack track2 :tracksOfSimilarSegments.get(seg2)){
+					if(track==track2){
+						return false;
+					}
 				}
 			}
-		}
+//		}
 		return true;
 	}
 
@@ -219,33 +258,37 @@ public class TrackCloud {
 	}
 
 	private void addSimilarSegments(GpxTrackSegment seg, GpxTrackSegment seg2) {
-		List<GpxTrackSegment> segEntry = similarSegments.get(seg);
-		List<GpxTrackSegment> seg2Entry = similarSegments.get(seg2);
+		HashSet<GpxTrackSegment> segEntry = similarSegments.get(seg);
+		HashSet<GpxTrackSegment> seg2Entry = similarSegments.get(seg2);
 		if(segEntry==null && seg2Entry==null){
-			List<GpxTrackSegment> list = new LinkedList<GpxTrackSegment>();
-			list.add(seg);
-			list.add(seg2);
-			similarSegments.put(seg, list);
-			similarSegments.put(seg2, list);
+			HashSet<GpxTrackSegment> set = new HashSet<GpxTrackSegment>();
+			set.add(seg);
+			set.add(seg2);
+			similarSegments.put(seg, set);
+			similarSegments.put(seg2, set);
 		}else if(segEntry==null && seg2Entry!=null){
 			if (!seg2Entry.contains(seg)){
 				seg2Entry.add(seg);
-				similarSegments.put(seg, getSimilarSegments(seg,seg2Entry));
+				similarSegments.put(seg, seg2Entry);
+				//similarSegments.put(seg, getSimilarSegments(seg,seg2Entry));
 			}
 		}else if(segEntry!=null && seg2Entry==null){
 			if (!segEntry.contains(seg2)){
 				segEntry.add(seg2);
-				similarSegments.put(seg2, getSimilarSegments(seg2,segEntry));
+				similarSegments.put(seg2, segEntry);
+				//similarSegments.put(seg2, getSimilarSegments(seg2,segEntry));
 			}
 		}else{
-			if (!segEntry.contains(seg2)){
-				segEntry.add(seg2);
-				similarSegments.put(seg, getSimilarSegments(seg,seg2Entry));
-			}
-			if (!seg2Entry.contains(seg)){
-				seg2Entry.add(seg);
-				similarSegments.put(seg2, getSimilarSegments(seg2,segEntry));
-			}
+			segEntry.addAll(seg2Entry);
+			similarSegments.put(seg2, segEntry);
+//			if (!segEntry.contains(seg2)){
+//				segEntry.add(seg2);
+//				similarSegments.put(seg, getSimilarSegments(seg,seg2Entry));
+//			}
+//			if (!seg2Entry.contains(seg)){
+//				seg2Entry.add(seg);
+//				similarSegments.put(seg2, getSimilarSegments(seg2,segEntry));
+//			}
 		}
 		HashSet<GpxTrack> trackSeg = tracksOfSimilarSegments.get(seg);
 		HashSet<GpxTrack> trackSeg2 = tracksOfSimilarSegments.get(seg2);
@@ -261,11 +304,7 @@ public class TrackCloud {
 				result.add(gpxTrackSegment);
 			}
 		}
-		if (result.size()>0){
-			return result;
-		}else{
-			return null;
-		}
+		return result;
 	}
 
 	private double getDistance(GpxTrackSegment seg,
@@ -322,7 +361,7 @@ public class TrackCloud {
 					if(antecessor!=null && !antecessor.containsNeighbor(mwp)){
 						antecessor.connect(mwp);
 					}
-					for (int index=0;index<1;index++) {
+					for (int index=0;index<overlappingSegments.size();index++) {
 					//for (int index=0;index<overlappingSegments.size();index++) {
 						List<WayPoint> currentSegment = overlappingSegments.get(index);
 						//in first run dont feed all lists

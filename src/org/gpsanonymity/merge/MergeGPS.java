@@ -246,12 +246,24 @@ public class MergeGPS {
 		int count=0;
 		do{
 			count++;
-			cluster= makeSegmentsCluster(clusterSegs, list);
+			cluster= makeSegmentCluster(clusterSegs, list);
 			oldClusterSegs=clusterSegs;
 			clusterSegs=cluster;
-		}while(!haveSameCoord(oldClusterSegs,clusterSegs));
-		return makeMergeCluster(clusterSegs,list);
+		}while(!areSameSegments(oldClusterSegs,clusterSegs));
+		return makeMergeSegmentCluster(clusterSegs,list);
 				
+	}
+	private static boolean areSameSegments(
+			List<GpxTrackSegment> oldClusterSegs,
+			List<GpxTrackSegment> clusterSegs) {
+		for (GpxTrackSegment gpxTrackSegment : clusterSegs) {
+			for (GpxTrackSegment oldGpxTrackSegment : oldClusterSegs) {
+				if(!gpxTrackSegment.equals(oldGpxTrackSegment)){
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 	public static List<MergedWayPoint> mergeWithKMeans(List<WayPoint> list, int k){
 		List<WayPoint> oldClusterPoints,clusterPoints=getRandomEntrys(list,k);
@@ -309,6 +321,28 @@ public class MergeGPS {
 			return null;
 		}
 	}
+	private static List<GpxTrackSegment> makeMergeSegmentCluster(
+			List<GpxTrackSegment> clusterSegs, List<GpxTrackSegment> list) {
+		List<List<GpxTrackSegment>> clusterGroups= new LinkedList<List<GpxTrackSegment>>();
+		//initialize result
+		for (int i = 0; i < clusterSegs.size(); i++) {
+			clusterGroups.add(new LinkedList<GpxTrackSegment>());
+		}
+		for (GpxTrackSegment seg : list) {
+			//for each waypoint find nearest cluster point
+			int index =findNearestSegmentIndex(seg,clusterSegs);
+			List<GpxTrackSegment> cluster = clusterGroups.get(index);
+			cluster.add(seg);
+		}
+		LinkedList<GpxTrackSegment> result = new LinkedList<GpxTrackSegment>();
+		//for each clusterGroup find new centroid
+		for (List<GpxTrackSegment> cluster : clusterGroups) {
+			if(!cluster.isEmpty()){
+				result.add(MergeGPS.calculateMergeSegmentCentroid(cluster));
+			}
+		}
+		return result;
+	}
 	private static List<GpxTrackSegment> makeSegmentCluster(
 			List<GpxTrackSegment> clusterSegs, List<GpxTrackSegment> list) {
 		List<List<GpxTrackSegment>> clusterGroups= new LinkedList<List<GpxTrackSegment>>();
@@ -331,21 +365,35 @@ public class MergeGPS {
 		}
 		return result;
 	}
+	private static GpxTrackSegment calculateSegmentCentroid(
+			List<GpxTrackSegment> cluster) {
+		double length=0,vectorLon=0, vectorLat=0;
+		List<WayPoint> minWps = new LinkedList<WayPoint>();
+		for (GpxTrackSegment gpxTrackSegment : cluster) {
+			List<WayPoint> wps = new LinkedList<WayPoint>(gpxTrackSegment.getWayPoints());
+			if (wps.get(0).getCoor().equals(gpxTrackSegment.getBounds().getMin())){
+				minWps.add(wps.get(0));
+			}else{
+				minWps.add(wps.get(1));
+			}
+			vectorLat+=Math.abs(wps.get(0).getCoor().lat()-wps.get(1).getCoor().lat());
+			vectorLon+=Math.abs(wps.get(0).getCoor().lon()-wps.get(1).getCoor().lon());
+		}
+		vectorLat=vectorLat/cluster.size();
+		vectorLon=vectorLon/cluster.size();
+		WayPoint minWp= new WayPoint(calculateCentroid(minWps));
+		LinkedList<WayPoint> newWps = new LinkedList<WayPoint>();
+		newWps.add(minWp);
+		newWps.add(new WayPoint(new LatLon(minWp.getCoor().getY()+vectorLat, minWp.getCoor().getX()+vectorLon)));
+		return new ImmutableGpxTrackSegment(newWps);
+	}
 	private static int findNearestSegmentIndex(GpxTrackSegment seg,
 			List<GpxTrackSegment> list) {
 		double distance=Double.MAX_VALUE;
 		int result=-1;
 		for (int i = 0; i < list.size(); i++) {
 			Double currentDistance;
-			/*
-			if (distanceMartix!=null){
-				currentDistance = distanceMartix.getValue(list.get(i), wayPoint);
-				if(currentDistance==null){
-					currentDistance = list.get(i).getCoor().greatCircleDistance(wayPoint.getCoor());
-				}
-			}else{*/
-				currentDistance = segmentDistance(list.get(i),seg);
-			/*}*/
+			currentDistance = segmentDistance(list.get(i),seg);
 			if (currentDistance<distance){
 				distance=currentDistance;
 				result=i;
@@ -357,7 +405,7 @@ public class MergeGPS {
 			GpxTrackSegment seg2) {
 		double distance = hausDorffDistance(seg1.getWayPoints(), seg2.getWayPoints());
 		double angle = calculateAngle(seg1, seg2);
-		double angleFactor=(-1)*((angle%Math.PI)/Math.PI-1);
+		double angleFactor=(Math.PI/2)/Math.abs(Math.PI/2-angle);
 		//angle/(pi/2) * distance
 		return distance*angleFactor;
 		
@@ -461,10 +509,10 @@ public class MergeGPS {
 		LinkedList<Double> allDiffs2 = new LinkedList<Double>();
 		//FIXME: here dynamic programming? maybe only for bigger segments
 		for (WayPoint wayPoint : tempList1) {
-			allDiffs1.add(getMaxDifference(wayPoint,tempList2));
+			allDiffs1.add(getMinDifference(wayPoint,tempList2));
 		}
 		for (WayPoint wayPoint : tempList2) {
-			allDiffs2.add(getMaxDifference(wayPoint,tempList1));
+			allDiffs2.add(getMinDifference(wayPoint,tempList1));
 		}
 		double max1=getMax(allDiffs1);
 		double max2=getMax(allDiffs2);
@@ -480,12 +528,12 @@ public class MergeGPS {
 		}
 		return result;
 	}
-	private static Double getMaxDifference(WayPoint wayPoint,
+	private static Double getMinDifference(WayPoint wayPoint,
 			LinkedList<WayPoint> tempList2) {
 		double result=0;
 		for (WayPoint wayPoint2 : tempList2) {
 			double distance = wayPoint.getCoor().greatCircleDistance(wayPoint2.getCoor());
-			if(distance>result){
+			if(distance<result){
 				result=distance;
 			}
 		}
@@ -578,18 +626,18 @@ public class MergeGPS {
 		LinkedList<Double> allDiffs2 = new LinkedList<Double>();
 		//FIXME: here dynamic programming? maybe only for bigger segments
 		for (WayPoint wayPoint : tempList1) {
-			double wpMax =getMaxDifference(wayPoint,tempList2);
-			if(wpMax>trackDistance){
+			double wpMin =getMinDifference(wayPoint,tempList2);
+			if(wpMin>trackDistance){
 				return false;
 			}
-			allDiffs1.add(wpMax);
+			allDiffs1.add(wpMin);
 		}
 		for (WayPoint wayPoint : tempList2) {
-			double wpMax = getMaxDifference(wayPoint,tempList2);
-			if (wpMax>trackDistance){
+			double wpMin = getMinDifference(wayPoint,tempList2);
+			if (wpMin>trackDistance){
 				return false;
 			}
-			allDiffs2.add(wpMax);
+			allDiffs2.add(wpMin);
 		}
 		double max1=getMax(allDiffs1);
 		double max2=getMax(allDiffs2);

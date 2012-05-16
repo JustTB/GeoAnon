@@ -40,7 +40,37 @@ public class WayPoint extends WithAttributes implements Comparable<WayPoint>, Te
         drawLine = p.drawLine;
         dir = p.dir;
     }
-
+    @Override
+    public boolean equals(Object obj) {
+    	if(obj==null){
+    		return false;
+    	}else if(!obj.getClass().equals(this.getClass())){
+    		return false;
+    	}else{
+    		WayPoint wp =(WayPoint)obj;
+    		if(!attr.equals(wp.attr)){
+    			return false;
+    		}else if(lat!=wp.lat){
+    			return false;
+    		}else if(lon!=wp.lon){
+    			return false;
+    		}else if(!(Double.isNaN(east) && (Double.isNaN(wp.east))) && east!=wp.east){
+    			return false;
+    		}else if(north!=wp.north && !(Double.isNaN(north) && (Double.isNaN(wp.north)))){
+    			return false;
+    		}else if(time!=time){
+    			return false;
+    		}else if(!(customColoring==null && wp.customColoring==null) && !customColoring.equals(wp.customColoring)){
+    			return false;
+    		}else if(drawLine!=wp.drawLine){
+    			return false;
+    		}else if(dir!=wp.dir){
+    			return false;
+    		}
+    	}
+    	return true;
+    }
+    
     public WayPoint(LatLon ll) {
         lat = ll.lat();
         lon = ll.lon();

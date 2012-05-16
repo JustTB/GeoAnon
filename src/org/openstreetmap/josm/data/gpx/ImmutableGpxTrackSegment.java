@@ -4,6 +4,7 @@ package org.openstreetmap.josm.data.gpx;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 import org.openstreetmap.josm.data.Bounds;
 
@@ -18,7 +19,28 @@ public class ImmutableGpxTrackSegment implements GpxTrackSegment {
         this.bounds = calculateBounds();
         this.length = calculateLength();
     }
-
+    @Override
+    public boolean equals(Object obj) {
+    	if(obj==null){
+    		return false;
+    	}else if(!obj.getClass().equals(this.getClass())){
+    		return false;
+    	}else{
+    		ImmutableGpxTrackSegment igts =(ImmutableGpxTrackSegment)obj;
+    		if(wayPoints.size()!=igts.wayPoints.size()){
+    			return false;
+    		}else{
+    			Iterator<WayPoint> iterThis = wayPoints.iterator();
+    			Iterator<WayPoint> iterThat = igts.wayPoints.iterator();
+    			while(iterThis.hasNext() && iterThat.hasNext()){
+    				if(!iterThis.next().equals(iterThat.next())){
+    					return false;
+    				}
+    			}
+    		}
+    	}
+    	return true;
+    }
     private Bounds calculateBounds() {
         Bounds result = null;
         for (WayPoint wpt: wayPoints) {
