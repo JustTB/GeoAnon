@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,6 +25,7 @@ import org.openstreetmap.josm.data.gpx.GpxData;
 import org.openstreetmap.josm.data.gpx.GpxRoute;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
+import org.openstreetmap.josm.data.gpx.ImmutableGpxTrack;
 import org.openstreetmap.josm.data.gpx.WayPoint;
 import org.openstreetmap.josm.io.GpxReader;
 import org.openstreetmap.josm.io.GpxWriter;
@@ -53,6 +55,17 @@ public class IOFunctions {
 		
 		
 		
+	}
+	public static void exportTrackSegments(Collection<GpxTrackSegment> segs,
+			String string){
+		GpxData gpxd = new GpxData();
+		List<GpxTrack> tracks = new LinkedList<GpxTrack>();
+		for (GpxTrackSegment seg : segs) {
+			Collection<Collection<WayPoint>> trackSegs = new LinkedList<Collection<WayPoint>>();
+			trackSegs.add(seg.getWayPoints());
+			tracks.add(new ImmutableGpxTrack(trackSegs, new HashMap<String, Object>()));
+		}
+		exportTracks(tracks, string);
 	}
 	public static void exportTracks(List<GpxTrack> tracks,
 			String string){

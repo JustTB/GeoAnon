@@ -72,7 +72,7 @@ public class ImmutableGpxTrackSegment implements GpxTrackSegment {
         if (bounds == null)
             return null;
         else
-            return new Bounds(bounds);
+            return new Bounds(calculateBounds());
     }
 
     public Collection<WayPoint> getWayPoints() {

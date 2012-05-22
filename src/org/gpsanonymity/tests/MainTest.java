@@ -2,6 +2,7 @@ package org.gpsanonymity.tests;
 
 import java.awt.Point;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedList;
 
 import org.gpsanonymity.Main;
@@ -42,32 +43,33 @@ public class MainTest {
 	public void testMergeTracks(){
 		int k=3;
 		int segmentLenght=2;
-		double pointDensity=3;
-		double trackDistance=2;
+		double pointDensity=5;
+		double trackDistance=4;
+		//String file = "input/leipzig2.gpx";
+		String file = "leipzig_track_example.gpx";
 		
 		IOFunctions.exportTracks(
 				Main.mergingTracks(
-						Main.importTracks("input/leipzig2.gpx"),
+						Main.importTracks(file),
 						k, pointDensity,trackDistance,segmentLenght),
 				"output/GPXMergeTracks_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
 	}
 	@Test
 	public void testHashing(){
-		HashMap<Point,String>	hm = new HashMap<Point, String>();
+		IdentityHashMap<Point,String>	hm = new IdentityHashMap<Point, String>();
 		Point a,b;
-		a= new Point(1,2);
-		b= new Point(1,2);
+		a= new Point(1, 1);
+		b= new Point(1, 1);
 		hm.put(a, "a");
 		hm.put(b, "b");
 		System.out.println(":::::before");
 		System.out.println("a:"+hm.get(a));
 		System.out.println("b:"+hm.get(b));
-		a.setLocation(3, 4);
+		a.setLocation(1,2);
 		System.out.println(":::::after");
-		System.out.println("b:"+hm.get(b));
-		System.out.println("a:"+hm.get(a));
+		System.out.println("a:"+hm.get(a) + " //a as key has changed, so no value; right");
+		System.out.println("b:"+hm.get(b) + " //we putted b at last but not the key");
 		System.out.println("keys:" + hm.keySet());
-		System.out.println("location b: "+b.getY() +" "+ b.getX());
 		
 	}
 	@Test

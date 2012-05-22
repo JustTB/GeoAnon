@@ -301,13 +301,16 @@ public class MergeGPS {
 			MergedWayPoint resultPoint = result.get(index);
 			resultPoint.addWayPoint(wayPoint);
 		}
+		for (int i = 0; i < clusterPoints.size(); i++) {
+			result.get(i).removeIfExist(clusterPoints.get(i));
+		}
 		return result;
 	}
 	private static List getRandomEntrys(List list,
 			int clusterNumber) {
 		if (clusterNumber<list.size()){
 			List result = new LinkedList();
-			Random generator= new Random();
+			Random generator= new Random(1);
 			while(result.size()< clusterNumber) {
 				int index =generator.nextInt(list.size());
 				Object randomWayPoint = list.get(index);
@@ -342,6 +345,27 @@ public class MergeGPS {
 			}
 		}
 		return result;
+	}
+	private static GpxTrackSegment calculateMergeSegmentCentroid(
+			List<GpxTrackSegment> cluster) {
+		List<WayPoint> minWps = new LinkedList<WayPoint>();
+		List<WayPoint> maxWps = new LinkedList<WayPoint>();
+		for (GpxTrackSegment gpxTrackSegment : cluster) {
+			List<WayPoint> wps = new LinkedList<WayPoint>(gpxTrackSegment.getWayPoints());
+			if (wps.get(0).getCoor().equals(gpxTrackSegment.getBounds().getMin())){
+				minWps.add(wps.get(0));
+				maxWps.add(wps.get(1));
+			}else{
+				minWps.add(wps.get(1));
+				maxWps.add(wps.get(0));
+			}
+		}
+		MergedWayPoint minWp= new MergedWayPoint(minWps);
+		MergedWayPoint maxWp= new MergedWayPoint(maxWps);
+		LinkedList<WayPoint> newWps = new LinkedList<WayPoint>();
+		newWps.add(minWp);
+		newWps.add(maxWp);
+		return new ImmutableGpxTrackSegment(newWps);
 	}
 	private static List<GpxTrackSegment> makeSegmentCluster(
 			List<GpxTrackSegment> clusterSegs, List<GpxTrackSegment> list) {
