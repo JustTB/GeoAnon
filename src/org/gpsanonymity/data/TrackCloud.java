@@ -1,9 +1,6 @@
 package org.gpsanonymity.data;
 
-import java.io.IOError;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -31,12 +28,21 @@ public class TrackCloud {
 	protected List<MergedWayPoint> mergedWayPoints;
 	protected IdentityHashMap<GpxTrackSegment,HashSet<GpxTrack>> tracksOfSimilarSegments;
 	private List<GpxTrackSegment> segmentCluster;
+	private boolean ignoreDirection;
+	private double angelAllowance;
 
-	public TrackCloud(List<GpxTrack> morePointTracks, int k, double trackDistance, int segmentLength) {
+	public TrackCloud(List<GpxTrack> morePointTracks
+			,int k
+			,double trackDistance
+			,int segmentLength
+			,boolean ignoreDirection
+			,double angelAllowance) {
 		this.sourceTracks=new LinkedList<GpxTrack>(morePointTracks);
 		this.k = k;
 		this.trackDistance=trackDistance;
 		this.segmentLength=segmentLength;
+		this.angelAllowance=angelAllowance;
+		this.ignoreDirection=ignoreDirection;
 		segments = new LinkedList<GpxTrackSegment>();
 		similarSegments= new IdentityHashMap<GpxTrackSegment, HashSet<GpxTrackSegment>>();
 		mergedWayPoints = new LinkedList<MergedWayPoint>();
@@ -233,8 +239,9 @@ public class TrackCloud {
 									)
 							)
 //						&& MergeGPS.haveNotTheSamePoints(seg,seg2)
-						&& (MergeGPS.calculateAngle(seg, seg2)<0.3*Math.PI 
-								|| MergeGPS.calculateAngle(seg, seg2)>0.7*Math.PI) 
+						&& (MergeGPS.calculateAngle(seg, seg2)<angelAllowance *(0.5*Math.PI)//90°*angelAllowance 
+								|| (MergeGPS.calculateAngle(seg, seg2)>(1-angelAllowance)*Math.PI
+										&& ignoreDirection)) //90*(1-angelAllowance) if ignoreDirection==true
 						&& haveNoTrackInCommon(seg,seg2)
 						){
 					Double distance = getDistance(seg, seg2);

@@ -1,10 +1,5 @@
 package org.gpsanonymity.data;
 import java.util.Collection;
-import java.util.HashMap;
-
-import org.openstreetmap.josm.data.Bounds;
-import org.openstreetmap.josm.data.coor.LatLon;
-import org.openstreetmap.josm.data.gpx.WayPoint;
 
 
 public abstract class Matrix<E,F> {

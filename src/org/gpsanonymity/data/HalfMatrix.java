@@ -1,9 +1,4 @@
 package org.gpsanonymity.data;
-import java.util.Collection;
-import java.util.HashMap;
-
-import org.openstreetmap.josm.data.coor.LatLon;
-import org.openstreetmap.josm.data.gpx.WayPoint;
 
 
 public class HalfMatrix<E,F> extends Matrix<E, F>{

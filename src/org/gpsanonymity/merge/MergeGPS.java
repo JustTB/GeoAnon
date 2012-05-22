@@ -1,19 +1,15 @@
 package org.gpsanonymity.merge;
 
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.gpsanonymity.data.DistanceMatrix;
 import org.gpsanonymity.data.MergedWayPoint;
 import org.gpsanonymity.data.comparator.ReferenceWayPointComparator;
-import org.openstreetmap.josm.actions.AddNodeAction;
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.GpxTrack;

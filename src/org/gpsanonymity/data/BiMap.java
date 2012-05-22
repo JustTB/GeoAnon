@@ -3,8 +3,6 @@ package org.gpsanonymity.data;
 import java.util.Collection;
 import java.util.HashMap;
 
-import org.openstreetmap.josm.data.Bounds;
-
 public class BiMap<E,D> {
 	protected HashMap<E,D> keyValue;
 	protected HashMap<D,E> valueKey;

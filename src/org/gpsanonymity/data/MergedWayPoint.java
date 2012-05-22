@@ -1,7 +1,6 @@
 package org.gpsanonymity.data;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.gpsanonymity.merge.MergeGPS;
-import org.junit.Assume;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;

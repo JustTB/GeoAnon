@@ -1,5 +1,6 @@
 package org.gpsanonymity.data;
 import java.util.Collection;
+
 import org.openstreetmap.josm.data.gpx.WayPoint;
 
 

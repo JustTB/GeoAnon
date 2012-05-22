@@ -1,12 +1,10 @@
 package org.gpsanonymity.tests;
 
 import java.awt.Point;
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
 
 import org.gpsanonymity.Main;
-import org.gpsanonymity.data.MergedWayPoint;
 import org.gpsanonymity.io.IOFunctions;
 import org.junit.Assert;
 import org.junit.Test;
@@ -45,13 +43,15 @@ public class MainTest {
 		int segmentLenght=2;
 		double pointDensity=5;
 		double trackDistance=4;
+		boolean ignoreDirection=true;
+		double angelAllowance=1;
 		//String file = "input/leipzig2.gpx";
 		String file = "leipzig_track_example.gpx";
 		
 		IOFunctions.exportTracks(
 				Main.mergingTracks(
 						Main.importTracks(file),
-						k, pointDensity,trackDistance,segmentLenght),
+						k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance),
 				"output/GPXMergeTracks_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
 	}
 	@Test
