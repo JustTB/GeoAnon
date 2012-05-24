@@ -382,6 +382,10 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		}
 		
 	}
+
+	public Collection<GpxTrackSegment> getSegments() {
+		return sourceSegments.keySet();
+	}
 	
 
 }

@@ -13,17 +13,23 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 
+import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.gpx.GpxData;
 import org.openstreetmap.josm.data.gpx.GpxRoute;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.ImmutableGpxTrack;
+import org.openstreetmap.josm.data.gpx.ImmutableGpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.WayPoint;
 import org.openstreetmap.josm.io.GpxReader;
 import org.openstreetmap.josm.io.GpxWriter;
@@ -168,6 +174,94 @@ public class IOFunctions {
 			}
 		}
 		return result;
+	}
+	public static List<GpxTrack> getDataFromOSM(Bounds bounds, String filename){
+		URL url;
+		List<GpxTrack> allTracks = new LinkedList<GpxTrack>();
+		List<GpxTrack> result = null;
+		GpxReader reader=null;
+		try {
+			LinkedList<GpxTrack> tempTracks = new LinkedList<GpxTrack>();
+			System.out.println("Downloading ...");
+			for(int i =0;i==0 || !reader.data.tracks.isEmpty();i++){
+				String urlString= "http://api.openstreetmap.org/api/0.6/trackpoints?bbox="+bounds.getMin().getX()+","+bounds.getMin().getY()+","+bounds.getMax().getX()+","+bounds.getMax().getY()+"&page="+i;
+				System.out.println(urlString);
+				url = new URL(urlString);
+				reader = new GpxReader(url.openStream());
+				reader.parse(false);
+				tempTracks.addAll(reader.data.tracks);
+			}
+			System.out.println("Downloading Tracks...");
+			int count=0,urlcount=0;
+			HashSet<String> ids = new HashSet<String>(); 
+			for(GpxTrack track :tempTracks){
+				count++;
+				Object urlObject= track.getAttributes().get("url");
+				if (urlObject!=null){
+					urlcount++;
+					assert(urlObject.getClass()==String.class);
+					String trackUrlAddress =(String)urlObject;
+					String id=trackUrlAddress.substring(trackUrlAddress.lastIndexOf("/")+1);
+					if(!ids.contains(id)){
+						ids.add(id);
+						System.out.println("ID from "+ id+ " from " + trackUrlAddress);
+						trackUrlAddress= "http://www.openstreetmap.org/trace/"+id+"/data/";
+						System.out.println(trackUrlAddress);
+						URL trackUrl = new URL(trackUrlAddress);
+						GpxReader trackReader = new GpxReader(trackUrl.openStream());
+						trackReader.parse(false);
+						allTracks.addAll(trackReader.data.tracks);
+					}
+				}
+			}
+			
+			System.out.println("Tracks with URLs:" + urlcount+"/"+count);
+			result = new LinkedList<GpxTrack>(allTracks);
+			System.out.println("Cutting...");
+			for (Iterator<GpxTrack> iterator = allTracks.iterator(); iterator.hasNext();) {
+				GpxTrack gpxTrack = (GpxTrack) iterator.next();
+				Bounds trackBounds=gpxTrack.getBounds();
+				if(!bounds.contains(trackBounds.getMin()) 
+						|| !bounds.contains(trackBounds.getMax())){
+					result.remove(gpxTrack);
+					Collection<Collection<WayPoint>> tempSegList = new LinkedList<Collection<WayPoint>>();
+					for (Iterator<GpxTrackSegment> iterator2 = gpxTrack.getSegments().iterator(); iterator2
+							.hasNext();) {
+						GpxTrackSegment seg = (GpxTrackSegment) iterator2.next();
+						Collection<WayPoint> tempWPList = new LinkedList<WayPoint>();
+						for (Iterator<WayPoint> iterator3 = seg.getWayPoints().iterator(); iterator3
+								.hasNext();) {
+							WayPoint wp = (WayPoint) iterator3.next();
+							if(bounds.contains(wp.getCoor())){
+								tempWPList.add(wp);
+							}else if(!tempWPList.isEmpty()){
+								tempSegList.add(tempWPList);
+								tempWPList=new LinkedList<WayPoint>();
+							}
+						}
+						if(!tempWPList.isEmpty()){
+							tempSegList.add(tempWPList);
+						}
+					}
+					result.add(new ImmutableGpxTrack(tempSegList, gpxTrack.getAttributes()));
+					GpxWriter writer = new GpxWriter(new FileOutputStream(new File(filename)));
+					GpxData resultData = new GpxData();
+					resultData.tracks=result;
+					writer.write(resultData);
+					System.out.println("Written to " + filename);
+				}
+			}
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return allTracks;
 	}
 
 }

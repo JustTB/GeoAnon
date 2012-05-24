@@ -49,7 +49,7 @@ public class MainTest {
 		String file = "leipzig_track_example.gpx";
 		
 		IOFunctions.exportTracks(
-				Main.mergingTracks(
+				Main.mergingTracksSimpleSimilar(
 						Main.importTracks(file),
 						k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance),
 				"output/GPXMergeTracks_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");

@@ -235,7 +235,7 @@ public class MergeGPS {
 		return null;//mergedWaypoints;
 	
 	}
-	public static List<MergedWayPoint> mergeSegmentsWithKMeans(List<GpxTrackSegment> list, int k){
+	public static List<GpxTrackSegment> mergeSegmentsWithKMeans(List<GpxTrackSegment> list, int k, boolean ignoreDirection){
 		List<GpxTrackSegment> oldClusterSegs,clusterSegs=getRandomEntrys(list,k);
 		List<GpxTrackSegment> cluster;
 		//DistanceMatrix distanceMartix = new DistanceMatrix(list, list);
@@ -246,7 +246,7 @@ public class MergeGPS {
 			oldClusterSegs=clusterSegs;
 			clusterSegs=cluster;
 		}while(!areSameSegments(oldClusterSegs,clusterSegs));
-		return makeMergeSegmentCluster(clusterSegs,list);
+		return makeMergeSegmentCluster(clusterSegs,list, ignoreDirection);
 				
 	}
 	private static boolean areSameSegments(
@@ -317,11 +317,11 @@ public class MergeGPS {
 			}
 			return result;
 		}else{
-			return null;
+			return new LinkedList(list);
 		}
 	}
 	private static List<GpxTrackSegment> makeMergeSegmentCluster(
-			List<GpxTrackSegment> clusterSegs, List<GpxTrackSegment> list) {
+			List<GpxTrackSegment> clusterSegs, List<GpxTrackSegment> list, boolean ignoreDirection) {
 		List<List<GpxTrackSegment>> clusterGroups= new LinkedList<List<GpxTrackSegment>>();
 		//initialize result
 		for (int i = 0; i < clusterSegs.size(); i++) {
@@ -337,18 +337,19 @@ public class MergeGPS {
 		//for each clusterGroup find new centroid
 		for (List<GpxTrackSegment> cluster : clusterGroups) {
 			if(!cluster.isEmpty()){
-				result.add(MergeGPS.calculateMergeSegmentCentroid(cluster));
+				result.add(MergeGPS.calculateMergeSegmentCentroid(cluster, ignoreDirection));
 			}
 		}
 		return result;
 	}
 	private static GpxTrackSegment calculateMergeSegmentCentroid(
-			List<GpxTrackSegment> cluster) {
+			List<GpxTrackSegment> cluster, boolean ignoreDirection) {
 		List<WayPoint> minWps = new LinkedList<WayPoint>();
 		List<WayPoint> maxWps = new LinkedList<WayPoint>();
 		for (GpxTrackSegment gpxTrackSegment : cluster) {
 			List<WayPoint> wps = new LinkedList<WayPoint>(gpxTrackSegment.getWayPoints());
-			if (wps.get(0).getCoor().equals(gpxTrackSegment.getBounds().getMin())){
+			if (wps.get(0).getCoor().equals(gpxTrackSegment.getBounds().getMin()) 
+				|| ignoreDirection){
 				minWps.add(wps.get(0));
 				maxWps.add(wps.get(1));
 			}else{

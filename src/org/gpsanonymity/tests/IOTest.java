@@ -9,6 +9,7 @@ import java.util.LinkedList;
 
 import org.gpsanonymity.io.IOFunctions;
 import org.junit.Test;
+import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.WayPoint;
 import org.openstreetmap.josm.io.GpxReader;
@@ -31,6 +32,16 @@ public class IOTest {
 		}catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	@Test
+	public void TestGetDataFromOSM(){
+		double minLat=52.3211801;
+		double minLon=12.794953;
+		double maxLat=52.347083;
+		double maxLon=12.8471279;
+		String filename= "output/test.gpx";
+		testData();
+		IOFunctions.getDataFromOSM(new Bounds(new LatLon(minLat,minLon),new LatLon(maxLat,maxLon)),filename);
 	}
 	@Test
 	public void importData(){
