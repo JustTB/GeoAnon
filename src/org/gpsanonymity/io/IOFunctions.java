@@ -192,7 +192,7 @@ public class IOFunctions {
 				tempTracks.addAll(reader.data.tracks);
 			}
 			System.out.println("Downloading Tracks...");
-			int count=0,urlcount=0;
+			int count=0,urlcount=0,notParsedCount=0;
 			HashSet<String> ids = new HashSet<String>(); 
 			for(GpxTrack track :tempTracks){
 				count++;
@@ -208,14 +208,22 @@ public class IOFunctions {
 						trackUrlAddress= "http://www.openstreetmap.org/trace/"+id+"/data/";
 						System.out.println(trackUrlAddress);
 						URL trackUrl = new URL(trackUrlAddress);
-						GpxReader trackReader = new GpxReader(trackUrl.openStream());
-						trackReader.parse(false);
-						allTracks.addAll(trackReader.data.tracks);
+						try{	
+							GpxReader trackReader = new GpxReader(trackUrl.openStream());
+							trackReader.parse(false);
+							allTracks.addAll(trackReader.data.tracks);
+						}
+						catch (SAXException e) {
+							System.out.println("Could not parse!");
+							notParsedCount++;
+							//e.printStackTrace();
+						}
 					}
 				}
 			}
 			
 			System.out.println("Tracks with URLs:" + urlcount+"/"+count);
+			System.out.println("Tracks cant parse:" + notParsedCount+"/"+urlcount);
 			result = new LinkedList<GpxTrack>(allTracks);
 			System.out.println("Cutting...");
 			for (Iterator<GpxTrack> iterator = allTracks.iterator(); iterator.hasNext();) {
@@ -244,13 +252,13 @@ public class IOFunctions {
 						}
 					}
 					result.add(new ImmutableGpxTrack(tempSegList, gpxTrack.getAttributes()));
-					GpxWriter writer = new GpxWriter(new FileOutputStream(new File(filename)));
-					GpxData resultData = new GpxData();
-					resultData.tracks=result;
-					writer.write(resultData);
-					System.out.println("Written to " + filename);
 				}
 			}
+			GpxWriter writer = new GpxWriter(new FileOutputStream(new File(filename)));
+			GpxData resultData = new GpxData();
+			resultData.tracks=result;
+			writer.write(resultData);
+			System.out.println("Written to " + filename);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
