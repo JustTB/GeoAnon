@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.openstreetmap.josm.data.Bounds;
+import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.GpxData;
 import org.openstreetmap.josm.data.gpx.GpxRoute;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
@@ -175,90 +176,150 @@ public class IOFunctions {
 		}
 		return result;
 	}
-	public static List<GpxTrack> getDataFromOSM(Bounds bounds, String filename){
+	public static List<GpxTrack> getDataFromOSM(Bounds bounds, String filename, String tempFile){
+		int countTempFiles=0;
 		URL url;
 		List<GpxTrack> allTracks = new LinkedList<GpxTrack>();
 		List<GpxTrack> result = null;
 		GpxReader reader=null;
 		try {
-			LinkedList<GpxTrack> tempTracks = new LinkedList<GpxTrack>();
+			Collection<GpxTrack> tempTracks = new LinkedList<GpxTrack>();
+			LinkedList<Bounds> currentBounds = new LinkedList<Bounds>();
+			if(bounds.getArea()>0.25){
+				System.out.println("Splitting...");
+				double factor=bounds.getArea()/0.2;
+				double latTileHeight=Math.abs((bounds.getMin().getY()-bounds.getMax().getY())/factor);
+				for(int j=0;j<factor;j++){
+				Bounds currentBound =new Bounds(
+						new LatLon(bounds.getMin().getY()+latTileHeight*j
+								,bounds.getMin().getX()),
+						new LatLon(bounds.getMin().getY()+latTileHeight*(j+1)
+								,bounds.getMax().getX()));
+				currentBounds.add(currentBound);
+				}
+			}else{
+				currentBounds.add(bounds);
+			}
 			System.out.println("Downloading ...");
-			for(int i =0;i==0 || !reader.data.tracks.isEmpty();i++){
-				String urlString= "http://api.openstreetmap.org/api/0.6/trackpoints?bbox="+bounds.getMin().getX()+","+bounds.getMin().getY()+","+bounds.getMax().getX()+","+bounds.getMax().getY()+"&page="+i;
-				System.out.println(urlString);
-				url = new URL(urlString);
-				reader = new GpxReader(url.openStream());
-				reader.parse(false);
-				tempTracks.addAll(reader.data.tracks);
+			for(Bounds currentBound:currentBounds){
+				for(int i =0;i==0 || !reader.data.tracks.isEmpty();i++){
+					String urlString= "http://api.openstreetmap.org/api/0.6/trackpoints?bbox="
+							+currentBound.getMin().getX()
+							+","
+							+currentBound.getMin().getY()
+							+","
+							+currentBound.getMax().getX()
+							+","
+							+currentBound.getMax().getY()
+							+"&page="
+							+i;
+					System.out.println(urlString);
+					url = new URL(urlString);
+					reader = new GpxReader(url.openStream());
+					reader.parse(false);
+					tempTracks.addAll(reader.data.tracks);
+				}
+				if(Runtime.getRuntime().freeMemory()/Runtime.getRuntime().maxMemory()<0.2){
+					String fileName=tempFile.replace(".gpx", countTempFiles+".gpx");
+					System.out.println("Temporary file written: "+filename);
+					FileOutputStream fos = new FileOutputStream(new File(fileName));
+					GpxWriter tempWriter = new GpxWriter(fos);
+					GpxData tempData = new GpxData();
+					tempData.tracks=tempTracks;
+					tempWriter.write(tempData);
+					countTempFiles++;
+					tempTracks = new LinkedList<GpxTrack>();
+				}
 			}
 			System.out.println("Downloading Tracks...");
 			int count=0,urlcount=0,notParsedCount=0;
-			HashSet<String> ids = new HashSet<String>(); 
-			for(GpxTrack track :tempTracks){
-				count++;
-				Object urlObject= track.getAttributes().get("url");
-				if (urlObject!=null){
-					urlcount++;
-					assert(urlObject.getClass()==String.class);
-					String trackUrlAddress =(String)urlObject;
-					String id=trackUrlAddress.substring(trackUrlAddress.lastIndexOf("/")+1);
-					if(!ids.contains(id)){
-						ids.add(id);
-						System.out.println("ID from "+ id+ " from " + trackUrlAddress);
-						trackUrlAddress= "http://www.openstreetmap.org/trace/"+id+"/data/";
-						System.out.println(trackUrlAddress);
-						URL trackUrl = new URL(trackUrlAddress);
-						try{	
-							GpxReader trackReader = new GpxReader(trackUrl.openStream());
-							trackReader.parse(false);
-							allTracks.addAll(trackReader.data.tracks);
-						}
-						catch (SAXException e) {
-							System.out.println("Could not parse!");
-							notParsedCount++;
-							//e.printStackTrace();
+			HashSet<String> ids = new HashSet<String>();
+			for(int i=-1;i<countTempFiles;i++){
+				//get tempfiles if tempTracks is through
+				if(i!=-1){
+					FileInputStream fis = new FileInputStream(new File(tempFile.replace(".gpx", i+".gpx")));
+					GpxReader tempReader = new GpxReader(fis);
+					tempReader.parse(false);
+					tempTracks = tempReader.data.tracks;
+				}
+				for(GpxTrack track :tempTracks){
+					count++;
+					Object urlObject= track.getAttributes().get("url");
+					if (urlObject!=null){
+						urlcount++;
+						assert(urlObject.getClass()==String.class);
+						String trackUrlAddress =(String)urlObject;
+						String id=trackUrlAddress.substring(trackUrlAddress.lastIndexOf("/")+1);
+						if(!ids.contains(id)){
+							ids.add(id);
+							System.out.println("ID from "+ id+ " from " + trackUrlAddress);
 						}
 					}
 				}
 			}
-			
-			System.out.println("Tracks with URLs:" + urlcount+"/"+count);
-			System.out.println("Tracks cant parse:" + notParsedCount+"/"+urlcount);
-			result = new LinkedList<GpxTrack>(allTracks);
-			System.out.println("Cutting...");
-			for (Iterator<GpxTrack> iterator = allTracks.iterator(); iterator.hasNext();) {
-				GpxTrack gpxTrack = (GpxTrack) iterator.next();
-				Bounds trackBounds=gpxTrack.getBounds();
-				if(!bounds.contains(trackBounds.getMin()) 
-						|| !bounds.contains(trackBounds.getMax())){
-					result.remove(gpxTrack);
-					Collection<Collection<WayPoint>> tempSegList = new LinkedList<Collection<WayPoint>>();
-					for (Iterator<GpxTrackSegment> iterator2 = gpxTrack.getSegments().iterator(); iterator2
-							.hasNext();) {
-						GpxTrackSegment seg = (GpxTrackSegment) iterator2.next();
-						Collection<WayPoint> tempWPList = new LinkedList<WayPoint>();
-						for (Iterator<WayPoint> iterator3 = seg.getWayPoints().iterator(); iterator3
-								.hasNext();) {
-							WayPoint wp = (WayPoint) iterator3.next();
-							if(bounds.contains(wp.getCoor())){
-								tempWPList.add(wp);
-							}else if(!tempWPList.isEmpty()){
-								tempSegList.add(tempWPList);
-								tempWPList=new LinkedList<WayPoint>();
+			int resultFileCounter=-1;
+			for (Iterator<String> idIter = ids.iterator(); idIter.hasNext();) {
+				String id = (String) idIter.next();
+				String trackUrlAddress= "http://www.openstreetmap.org/trace/"+id+"/data/";
+				System.out.println(trackUrlAddress);
+				URL trackUrl = new URL(trackUrlAddress);
+				try{	
+					GpxReader trackReader = new GpxReader(trackUrl.openStream());
+					trackReader.parse(false);
+					allTracks.addAll(trackReader.data.tracks);
+				}
+				catch (SAXException e) {
+					System.out.println("Could not parse!");
+					notParsedCount++;
+					//e.printStackTrace();
+				}
+				if(Runtime.getRuntime().freeMemory()/Runtime.getRuntime().maxMemory()<0.2 || !idIter.hasNext()){
+					resultFileCounter++;
+					while(allTracks.remove(null));
+					result = new LinkedList<GpxTrack>(allTracks);
+					System.out.println("Cutting..."+resultFileCounter);
+					for (Iterator<GpxTrack> iterator = allTracks.iterator(); iterator.hasNext();) {
+						GpxTrack gpxTrack = (GpxTrack) iterator.next();
+						Bounds trackBounds=gpxTrack.getBounds();
+						if(trackBounds==null){
+							result.remove(gpxTrack);
+						}else if(!bounds.contains(trackBounds.getMin()) 
+								|| !bounds.contains(trackBounds.getMax())){
+							result.remove(gpxTrack);
+							Collection<Collection<WayPoint>> tempSegList = new LinkedList<Collection<WayPoint>>();
+							for (Iterator<GpxTrackSegment> iterator2 = gpxTrack.getSegments().iterator(); iterator2
+									.hasNext();) {
+								GpxTrackSegment seg = (GpxTrackSegment) iterator2.next();
+								Collection<WayPoint> tempWPList = new LinkedList<WayPoint>();
+								for (Iterator<WayPoint> iterator3 = seg.getWayPoints().iterator(); iterator3
+										.hasNext();) {
+									WayPoint wp = (WayPoint) iterator3.next();
+									if(bounds.contains(wp.getCoor())){
+										tempWPList.add(wp);
+									}else if(!tempWPList.isEmpty()){
+										tempSegList.add(tempWPList);
+										tempWPList=new LinkedList<WayPoint>();
+									}
+								}
+								if(!tempWPList.isEmpty()){
+									tempSegList.add(tempWPList);
+								}
 							}
-						}
-						if(!tempWPList.isEmpty()){
-							tempSegList.add(tempWPList);
+							result.add(new ImmutableGpxTrack(tempSegList, gpxTrack.getAttributes()));
 						}
 					}
-					result.add(new ImmutableGpxTrack(tempSegList, gpxTrack.getAttributes()));
+					String realFilename=filename.replace(".gpx", resultFileCounter+".gpx");
+					GpxWriter writer = new GpxWriter(new FileOutputStream(new File(realFilename)));
+					GpxData resultData = new GpxData();
+					resultData.tracks=result;
+					writer.write(resultData);
+					System.out.println("Written to " + realFilename);
+					allTracks = new LinkedList<GpxTrack>();
+					result = new LinkedList<GpxTrack>();
 				}
 			}
-			GpxWriter writer = new GpxWriter(new FileOutputStream(new File(filename)));
-			GpxData resultData = new GpxData();
-			resultData.tracks=result;
-			writer.write(resultData);
-			System.out.println("Written to " + filename);
+			System.out.println("Tracks with URLs:" + urlcount+"/"+count);
+			System.out.println("Tracks can't parse:" + notParsedCount+"/"+urlcount);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -35,13 +35,16 @@ public class IOTest {
 	}
 	@Test
 	public void TestGetDataFromOSM(){
-		double minLat=52.3211801;
-		double minLon=12.794953;
-		double maxLat=52.347083;
-		double maxLon=12.8471279;
-		String filename= "output/test.gpx";
+		double minLat=52.338;
+		double minLon=13.088;
+		double maxLat=52.675;
+		
+		double maxLon=13.761;
+		
+		String filename= "output/Berlin.gpx";
+		String tempFilename= "output/tempBerlin.gpx";
 		testData();
-		IOFunctions.getDataFromOSM(new Bounds(new LatLon(minLat,minLon),new LatLon(maxLat,maxLon)),filename);
+		IOFunctions.getDataFromOSM(new Bounds(new LatLon(minLat,minLon),new LatLon(maxLat,maxLon)),filename,tempFilename);
 	}
 	@Test
 	public void importData(){
