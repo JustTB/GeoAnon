@@ -6,6 +6,7 @@ import java.util.List;
 import org.gpsanonymity.data.GridMatrix;
 import org.gpsanonymity.data.SegmentCloud;
 import org.gpsanonymity.data.SegmentClusterCloud;
+import org.gpsanonymity.data.Statistician;
 import org.gpsanonymity.io.IOFunctions;
 import org.gpsanonymity.merge.MergeGPS;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
@@ -135,10 +136,11 @@ public class Main {
 	 * @param segmentLength 
 	 * @param angelAllowance 
 	 * @param ignoreDirection 
+	 * @param statistician 
 	 * @return new merged Tracks
 	 * @see Main#merginWayPoints(List, int, double)
 	 */
-	public static List<GpxTrack> mergingTracksSimpleSimilar(List<GpxTrack> tracks,int k , double pointDensity, double trackDistance, int segmentLength, boolean ignoreDirection, double angelAllowance) {
+	public static List<GpxTrack> mergingTracksSimpleSimilar(List<GpxTrack> tracks,int k , double pointDensity, double trackDistance, int segmentLength, boolean ignoreDirection, double angelAllowance, Statistician statistician) {
 		List<GpxTrack> morePointTracks;
 		if (pointDensity!=0){
 			System.out.println("Status: Create more Waypoints");
@@ -146,7 +148,7 @@ public class Main {
 		}else{
 			morePointTracks = new LinkedList<GpxTrack>(tracks);
 		}
-		SegmentCloud sc= new SegmentCloud(morePointTracks,k,trackDistance, segmentLength,ignoreDirection, angelAllowance);
+		SegmentCloud sc= new SegmentCloud(morePointTracks,k,trackDistance, segmentLength,ignoreDirection, angelAllowance, statistician);
 		return sc.getMergedTracks();
 	}
 	/**
@@ -158,10 +160,11 @@ public class Main {
 	 * @param segmentLength 
 	 * @param angelAllowance 
 	 * @param ignoreDirection 
+	 * @param statistician 
 	 * @return new merged Tracks
 	 * @see Main#merginWayPoints(List, int, double)
 	 */
-	public static List<GpxTrack> mergingTracksWithSegmentClusters(List<GpxTrack> tracks,int k , double pointDensity, double trackDistance, int segmentLength, boolean ignoreDirection, double angelAllowance) {
+	public static List<GpxTrack> mergingTracksWithSegmentClusters(List<GpxTrack> tracks,int k , double pointDensity, double trackDistance, int segmentLength, boolean ignoreDirection, double angelAllowance, Statistician statistician) {
 		List<GpxTrack> morePointTracks;
 		if (pointDensity!=0){
 			System.out.println("Status: Create more Waypoints");
@@ -169,7 +172,7 @@ public class Main {
 		}else{
 			morePointTracks = new LinkedList<GpxTrack>(tracks);
 		}
-		SegmentClusterCloud scc= new SegmentClusterCloud(morePointTracks,k,trackDistance, segmentLength,ignoreDirection, angelAllowance);
+		SegmentClusterCloud scc= new SegmentClusterCloud(morePointTracks,k,trackDistance, segmentLength,ignoreDirection, angelAllowance,statistician);
 		return scc.getMergedTracks();
 	}
 	/**

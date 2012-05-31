@@ -16,12 +16,17 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
@@ -38,6 +43,7 @@ import org.xml.sax.SAXException;
 
 
 public class IOFunctions {
+	
 	//number of nearest waypoints
 	
 	public static void exportWayPoints(List<WayPoint> wayPoints,
@@ -178,12 +184,11 @@ public class IOFunctions {
 	}
 	public static List<GpxTrack> getDataFromOSM(Bounds bounds, String filename, String tempFile){
 		int countTempFiles=0;
-		URL url;
 		List<GpxTrack> allTracks = new LinkedList<GpxTrack>();
 		List<GpxTrack> result = null;
 		GpxReader reader=null;
 		try {
-			Collection<GpxTrack> tempTracks = new LinkedList<GpxTrack>();
+			Collection<GpxTrack> tempTracks = Collections.synchronizedCollection(new LinkedList<GpxTrack>());
 			LinkedList<Bounds> currentBounds = new LinkedList<Bounds>();
 			if(bounds.getArea()>0.25){
 				System.out.println("Splitting...");
@@ -201,8 +206,9 @@ public class IOFunctions {
 				currentBounds.add(bounds);
 			}
 			System.out.println("Downloading ...");
+			boolean theEnd = false;
 			for(Bounds currentBound:currentBounds){
-				for(int i =0;i==0 || !reader.data.tracks.isEmpty();i++){
+				for(int i =0;i==0 || !theEnd;i++){
 					String urlString= "http://api.openstreetmap.org/api/0.6/trackpoints?bbox="
 							+currentBound.getMin().getX()
 							+","
@@ -213,22 +219,32 @@ public class IOFunctions {
 							+currentBound.getMax().getY()
 							+"&page="
 							+i;
-					System.out.println(urlString);
-					url = new URL(urlString);
+					//System.out.println(urlString);
+					//Runnable adder=new TrackAdder(urlString,tempTracks,endIsNear);
+					//exServ.execute(adder);
+					URL url = new URL(urlString);	
 					reader = new GpxReader(url.openStream());
 					reader.parse(false);
-					tempTracks.addAll(reader.data.tracks);
-				}
-				if(Runtime.getRuntime().freeMemory()/Runtime.getRuntime().maxMemory()<0.2){
-					String fileName=tempFile.replace(".gpx", countTempFiles+".gpx");
-					System.out.println("Temporary file written: "+filename);
-					FileOutputStream fos = new FileOutputStream(new File(fileName));
-					GpxWriter tempWriter = new GpxWriter(fos);
-					GpxData tempData = new GpxData();
-					tempData.tracks=tempTracks;
-					tempWriter.write(tempData);
-					countTempFiles++;
-					tempTracks = new LinkedList<GpxTrack>();
+					System.out.println(url+" tracks: " +reader.data.tracks.size());
+					if(reader.data.tracks.size()>0){
+						tempTracks.addAll(reader.data.tracks);
+					}else{
+						theEnd=true;;
+					}
+					double totalMemory=Runtime.getRuntime().totalMemory();
+					double freeMemory=Runtime.getRuntime().freeMemory();
+					double freeMemoryPercentage= (double)(freeMemory/totalMemory);
+					if(i%100==99 ||freeMemoryPercentage <0.2){
+						String fileName=tempFile.replace(".gpx", countTempFiles+".gpx");
+						System.out.println("Temporary file written: "+filename);
+						FileOutputStream fos = new FileOutputStream(new File(fileName));
+						GpxWriter tempWriter = new GpxWriter(fos);
+						GpxData tempData = new GpxData();
+						tempData.tracks=tempTracks;
+						tempWriter.write(tempData);
+						countTempFiles++;
+						tempTracks = new LinkedList<GpxTrack>();
+					}
 				}
 			}
 			System.out.println("Downloading Tracks...");

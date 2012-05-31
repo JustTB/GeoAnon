@@ -29,24 +29,33 @@ public class SegmentCloud {
 	protected IdentityHashMap<GpxTrackSegment,HashSet<GpxTrack>> tracksOfSimilarSegments;
 	protected boolean ignoreDirection;
 	private double angelAllowance;
+	protected Statistician statistician;
 
 	public SegmentCloud(List<GpxTrack> morePointTracks
 			,int k
 			,double trackDistance
 			,int segmentLength
 			,boolean ignoreDirection
-			,double angelAllowance) {
+			,double angelAllowance
+			,Statistician statistician) {
 		this.sourceTracks=new LinkedList<GpxTrack>(morePointTracks);
 		this.k = k;
 		this.trackDistance=trackDistance;
 		this.segmentLength=segmentLength;
 		this.angelAllowance=angelAllowance;
 		this.ignoreDirection=ignoreDirection;
+		this.statistician = statistician;
+		initializeStatistician();
 		segments = new LinkedList<GpxTrackSegment>();
 		similarSegments= new IdentityHashMap<GpxTrackSegment, HashSet<GpxTrackSegment>>();
 		mergedWayPoints = new LinkedList<MergedWayPoint>();
 		tracksOfSimilarSegments = new IdentityHashMap<GpxTrackSegment, HashSet<GpxTrack>>();
 		initialize();
+	}
+
+	private void initializeStatistician() {
+		statistician.setSourceTrackNumber(sourceTracks.size());
+		statistician.setSourceWaypointNumber(MergeGPS.getWayPointNumber(sourceTracks));
 	}
 
 	protected void initialize() {
@@ -55,6 +64,7 @@ public class SegmentCloud {
 		IOFunctions.exportTrackSegments(segments, "output/BuildedSegments.gpx");
 		//System.out.println("Status: Find Segmentcluster");
 		//findSegmentCluster();
+		statistician.setSourceConnectionNumber(segments.size());
 		System.out.println("Status: Find Similar Segments");
 		findSimilarSegments();
 		System.out.println("Status: Eliminate similar segments with grade<"+k);
@@ -213,6 +223,7 @@ public class SegmentCloud {
 				System.out.println();
 			}
 		}
+		statistician.setRemovedConnectionNumber(count);
 		System.out.println("Segments removed: " + count+"\\" +size);
 		System.out.println("Average Grade: " + averageGrade/size);
 		System.out.println("Highest Grade: " + highestGrade);
@@ -412,13 +423,15 @@ public class SegmentCloud {
 							currentSegment.add(mwp);
 						}
 						if(currentSegment.size()>=segmentLength){
-							GpxTrackSegment newSeg =new ImmutableGpxTrackSegment(currentSegment);
-//							double length = newSeg.length();
-//							System.out.println(length);
-							segments.add(newSeg);
-							HashSet<GpxTrack> trackList = new HashSet<GpxTrack>();
-							trackList.add(track);
-							tracksOfSimilarSegments.put(newSeg,trackList);
+							if(!currentSegment.get(0).getCoor().equals(currentSegment.get(1).getCoor())){
+								GpxTrackSegment newSeg =new ImmutableGpxTrackSegment(currentSegment);
+								//double length = newSeg.length();
+								//System.out.println(length);
+								segments.add(newSeg);
+								HashSet<GpxTrack> trackList = new HashSet<GpxTrack>();
+								trackList.add(track);
+								tracksOfSimilarSegments.put(newSeg,trackList);
+							}
 							int i=overlappingSegments.indexOf(currentSegment);
 							overlappingSegments.set(i, new LinkedList<WayPoint>());
 						}

@@ -329,9 +329,11 @@ public class MergeGPS {
 		}
 		for (GpxTrackSegment seg : list) {
 			//for each waypoint find nearest cluster point
-			int index =findNearestSegmentIndex(seg,clusterSegs);
-			List<GpxTrackSegment> cluster = clusterGroups.get(index);
-			cluster.add(seg);
+			if(seg.length()!=0){
+				int index =findNearestSegmentIndex(seg,clusterSegs);
+				List<GpxTrackSegment> cluster = clusterGroups.get(index);
+				cluster.add(seg);
+			}
 		}
 		LinkedList<GpxTrackSegment> result = new LinkedList<GpxTrackSegment>();
 		//for each clusterGroup find new centroid
@@ -373,9 +375,11 @@ public class MergeGPS {
 		}
 		for (GpxTrackSegment seg : list) {
 			//for each waypoint find nearest cluster point
-			int index =findNearestSegmentIndex(seg,clusterSegs);
-			List<GpxTrackSegment> cluster = clusterGroups.get(index);
-			cluster.add(seg);
+			if(seg.length()!=0){
+				int index =findNearestSegmentIndex(seg,clusterSegs);
+				List<GpxTrackSegment> cluster = clusterGroups.get(index);
+				cluster.add(seg);
+			}
 		}
 		LinkedList<GpxTrackSegment> result = new LinkedList<GpxTrackSegment>();
 		//for each clusterGroup find new centroid
@@ -413,12 +417,13 @@ public class MergeGPS {
 		double distance=Double.MAX_VALUE;
 		int result=-1;
 		for (int i = 0; i < list.size(); i++) {
-			Double currentDistance;
+			double currentDistance;
 			currentDistance = segmentDistance(list.get(i),seg);
 			if (currentDistance<distance){
 				distance=currentDistance;
 				result=i;
 			}
+			result=result;
 		}
 		return result;
 	}
@@ -428,7 +433,8 @@ public class MergeGPS {
 		double angle = calculateAngle(seg1, seg2);
 		double angleFactor=(Math.PI/2)/Math.abs(Math.PI/2-angle);
 		//angle/(pi/2) * distance
-		return distance*angleFactor;
+		double result=distance*angleFactor;
+		return result;
 		
 	}
 	/**
@@ -528,7 +534,6 @@ public class MergeGPS {
 		//get min
 		LinkedList<Double> allDiffs1 = new LinkedList<Double>();
 		LinkedList<Double> allDiffs2 = new LinkedList<Double>();
-		//FIXME: here dynamic programming? maybe only for bigger segments
 		for (WayPoint wayPoint : tempList1) {
 			allDiffs1.add(getMinDifference(wayPoint,tempList2));
 		}
@@ -551,7 +556,7 @@ public class MergeGPS {
 	}
 	private static Double getMinDifference(WayPoint wayPoint,
 			LinkedList<WayPoint> tempList2) {
-		double result=0;
+		double result=Double.MAX_VALUE;
 		for (WayPoint wayPoint2 : tempList2) {
 			double distance = wayPoint.getCoor().greatCircleDistance(wayPoint2.getCoor());
 			if(distance<result){
@@ -604,7 +609,7 @@ public class MergeGPS {
 		MergedWayPoint neighbor;
 		while(!mergedWayPointsList.isEmpty()){
 			list.add(temp);
-			neighbor = temp.getOneNotMarkedNeighbor(k);
+			neighbor = temp.getHighestNotMarkedNeighbor(k);
 			if(neighbor==null){
 				mergedWayPointsList.remove(temp);
 				if(list.size()>1){//no one point seqs
@@ -699,6 +704,9 @@ public class MergeGPS {
 		double cosinusAlpha=(latVector1*latVector2+lonVector1*lonVector2)
 					/(Math.sqrt(latVector1*latVector1+lonVector1*lonVector1)
 							*(Math.sqrt(latVector2*latVector2+lonVector2*lonVector2)));
+		if(cosinusAlpha>1){
+			cosinusAlpha=1;
+		}
 		double alpha = Math.acos(cosinusAlpha);
 		return alpha;
 	}
@@ -722,6 +730,15 @@ public class MergeGPS {
 			}
 		}
 		return false;
+	}
+	public static int getWayPointNumber(List<GpxTrack> tracks) {
+		int result=0;
+		for (GpxTrack gpxTrack : tracks) {
+			for (GpxTrackSegment seg : gpxTrack.getSegments()) {
+				result+=seg.getWayPoints().size();
+			}
+		}
+		return result;
 	}
 	
 	

@@ -5,6 +5,7 @@ import java.util.IdentityHashMap;
 import java.util.LinkedList;
 
 import org.gpsanonymity.Main;
+import org.gpsanonymity.data.Statistician;
 import org.gpsanonymity.io.IOFunctions;
 import org.junit.Assert;
 import org.junit.Test;
@@ -38,6 +39,22 @@ public class MainTest {
 				"output/GPXMergeTracksOnGrid_1_2_0.5.gpx");
 	}
 	@Test
+	public void testMergeTracksWithSegmentCluster(){
+		int k=3;
+		int segmentLenght=2;
+		double pointDensity=5;
+		double trackDistance=4;
+		boolean ignoreDirection=true;
+		double angelAllowance=1;
+		String file = "input/leipzig.gpx";
+		Statistician statistician = new Statistician();
+		IOFunctions.exportTracks(
+				Main.mergingTracksWithSegmentClusters(
+						Main.importTracks(file),
+						k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance,statistician),
+				"output/GPXMergeTracks_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
+	}
+	@Test
 	public void testMergeTracks(){
 		int k=3;
 		int segmentLenght=2;
@@ -47,11 +64,11 @@ public class MainTest {
 		double angelAllowance=1;
 		//String file = "input/leipzig2.gpx";
 		String file = "leipzig_track_example.gpx";
-		
+		Statistician statistician = new Statistician();
 		IOFunctions.exportTracks(
 				Main.mergingTracksSimpleSimilar(
 						Main.importTracks(file),
-						k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance),
+						k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance,statistician),
 				"output/GPXMergeTracks_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
 	}
 	@Test

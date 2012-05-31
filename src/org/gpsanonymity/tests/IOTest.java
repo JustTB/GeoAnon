@@ -35,11 +35,14 @@ public class IOTest {
 	}
 	@Test
 	public void TestGetDataFromOSM(){
-		double minLat=52.338;
-		double minLon=13.088;
-		double maxLat=52.675;
+		System.setProperty("http.proxySet", "true");
+		System.setProperty("http.proxyPort","80");
+		System.setProperty("http.proxyHost","http-proxy.fu-berlin.de");
+		double minLat=52.3501263;
+		double minLon=13.1303787;
+		double maxLat=52.3618687;
 		
-		double maxLon=13.761;
+		double maxLon=13.1550980;
 		
 		String filename= "output/Berlin.gpx";
 		String tempFilename= "output/tempBerlin.gpx";

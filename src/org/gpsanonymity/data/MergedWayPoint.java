@@ -20,7 +20,6 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 	private IdentityHashMap<GpxTrackSegment,List<WayPoint>> sourceSegments;
 	private IdentityHashMap<GpxTrack,List<WayPoint>> sourceTracks;
 	private IdentityHashMap<MergedWayPoint,Boolean> connections;
-	private LinkedList<GpxTrackSegment> mergedSegments;
 	private String gpxDate;
 	private IdentityHashMap<MergedWayPoint,Integer> connectionGrades;
 	private MergedWayPoint updateMergedWayPoint=this;
@@ -31,7 +30,6 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		sourceTracks = new IdentityHashMap<GpxTrack, List<WayPoint>>();
 		connections = new IdentityHashMap<MergedWayPoint,Boolean>();
 		connectionGrades = new IdentityHashMap<MergedWayPoint, Integer>();
-		mergedSegments = new LinkedList<GpxTrackSegment>();
 		addWayPoints(lp);
 	}
 	
@@ -42,7 +40,6 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		sourceTracks = new IdentityHashMap<GpxTrack, List<WayPoint>>();
 		connections = new IdentityHashMap<MergedWayPoint,Boolean>();
 		connectionGrades = new IdentityHashMap<MergedWayPoint, Integer>();
-		mergedSegments = new LinkedList<GpxTrackSegment>();
 		addWayPoint(p);
 	}
 
@@ -311,20 +308,22 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		return connections.keySet();
 	}
 
-	public MergedWayPoint getOneNotMarkedNeighbor(int k) {
+	public MergedWayPoint getHighestNotMarkedNeighbor(int k) {
 		Set<MergedWayPoint> keys = connections.keySet();
+		MergedWayPoint highestMwp=null;
+		int highestGrade=0;
 		for (MergedWayPoint mwp : keys) {
 			Boolean color = connections.get(mwp);
 			Integer grade = connectionGrades.get(mwp);
 			if(color==null || grade==null){
 				System.out.println("This should not happen!!!!" + color + " " + grade);
 			}
-			if (!color && grade>=k){
-				return mwp;
+			if (!color && grade>=k && grade>highestGrade){
+				highestGrade=grade;
+				highestMwp=mwp;
 			}
 		}
-		return null;
-		
+		return highestMwp;
 	}
 
 	public int getNeighborCount() {
