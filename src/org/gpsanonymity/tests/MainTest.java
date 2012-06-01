@@ -3,6 +3,7 @@ package org.gpsanonymity.tests;
 import java.awt.Point;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.gpsanonymity.Main;
 import org.gpsanonymity.data.Statistician;
@@ -14,6 +15,16 @@ import org.openstreetmap.josm.data.gpx.ImmutableGpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.WayPoint;
 
 public class MainTest {
+	private List<String> getSimpleTestData(){
+		LinkedList<String> result = new LinkedList<String>();
+		result.add("input/block.gpx");
+		result.add("input/cross.gpx");
+		result.add("input/2par_top_down.gpx");
+		result.add("input/top_down_x.gpx");
+		result.add("input/left_right.gpx");
+		result.add("input/V.gpx");
+		return result;
+	}
 	@Test
 	public void testMergeWayPointsOnGrid(){
 		IOFunctions.exportWayPoints(
@@ -39,37 +50,63 @@ public class MainTest {
 				"output/GPXMergeTracksOnGrid_1_2_0.5.gpx");
 	}
 	@Test
-	public void testMergeTracksWithSegmentCluster(){
-		int k=3;
+	public void testMergeTracksKMeansCloud(){
+		int k=2;
 		int segmentLenght=2;
-		double pointDensity=5;
+		double pointDensity=2;
 		double trackDistance=4;
 		boolean ignoreDirection=true;
 		double angelAllowance=1;
-		String file = "input/leipzig.gpx";
-		Statistician statistician = new Statistician();
-		IOFunctions.exportTracks(
-				Main.mergingTracksWithSegmentClusters(
-						Main.importTracks(file),
-						k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance,statistician),
-				"output/GPXMergeTracks_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
+		double distanceWeight=1;
+		double angleWeight=1;
+		for (String file : getSimpleTestData()) {
+			System.out.println("File: "+file);
+			Statistician statistician = new Statistician();
+			IOFunctions.exportTracks(
+					Main.mergingTracksWithKMeans(
+							Main.importTracks(file),
+							k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance,statistician),
+							"output/GPXKMeansCloud_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
+		}
+	}
+	@Test
+	public void testMergeTracksWithSegmentCluster(){
+		int k=1;
+		int segmentLenght=2;
+		double pointDensity=2;
+		double trackDistance=4;
+		boolean ignoreDirection=true;
+		double angelAllowance=1;
+		double distanceWeight=1;
+		double angleWeight=1;
+		for (String file : getSimpleTestData()) {
+			System.out.println("File: "+file);
+			Statistician statistician = new Statistician();
+			IOFunctions.exportTracks(
+					Main.mergingTracksWithSegmentClusters(
+							Main.importTracks(file),
+							k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance,statistician,angleWeight,distanceWeight),
+							"output/GPXSegmentCloud_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
+		}
 	}
 	@Test
 	public void testMergeTracks(){
-		int k=3;
+		int k=1;
 		int segmentLenght=2;
 		double pointDensity=5;
 		double trackDistance=4;
 		boolean ignoreDirection=true;
 		double angelAllowance=1;
 		//String file = "input/leipzig2.gpx";
-		String file = "leipzig_track_example.gpx";
+		for (String file : getSimpleTestData()) {
+			System.out.println("Status: Reading file"+file);
 		Statistician statistician = new Statistician();
 		IOFunctions.exportTracks(
 				Main.mergingTracksSimpleSimilar(
 						Main.importTracks(file),
 						k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance,statistician),
-				"output/GPXMergeTracks_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
+				"output/GPXMergeTracks_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
+		}
 	}
 	@Test
 	public void testHashing(){

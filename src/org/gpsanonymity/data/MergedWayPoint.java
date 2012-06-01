@@ -104,6 +104,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		if(mwp==this){
 			return;
 		}
+		mwp=mwp.current();
 		assert(connections.size()==connectionGrades.size());
 //		addWayPoint((WayPoint)mwp,true);
 		sourceWaypoints.addAll(mwp.sourceWaypoints);
@@ -125,12 +126,16 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		assert(connections.size()==connectionGrades.size());
 	}
 	private void update(MergedWayPoint mergedWayPoint) {
-		updateMergedWayPoint =mergedWayPoint;	
+		MergedWayPoint mwp = mergedWayPoint;
+		while(mwp.needsUpdate()){
+			mwp=mwp.current();
+		}
+		updateMergedWayPoint =mwp;
 	}
 	public boolean needsUpdate(){
 		return updateMergedWayPoint!=this;
 	}
-	public WayPoint update(){
+	public MergedWayPoint current(){
 		return updateMergedWayPoint;
 	}
 
@@ -211,6 +216,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		return "WayPoint {"+ new LatLon(this.lat, this.lon).toString() + "time="+gpxDate+" grade:"+getGrade()+"}";
 	}
 	public void connect(MergedWayPoint neighbor){
+		neighbor=neighbor.current();
 		assert(connections.size()==connectionGrades.size());
 		if(neighbor==this){
 			return;
@@ -223,15 +229,19 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		assert(connections.size()==connectionGrades.size());
 	}
 	public void connect(MergedWayPoint neighbor, int grade){
+		neighbor=neighbor.current();
+		assert(connections.size()==connectionGrades.size());
 		connections.put(neighbor,false);
 		connectionGrades.put(neighbor, grade);
 		neighbor.connections.put(this,false);
 		neighbor.connectionGrades.put(this, grade);
+		assert(connections.size()==connectionGrades.size());
 	}
 	public boolean connectSameTracks(MergedWayPoint neighbor, double distance, double minimalSpeed){
 		return connectSameTracks(neighbor, distance, minimalSpeed, 0);
 	}
 	public boolean connectSameTracks(MergedWayPoint neighbor, double distance, double minimalSpeed, int k){
+		neighbor=neighbor.current();
 		boolean establish=false;
 		int count=0;
 		for (Iterator<GpxTrack> trackIter = sourceTracks.keySet().iterator(); trackIter.hasNext();) {
@@ -256,10 +266,11 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 			neighbor.connections.put(this,false);
 			neighbor.connectionGrades.put(this,count);
 		}
-
+		assert(connections.size()==connectionGrades.size());
 		return establish;
 	}
 	private boolean isRealNeighbor(MergedWayPoint neighbor, GpxTrack onTrack, double distance, double minimalSpeed) {
+		neighbor=neighbor.current();
 		List<WayPoint> sourcePoint = sourceTracks.get(onTrack);
 		List<WayPoint> neighborSourcePoint = neighbor.sourceTracks.get(onTrack);
 		//heuristic example for minimalSpeed=0.5:
@@ -279,20 +290,26 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 
 
 	public void colorConnection(MergedWayPoint neighbor){
+		neighbor=neighbor.current();
 		if(connections.containsKey(neighbor)){
 			connections.put(neighbor, true);
-			neighbor.connections.put(neighbor, true);
+			neighbor.connections.put(this, true);
 		}
+		assert(connections.size()==connectionGrades.size());
 	}
 	public Boolean getColor(MergedWayPoint neighbor){
+		neighbor=neighbor.current();
 		if(connections.containsKey(neighbor)){
+			assert(connections.size()==connectionGrades.size());
 			return connections.get(neighbor);
 		}else{
+			assert(connections.size()==connectionGrades.size());
 			return null;
 		}
 	}
 	
 	public boolean disconnect(MergedWayPoint neighbor){
+		neighbor=neighbor.current();
 		assert(connections.size()==connectionGrades.size());
 		if (null!=connections.remove(neighbor)){
 			connectionGrades.remove(neighbor);
@@ -305,10 +322,12 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		return false;
 	}
 	public Collection<MergedWayPoint> getNeighbors(){
+		assert(connections.size()==connectionGrades.size());
 		return connections.keySet();
 	}
 
 	public MergedWayPoint getHighestNotMarkedNeighbor(int k) {
+		assert(connections.size()==connectionGrades.size());
 		Set<MergedWayPoint> keys = connections.keySet();
 		MergedWayPoint highestMwp=null;
 		int highestGrade=0;
@@ -340,10 +359,12 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 	}
 
 	public boolean containsNeighbor(MergedWayPoint mwp) {
+		mwp=mwp.current();
 		return connections.containsKey(mwp);
 	}
 
 	public int getNeighborGrade(MergedWayPoint mergedWayPoint) {
+		mergedWayPoint=mergedWayPoint.current();
 		if(mergedWayPoint!=null){
 			Integer entry = connectionGrades.get(mergedWayPoint);
 			if (entry!=null){
@@ -354,6 +375,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 	}
 
 	public boolean hasSameTracks(MergedWayPoint mwp2) {
+		mwp2=mwp2.current();
 		for(GpxTrack track : sourceTracks.keySet()){
 			for(GpxTrack track2 : mwp2.sourceTracks.keySet()){
 				if(track==track2){
@@ -365,6 +387,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 	}
 
 	public void deleteDistantNeighbors(double distance) {
+		assert(connections.size()==connectionGrades.size());
 		LinkedList<MergedWayPoint> keySet = new LinkedList<MergedWayPoint>(connections.keySet());
 		for(MergedWayPoint neighbor: keySet){
 			if(neighbor.getCoor().greatCircleDistance(this.getCoor())>distance){
@@ -384,6 +407,14 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 
 	public Collection<GpxTrackSegment> getSegments() {
 		return sourceSegments.keySet();
+	}
+
+	public boolean isConnectionGradeCorrect() {
+		return connectionGrades.size()==connections.size();
+	}
+
+	public int getTrackGrade() {
+		return sourceTracks.size();
 	}
 	
 

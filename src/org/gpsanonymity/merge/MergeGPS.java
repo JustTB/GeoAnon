@@ -7,6 +7,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.gpsanonymity.data.MergedWayPoint;
 import org.gpsanonymity.data.comparator.ReferenceWayPointComparator;
@@ -235,18 +238,18 @@ public class MergeGPS {
 		return null;//mergedWaypoints;
 	
 	}
-	public static List<GpxTrackSegment> mergeSegmentsWithKMeans(List<GpxTrackSegment> list, int k, boolean ignoreDirection){
+	public static List<GpxTrackSegment> mergeSegmentsWithKMeans(List<GpxTrackSegment> list, int k, boolean ignoreDirection, double angleWeight, double distanceWeight){
 		List<GpxTrackSegment> oldClusterSegs,clusterSegs=getRandomEntrys(list,k);
 		List<GpxTrackSegment> cluster;
 		//DistanceMatrix distanceMartix = new DistanceMatrix(list, list);
 		int count=0;
 		do{
 			count++;
-			cluster= makeSegmentCluster(clusterSegs, list);
+			cluster= makeSegmentCluster(clusterSegs, list,angleWeight, distanceWeight);
 			oldClusterSegs=clusterSegs;
 			clusterSegs=cluster;
 		}while(!areSameSegments(oldClusterSegs,clusterSegs));
-		return makeMergeSegmentCluster(clusterSegs,list, ignoreDirection);
+		return makeMergeSegmentCluster(clusterSegs,list, ignoreDirection, angleWeight, distanceWeight);
 				
 	}
 	private static boolean areSameSegments(
@@ -321,7 +324,7 @@ public class MergeGPS {
 		}
 	}
 	private static List<GpxTrackSegment> makeMergeSegmentCluster(
-			List<GpxTrackSegment> clusterSegs, List<GpxTrackSegment> list, boolean ignoreDirection) {
+			List<GpxTrackSegment> clusterSegs, List<GpxTrackSegment> list, boolean ignoreDirection, double angleWeight, double distanceWeight) {
 		List<List<GpxTrackSegment>> clusterGroups= new LinkedList<List<GpxTrackSegment>>();
 		//initialize result
 		for (int i = 0; i < clusterSegs.size(); i++) {
@@ -330,7 +333,7 @@ public class MergeGPS {
 		for (GpxTrackSegment seg : list) {
 			//for each waypoint find nearest cluster point
 			if(seg.length()!=0){
-				int index =findNearestSegmentIndex(seg,clusterSegs);
+				int index =findNearestSegmentIndex(seg,clusterSegs,angleWeight,distanceWeight);
 				List<GpxTrackSegment> cluster = clusterGroups.get(index);
 				cluster.add(seg);
 			}
@@ -367,18 +370,25 @@ public class MergeGPS {
 		return new ImmutableGpxTrackSegment(newWps);
 	}
 	private static List<GpxTrackSegment> makeSegmentCluster(
-			List<GpxTrackSegment> clusterSegs, List<GpxTrackSegment> list) {
-		List<List<GpxTrackSegment>> clusterGroups= new LinkedList<List<GpxTrackSegment>>();
+			List<GpxTrackSegment> clusterSegs, List<GpxTrackSegment> list, double angleWeight, double distanceWeight) {
+		List<GpxTrackSegment> syncClusterSegs = Collections.synchronizedList(clusterSegs);
+		List<GpxTrackSegment> synList = Collections.synchronizedList(list);
+		List<List<GpxTrackSegment>> clusterGroups= Collections.synchronizedList(new LinkedList<List<GpxTrackSegment>>());
 		//initialize result
 		for (int i = 0; i < clusterSegs.size(); i++) {
-			clusterGroups.add(new LinkedList<GpxTrackSegment>());
+			clusterGroups.add(Collections.synchronizedList(new LinkedList<GpxTrackSegment>()));
 		}
+		ExecutorService threadPool = Executors.newCachedThreadPool();
 		for (GpxTrackSegment seg : list) {
-			//for each waypoint find nearest cluster point
-			if(seg.length()!=0){
-				int index =findNearestSegmentIndex(seg,clusterSegs);
-				List<GpxTrackSegment> cluster = clusterGroups.get(index);
-				cluster.add(seg);
+			threadPool.execute(new ClusterFinder(seg,clusterSegs,clusterGroups,angleWeight, distanceWeight));
+		}
+		threadPool.shutdown();
+		while(!threadPool.isTerminated()){
+			try {
+				threadPool.awaitTermination(20, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		LinkedList<GpxTrackSegment> result = new LinkedList<GpxTrackSegment>();
@@ -393,32 +403,40 @@ public class MergeGPS {
 	private static GpxTrackSegment calculateSegmentCentroid(
 			List<GpxTrackSegment> cluster) {
 		double length=0,vectorLon=0, vectorLat=0;
-		List<WayPoint> minWps = new LinkedList<WayPoint>();
+		List<WayPoint> all1Wps = new LinkedList<WayPoint>();
+		List<WayPoint> all2Wps = new LinkedList<WayPoint>();
+		LatLon reference1=null;
+		LatLon reference2=null;
 		for (GpxTrackSegment gpxTrackSegment : cluster) {
 			List<WayPoint> wps = new LinkedList<WayPoint>(gpxTrackSegment.getWayPoints());
-			if (wps.get(0).getCoor().equals(gpxTrackSegment.getBounds().getMin())){
-				minWps.add(wps.get(0));
+			if(reference1==null || reference2==null){
+				reference1=wps.get(0).getCoor();
+				reference2=wps.get(1).getCoor();
+				all1Wps.add(wps.get(0));
+				all2Wps.add(wps.get(1));
+			}else if(reference1.distance(wps.get(0).getCoor())//if 0 is closer to reference1
+					<reference1.distance(wps.get(1).getCoor())){
+				all1Wps.add(wps.get(0));
+				all2Wps.add(wps.get(1));
 			}else{
-				minWps.add(wps.get(1));
+				all1Wps.add(wps.get(1));
+				all2Wps.add(wps.get(0));
 			}
-			vectorLat+=Math.abs(wps.get(0).getCoor().lat()-wps.get(1).getCoor().lat());
-			vectorLon+=Math.abs(wps.get(0).getCoor().lon()-wps.get(1).getCoor().lon());
 		}
-		vectorLat=vectorLat/cluster.size();
-		vectorLon=vectorLon/cluster.size();
-		WayPoint minWp= new WayPoint(calculateCentroid(minWps));
+		WayPoint wp1= new WayPoint(calculateCentroid(all1Wps));
+		WayPoint wp2= new WayPoint(calculateCentroid(all2Wps));
 		LinkedList<WayPoint> newWps = new LinkedList<WayPoint>();
-		newWps.add(minWp);
-		newWps.add(new WayPoint(new LatLon(minWp.getCoor().getY()+vectorLat, minWp.getCoor().getX()+vectorLon)));
+		newWps.add(wp1);
+		newWps.add(wp2);
 		return new ImmutableGpxTrackSegment(newWps);
 	}
-	private static int findNearestSegmentIndex(GpxTrackSegment seg,
-			List<GpxTrackSegment> list) {
+	public static int findNearestSegmentIndex(GpxTrackSegment seg,
+			List<GpxTrackSegment> list, double angleWeight, double distanceWeight) {
 		double distance=Double.MAX_VALUE;
 		int result=-1;
 		for (int i = 0; i < list.size(); i++) {
 			double currentDistance;
-			currentDistance = segmentDistance(list.get(i),seg);
+			currentDistance = segmentDistance(list.get(i),seg,angleWeight,distanceWeight);
 			if (currentDistance<distance){
 				distance=currentDistance;
 				result=i;
@@ -427,13 +445,39 @@ public class MergeGPS {
 		}
 		return result;
 	}
-	private static Double segmentDistance(GpxTrackSegment seg1,
+	@SuppressWarnings("unused")
+	private static Double segmentAnglePercentDistance(GpxTrackSegment seg1,
 			GpxTrackSegment seg2) {
 		double distance = hausDorffDistance(seg1.getWayPoints(), seg2.getWayPoints());
 		double angle = calculateAngle(seg1, seg2);
 		double angleFactor=(Math.PI/2)/Math.abs(Math.PI/2-angle);
 		//angle/(pi/2) * distance
 		double result=distance*angleFactor;
+		return result;
+		
+	}
+	private static Double segmentDistance(GpxTrackSegment seg1,
+			GpxTrackSegment seg2, double angleWeight, double distanceWeight) {
+		assert(seg1.getWayPoints().size()==2 && seg2.getWayPoints().size()==2);
+		double distance = hausDorffDistance(seg1.getWayPoints(), seg2.getWayPoints());
+		double lonDiff1=Double.NaN;
+		for (WayPoint wp1 : seg1.getWayPoints()) {
+			if(Double.isNaN(lonDiff1)){
+				lonDiff1=wp1.getCoor().getY();
+			}else{
+				lonDiff1-=wp1.getCoor().getY();
+			}
+		}
+		double lonDiff2=Double.NaN;
+		for (WayPoint wp2 : seg2.getWayPoints()) {
+			if(Double.isNaN(lonDiff2)){
+				lonDiff2=wp2.getCoor().getY();
+			}else{
+				lonDiff2-=wp2.getCoor().getY();
+			}
+		}
+		double lonDistance=Math.abs(Math.abs(lonDiff1)-Math.abs(lonDiff2));
+		double result=distance*distanceWeight+lonDistance*angleWeight;
 		return result;
 		
 	}

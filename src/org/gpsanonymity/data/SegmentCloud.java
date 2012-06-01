@@ -72,15 +72,30 @@ public class SegmentCloud {
 		IOFunctions.exportTrackSegments(similarSegments.keySet(), "output/SimilarSegments.gpx");
 		System.out.println("Status: Merge similar Segments");
 		mergeSimilarSegments();
+		for (MergedWayPoint mwp : mergedWayPoints) {
+			if(!mwp.isConnectionGradeCorrect()){
+				System.out.println("its here");
+			}
+		}
 		IOFunctions.exportWayPoints((List)mergedWayPoints, "output/MergedWayPoints.gpx");
 		System.out.println("Status: Eliminate wayPoints with grade<"+k);
 		eliminateLowerGradeWayPoints();
 		System.out.println("Status: Check Neighborhood");
+		for (MergedWayPoint mwp : mergedWayPoints) {
+			if(!mwp.isConnectionGradeCorrect()){
+				System.out.println("its here");
+			}
+		}
 		checkNeighborHood();
 		//System.out.println("Status:Delete big distances");
 		//deleteBigDistances();
 		System.out.println("Status: Build tracks!!");
 		//mergeNearWayPoints();
+		for (MergedWayPoint mwp : mergedWayPoints) {
+			if(!mwp.isConnectionGradeCorrect()){
+				System.out.println("its here");
+			}
+		}
 		IOFunctions.exportWayPoints((List)mergedWayPoints, "output/EliminatedMergedWayPoints.gpx");
 		buildTracks();
 		//System.out.println("Status:Delete short tracks");
@@ -107,7 +122,7 @@ public class SegmentCloud {
 		List<MergedWayPoint> mwps = new LinkedList<MergedWayPoint>(mergedWayPoints);
 		int count=0;
 		for (MergedWayPoint mwp : mwps) {
-			if(mwp.getGrade()<k){
+			if(mwp.getGrade()<k || mwp.getTrackGrade()<k){
 				mergedWayPoints.remove(mwp);
 				mwp.disconnectAll();
 				count++;
@@ -175,12 +190,8 @@ public class SegmentCloud {
 				}
 				LinkedList<WayPoint> newWps = new LinkedList<WayPoint>();
 				for (WayPoint wp : wps) {
-					MergedWayPoint mwp = (MergedWayPoint) wp;
-					if(mwp.needsUpdate()){
-						newWps.add(mwp.update());
-					}else{
-						newWps.add(wp);
-					}
+					MergedWayPoint mwp = ((MergedWayPoint) wp).current();
+					newWps.add(mwp);
 				}
 				newMwps=MergeGPS.mergeWithKMeans(newWps, segmentLength);
 			}
@@ -200,6 +211,11 @@ public class SegmentCloud {
 	}
 
 	protected void buildTracks() {
+		for (MergedWayPoint mwp : mergedWayPoints) {
+			if(!mwp.isConnectionGradeCorrect()){
+				System.out.println("its here");
+			}
+		}
 		tracks=MergeGPS.buildTracks(mergedWayPoints , k);
 	}
 
