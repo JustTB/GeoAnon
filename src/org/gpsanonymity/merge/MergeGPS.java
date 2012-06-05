@@ -11,8 +11,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.DebugGraphics;
+
 import org.gpsanonymity.data.MergedWayPoint;
 import org.gpsanonymity.data.comparator.ReferenceWayPointComparator;
+import org.gpsanonymity.io.IOFunctions;
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
@@ -248,6 +251,8 @@ public class MergeGPS {
 			cluster= makeSegmentCluster(clusterSegs, list,angleWeight, distanceWeight);
 			oldClusterSegs=clusterSegs;
 			clusterSegs=cluster;
+			IOFunctions.exportTrackSegments(cluster, "output/a_cluster.gpx");
+			//IOFunctions.exportTrackSegments(oldClusterSegs, "output/a_ocluster.gpx");
 		}while(!areSameSegments(oldClusterSegs,clusterSegs));
 		return makeMergeSegmentCluster(clusterSegs,list, ignoreDirection, angleWeight, distanceWeight);
 				
@@ -255,12 +260,22 @@ public class MergeGPS {
 	private static boolean areSameSegments(
 			List<GpxTrackSegment> oldClusterSegs,
 			List<GpxTrackSegment> clusterSegs) {
-		for (GpxTrackSegment gpxTrackSegment : clusterSegs) {
-			for (GpxTrackSegment oldGpxTrackSegment : oldClusterSegs) {
-				if(!gpxTrackSegment.equals(oldGpxTrackSegment)){
+		SegmentComparator comp = new SegmentComparator();
+		//Collections.sort(oldClusterSegs,comp);
+		//Collections.sort(clusterSegs,comp);
+		int count=-1;
+		Iterator<GpxTrackSegment> newOneIter =clusterSegs.iterator();
+		if(clusterSegs.size()==oldClusterSegs.size()){
+			while (newOneIter.hasNext()) {
+				count++;
+				GpxTrackSegment newOne = newOneIter.next();
+				if(!oldClusterSegs.contains(newOne)){
+					System.out.println("KMeans cluster: "+count);
 					return false;
 				}
 			}
+		}else{
+			return false;
 		}
 		return true;
 	}
@@ -333,7 +348,7 @@ public class MergeGPS {
 		for (GpxTrackSegment seg : list) {
 			//for each waypoint find nearest cluster point
 			if(seg.length()!=0){
-				int index =findNearestSegmentIndex(seg,clusterSegs,angleWeight,distanceWeight);
+				int index =findNearestSegmentIndex(seg,clusterSegs,clusterGroups,angleWeight,distanceWeight);
 				List<GpxTrackSegment> cluster = clusterGroups.get(index);
 				cluster.add(seg);
 			}
@@ -379,15 +394,21 @@ public class MergeGPS {
 			clusterGroups.add(Collections.synchronizedList(new LinkedList<GpxTrackSegment>()));
 		}
 		ExecutorService threadPool = Executors.newCachedThreadPool();
-		for (GpxTrackSegment seg : list) {
-			threadPool.execute(new ClusterFinder(seg,clusterSegs,clusterGroups,angleWeight, distanceWeight));
+		for (GpxTrackSegment seg : synList) {
+			if(seg.length()!=0){
+				int index =MergeGPS.findNearestSegmentIndex(seg,clusterSegs,clusterGroups,angleWeight, distanceWeight);
+				if(index!=-1){
+					List<GpxTrackSegment> cluster = clusterGroups.get(index);
+					cluster.add(seg);
+				}
+			}
+			//threadPool.execute(new ClusterFinder(seg,syncClusterSegs,clusterGroups,angleWeight, distanceWeight));
 		}
 		threadPool.shutdown();
 		while(!threadPool.isTerminated()){
 			try {
 				threadPool.awaitTermination(20, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -395,7 +416,12 @@ public class MergeGPS {
 		//for each clusterGroup find new centroid
 		for (List<GpxTrackSegment> cluster : clusterGroups) {
 			if(!cluster.isEmpty()){
-				result.add(MergeGPS.calculateSegmentCentroid(cluster));
+				//IOFunctions.exportTrackSegments(cluster, "output/cluster.gpx");
+				GpxTrackSegment clusterSegment = MergeGPS.calculateSegmentCentroid(cluster);
+				result.add(clusterSegment);
+				LinkedList<GpxTrackSegment> clusterSegmentList = new LinkedList<GpxTrackSegment>();
+				clusterSegmentList.add(clusterSegment);
+				//IOFunctions.exportTrackSegments(clusterSegmentList, "output/resultingCluster.gpx");
 			}
 		}
 		return result;
@@ -431,17 +457,27 @@ public class MergeGPS {
 		return new ImmutableGpxTrackSegment(newWps);
 	}
 	public static int findNearestSegmentIndex(GpxTrackSegment seg,
-			List<GpxTrackSegment> list, double angleWeight, double distanceWeight) {
+			List<GpxTrackSegment> list,List<List<GpxTrackSegment>> noSameTracks, double angleWeight, double distanceWeight) {
 		double distance=Double.MAX_VALUE;
 		int result=-1;
 		for (int i = 0; i < list.size(); i++) {
 			double currentDistance;
-			currentDistance = segmentDistance(list.get(i),seg,angleWeight,distanceWeight);
+			if(!MergeGPS.haveSameTracks(seg.getWayPoints(), list.get(i).getWayPoints())){
+				currentDistance = segmentDistance(list.get(i),seg,angleWeight,distanceWeight);
+			}else{
+				currentDistance=Double.MAX_VALUE;
+			}
 			if (currentDistance<distance){
+				List<WayPoint> notSameTrackWps = new LinkedList<WayPoint>();
+				for (GpxTrackSegment seg2 : noSameTracks.get(i)) {
+					notSameTrackWps.addAll(seg2.getWayPoints());
+				}
+
+				if(!MergeGPS.haveSameTracks(seg.getWayPoints(),notSameTrackWps)){
 				distance=currentDistance;
 				result=i;
+				}
 			}
-			result=result;
 		}
 		return result;
 	}
@@ -459,7 +495,7 @@ public class MergeGPS {
 	private static Double segmentDistance(GpxTrackSegment seg1,
 			GpxTrackSegment seg2, double angleWeight, double distanceWeight) {
 		assert(seg1.getWayPoints().size()==2 && seg2.getWayPoints().size()==2);
-		double distance = hausDorffDistance(seg1.getWayPoints(), seg2.getWayPoints());
+		double distance = additiveMinDistance(seg1.getWayPoints(), seg2.getWayPoints());
 		double lonDiff1=Double.NaN;
 		for (WayPoint wp1 : seg1.getWayPoints()) {
 			if(Double.isNaN(lonDiff1)){
@@ -477,7 +513,7 @@ public class MergeGPS {
 			}
 		}
 		double lonDistance=Math.abs(Math.abs(lonDiff1)-Math.abs(lonDiff2));
-		double result=distance*distanceWeight+lonDistance*angleWeight;
+		double result=distance*(distanceWeight)+lonDistance*(angleWeight);
 		return result;
 		
 	}
@@ -587,6 +623,17 @@ public class MergeGPS {
 		double max1=getMax(allDiffs1);
 		double max2=getMax(allDiffs2);
 		return Math.max(max1,max2);
+	}
+static public Double additiveMinDistance(Collection<? extends WayPoint> trackSeqs1, Collection<? extends WayPoint> trackSeqs2) {
+		
+		LinkedList<WayPoint> tempList1= new LinkedList<WayPoint>(trackSeqs1);
+		LinkedList<WayPoint> tempList2= new LinkedList<WayPoint>(trackSeqs2);
+		//get min
+		double result=0;
+		for (WayPoint wayPoint : tempList1) {
+			result+=getMinDifference(wayPoint,tempList2);
+		}
+		return result;
 	}
 	
 	private static double getMax(LinkedList<Double> allDiffs1) {

@@ -16,20 +16,22 @@ import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.ImmutableGpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.WayPoint;
 
-public class SegmentCloud {
+public class SegmentCloud extends Cloud{
 
 	protected List<GpxTrack> sourceTracks;
 	protected int k;
 	protected double trackDistance;
 	protected int segmentLength;
-	protected IdentityHashMap<GpxTrackSegment,HashSet<GpxTrackSegment>> similarSegments;
-	protected List<GpxTrackSegment> segments;
+	protected IdentityHashMap<GpxTrackSegment,HashSet<GpxTrackSegment>> similarSegments=new IdentityHashMap<GpxTrackSegment, HashSet<GpxTrackSegment>>();
+	protected List<GpxTrackSegment> segments=new LinkedList<GpxTrackSegment>();
 	protected List<GpxTrack> tracks;
-	protected List<MergedWayPoint> mergedWayPoints;
-	protected IdentityHashMap<GpxTrackSegment,HashSet<GpxTrack>> tracksOfSimilarSegments;
+	protected List<MergedWayPoint> mergedWayPoints=new LinkedList<MergedWayPoint>();
+	protected IdentityHashMap<GpxTrackSegment,HashSet<GpxTrack>> tracksOfSimilarSegments= new IdentityHashMap<GpxTrackSegment, HashSet<GpxTrack>>();
 	protected boolean ignoreDirection;
-	private double angelAllowance;
+	protected double angelAllowance;
 	protected Statistician statistician;
+	
+	protected SegmentCloud(){}
 
 	public SegmentCloud(List<GpxTrack> morePointTracks
 			,int k
@@ -38,24 +40,12 @@ public class SegmentCloud {
 			,boolean ignoreDirection
 			,double angelAllowance
 			,Statistician statistician) {
-		this.sourceTracks=new LinkedList<GpxTrack>(morePointTracks);
-		this.k = k;
+		super(morePointTracks,k,statistician);
 		this.trackDistance=trackDistance;
 		this.segmentLength=segmentLength;
 		this.angelAllowance=angelAllowance;
 		this.ignoreDirection=ignoreDirection;
-		this.statistician = statistician;
-		initializeStatistician();
-		segments = new LinkedList<GpxTrackSegment>();
-		similarSegments= new IdentityHashMap<GpxTrackSegment, HashSet<GpxTrackSegment>>();
-		mergedWayPoints = new LinkedList<MergedWayPoint>();
-		tracksOfSimilarSegments = new IdentityHashMap<GpxTrackSegment, HashSet<GpxTrack>>();
 		initialize();
-	}
-
-	private void initializeStatistician() {
-		statistician.setSourceTrackNumber(sourceTracks.size());
-		statistician.setSourceWaypointNumber(MergeGPS.getWayPointNumber(sourceTracks));
 	}
 
 	protected void initialize() {
@@ -103,35 +93,7 @@ public class SegmentCloud {
 		System.out.println("Status: Done!!");
 	}
 
-	protected void checkNeighborHood() {
-		List<MergedWayPoint> mwps = new LinkedList<MergedWayPoint>(mergedWayPoints);
-		int count=0;
-		for (MergedWayPoint mwp : mwps) {
-			List<MergedWayPoint> neighbors = new LinkedList(mwp.getNeighbors());
-			for (MergedWayPoint neighbor : neighbors) {
-				if(neighbor.getGrade()<k){
-					mwp.disconnect(neighbor);
-					count++;
-				}
-			}
-		}
-		
-	}
-
-	protected void eliminateLowerGradeWayPoints() {
-		List<MergedWayPoint> mwps = new LinkedList<MergedWayPoint>(mergedWayPoints);
-		int count=0;
-		for (MergedWayPoint mwp : mwps) {
-			if(mwp.getGrade()<k || mwp.getTrackGrade()<k){
-				mergedWayPoints.remove(mwp);
-				mwp.disconnectAll();
-				count++;
-			}
-		}
-		
-	}
-
-	private void mergeNearWayPoints() {
+	protected void mergeNearWayPoints() {
 		for (MergedWayPoint mwp : mergedWayPoints) {
 			Bounds mwpsBounds = MergeGPS.getBoundsWithSpace(new Bounds(mwp.getCoor()), trackDistance);
 			for (MergedWayPoint mwp2 : mergedWayPoints) {
@@ -147,16 +109,6 @@ public class SegmentCloud {
 	private void deleteBigDistances() {
 		for(MergedWayPoint mwp : mergedWayPoints){
 			mwp.deleteDistantNeighbors(trackDistance);
-		}
-		
-	}
-
-	private void deleteShortTracks() {
-		LinkedList<GpxTrack> tempTracks = new LinkedList<GpxTrack>(tracks);
-		for(GpxTrack track : tempTracks){
-			if(track.length()<6){
-				tracks.remove(track);
-			}
 		}
 		
 	}
@@ -208,15 +160,6 @@ public class SegmentCloud {
 			//System.out.println("NeighborGrade: "+newWps.get(0).getNeighborGrade(newWps.get(newWps.size()-1)));
 			mergedWayPoints.addAll(newMwps);
 		}
-	}
-
-	protected void buildTracks() {
-		for (MergedWayPoint mwp : mergedWayPoints) {
-			if(!mwp.isConnectionGradeCorrect()){
-				System.out.println("its here");
-			}
-		}
-		tracks=MergeGPS.buildTracks(mergedWayPoints , k);
 	}
 
 	protected void eliminateLowerGradeSegments() {
@@ -287,43 +230,6 @@ public class SegmentCloud {
 		return true;
 	}
 
-	@Deprecated
-	private boolean haveSimilarVectors(GpxTrackSegment seg, GpxTrackSegment seg2) {
-		if (seg!=null && seg2!=null){
-		List<WayPoint> wps1 = new LinkedList<WayPoint>(seg.getWayPoints());
-		List<WayPoint> wps2 = new LinkedList<WayPoint>(seg2.getWayPoints());
-		//find same end
-		if(wps1
-				.get(0)
-				.getCoor()
-				.greatCircleDistance(
-						wps2.get(0).getCoor()
-						)
-				<wps1
-				.get(0)
-				.getCoor()
-				.greatCircleDistance(
-						wps2.get(wps2.size()-1).getCoor()
-						)
-				){
-			//wps1 and wps2 have near beginnings at index 0
-			for (int i = 0; i < wps1.size() && i<wps2.size(); i++) {
-				if (i>0) {
-					double latVector,lonVector,latVector2,lonVector2;
-					latVector=wps1.get(i-1).getCoor().getY()-wps1.get(i).getCoor().getY();
-					lonVector=wps1.get(i-1).getCoor().getX()-wps1.get(i).getCoor().getX();
-					latVector2=wps2.get(i-1).getCoor().getY()-wps2.get(i).getCoor().getY();
-					lonVector2=wps2.get(i-1).getCoor().getX()-wps2.get(i).getCoor().getX();
-					//TODO
-				}
-			}
-			}
-		return true;//TODO
-		}else{
-			return false;
-		}
-	}
-
 	private void addSimilarSegments(GpxTrackSegment seg, GpxTrackSegment seg2) {
 		HashSet<GpxTrackSegment> segEntry = similarSegments.get(seg);
 		HashSet<GpxTrackSegment> seg2Entry = similarSegments.get(seg2);
@@ -372,23 +278,6 @@ public class SegmentCloud {
 			}
 		}
 		return result;
-	}
-
-	private double getDistance(GpxTrackSegment seg,
-			GpxTrackSegment seg2) {
-		Double distance =null;//segmentDistanceMatrix.getValue(seg, seg2);
-		if (distance==null){
-			distance=MergeGPS.hausDorffDistance(seg.getWayPoints()
-							,seg2.getWayPoints());
-			//segmentDistanceMatrix.put(seg, seg2,distance		);
-		}
-		return distance;
-	}
-	private boolean isDistanceShorter(GpxTrackSegment seg,
-			GpxTrackSegment seg2,double trackDistance) {
-		return MergeGPS.isHausDorffDistanceShorter(seg.getWayPoints()
-				,seg2.getWayPoints()
-				,trackDistance);
 	}
 
 	protected void buildSegments() {
@@ -457,10 +346,6 @@ public class SegmentCloud {
 				}
 			}
 		}
-	}
-
-	public List<GpxTrack> getMergedTracks() {
-		return tracks;
 	}
 
 }

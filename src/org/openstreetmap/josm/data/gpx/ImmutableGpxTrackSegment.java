@@ -53,7 +53,7 @@ public class ImmutableGpxTrackSegment implements GpxTrackSegment {
         return result;
     }
 
-    private double calculateLength() {
+    protected double calculateLength() {
         double result = 0.0; // in meters
         WayPoint last = null;
         for (WayPoint tpt : wayPoints) {
@@ -83,7 +83,7 @@ public class ImmutableGpxTrackSegment implements GpxTrackSegment {
     }
 
     public double length() {
-        return length;
+        return calculateLength();
     }
 
     public int getUpdateCount() {

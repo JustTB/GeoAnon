@@ -87,11 +87,15 @@ public class IOFunctions {
 			fos = new FileOutputStream(new File(string));
 			GpxWriter gpxWriter = new GpxWriter(fos);
 			gpxWriter.write(gpxd);
+			fos.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("File "+string+" not found.");
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
 			System.out.println("Unsupported encoding.");
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

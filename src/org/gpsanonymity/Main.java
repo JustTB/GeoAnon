@@ -3,6 +3,7 @@ package org.gpsanonymity;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.gpsanonymity.data.CliqueCloakCloud;
 import org.gpsanonymity.data.GridMatrix;
 import org.gpsanonymity.data.KMeansCloud;
 import org.gpsanonymity.data.SegmentCloud;
@@ -228,5 +229,16 @@ public class Main {
 		}
 		SegmentCloud sc= new KMeansCloud(morePointTracks,k,trackDistance, segmentLength,ignoreDirection, angelAllowance, statistician);
 		return sc.getMergedTracks();
+	}
+	public static List<GpxTrack> mergingTracksWithCliqueCloak(List<GpxTrack> tracks,int k , double pointDensity, Statistician statistician) {
+		List<GpxTrack> morePointTracks;
+		if (pointDensity!=0){
+			System.out.println("Status: Create more Waypoints");
+			morePointTracks = MergeGPS.createMoreWaypointsOnTracks(tracks, pointDensity);
+		}else{
+			morePointTracks = new LinkedList<GpxTrack>(tracks);
+		}
+		CliqueCloakCloud ccc= new CliqueCloakCloud(morePointTracks,k, statistician);
+		return ccc.getMergedTracks();
 	}
 }

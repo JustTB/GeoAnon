@@ -13,30 +13,32 @@ import org.openstreetmap.josm.data.gpx.WayPoint;
 
 
 public class GridMatrix extends Matrix<Integer, Bounds> {
-	private int widthSize;
-	private int heightSize;
-	private double distance;
-	private LatLon downLeftCorner;
-	private Bounds wholeGrid;
-	private BiMap<Bounds,MergedWayPoint> mergedWaypoints = new BiMap<Bounds, MergedWayPoint>();
-	private List<GpxTrack> tracks;
-	private double minimalSpeed;
+	protected int k;
+	protected int widthSize;
+	protected int heightSize;
+	protected double distance;
+	protected LatLon downLeftCorner;
+	protected Bounds wholeGrid;
+	protected BiMap<Bounds,MergedWayPoint> mergedWaypoints = new BiMap<Bounds, MergedWayPoint>();
+	protected List<GpxTrack> tracks;
+	protected double minimalSpeed;
 	/**
 	 * 
-	 * @param ts MUST BE a Collection from type WayPoint or GpxTrack
+	 * @param tracks MUST BE a Collection from type WayPoint or GpxTrack
 	 * @param distance
 	 * @exception throws an exception if it is not a Collection of WayPoint or GpxTrack
 	 * IMPORTANT: through performance reasons we only check the first element of the collection,
 	 * if the collection has not only GpxTracks or not only WayPoints this will bring DOOM!!!!!
 	 */
-	public GridMatrix(List<GpxTrack> ts,int k, double distance, double minimalSpeed) {
+	public GridMatrix(List<GpxTrack> tracks,int k, double distance, double minimalSpeed) {
 		this.minimalSpeed=minimalSpeed;
-		initWithTracks(ts,k, distance);
+		initWithTracks(tracks,k, distance);
 	}
 	public GridMatrix(double distance, Collection<WayPoint> wps) {
 		initWithWayPoints(wps, distance);
 	}
-	private void initWithTracks(Collection<GpxTrack> ts,int k, double distance){
+	protected void initWithTracks(Collection<GpxTrack> ts,int k, double distance){
+		this.k=k;
 		Bounds newBounds=null;
 		for (Iterator<GpxTrack> iterator = ts.iterator(); iterator.hasNext();) {
 			GpxTrack gpxTrack = (GpxTrack) iterator.next();
@@ -51,7 +53,7 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		eliminateLowerGrades(k);
 		generateTracks(k);
 	}
-	private void eliminateLowerGrades(int k) {
+	protected void eliminateLowerGrades(int k) {
 		int size = mergedWaypoints.values().size();
 		int counter=0;
 		Collection<MergedWayPoint> values = new LinkedList<MergedWayPoint>(mergedWaypoints.values());
@@ -219,7 +221,7 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		}
 		return result;
 	}
-	private void generateGrid() {
+	protected void generateGrid() {
 		//initial Bounds lying on (-1,-1)
 		LatLon uRCornerStart,dLCornerStart;
 		LatLon dLCorner=dLCornerStart=downLeftCorner; 
@@ -256,19 +258,19 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	public double getWidth() {
 		return widthSize;
 	}
-	private void initialize (Bounds border, double distance){
+	protected void initialize (Bounds border, double distance){
 		this.distance=distance;
-		LatLon rightDownCorner = new LatLon(border.getMin().getY(), border.getMax().getX());
+		LatLon downRightCorner = new LatLon(border.getMin().getY(), border.getMax().getX());
 		System.out.println("Width in m:"+ border.getMin()
-				.greatCircleDistance(rightDownCorner));
+				.greatCircleDistance(downRightCorner));
 		System.out.println("Height in m:"+ border.getMax()
-				.greatCircleDistance(rightDownCorner));
+				.greatCircleDistance(downRightCorner));
 		this.widthSize =1+ (int)Math.floor(
 				border.getMin()
-				.greatCircleDistance(rightDownCorner)/distance);
+				.greatCircleDistance(downRightCorner)/distance);
 		this.heightSize =1+ (int)Math.floor(
 				border.getMax()
-				.greatCircleDistance(rightDownCorner)/distance);
+				.greatCircleDistance(downRightCorner)/distance);
 		downLeftCorner=border.getMin();
 		generateGrid();
 	}

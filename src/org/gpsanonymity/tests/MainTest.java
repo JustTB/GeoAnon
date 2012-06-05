@@ -19,7 +19,7 @@ public class MainTest {
 		LinkedList<String> result = new LinkedList<String>();
 		result.add("input/block.gpx");
 		result.add("input/cross.gpx");
-		result.add("input/2par_top_down.gpx");
+		result.add("input/4par_top_down.gpx");
 		result.add("input/top_down_x.gpx");
 		result.add("input/left_right.gpx");
 		result.add("input/V.gpx");
@@ -57,8 +57,6 @@ public class MainTest {
 		double trackDistance=4;
 		boolean ignoreDirection=true;
 		double angelAllowance=1;
-		double distanceWeight=1;
-		double angleWeight=1;
 		for (String file : getSimpleTestData()) {
 			System.out.println("File: "+file);
 			Statistician statistician = new Statistician();
@@ -71,14 +69,14 @@ public class MainTest {
 	}
 	@Test
 	public void testMergeTracksWithSegmentCluster(){
-		int k=1;
+		int k=2;
 		int segmentLenght=2;
-		double pointDensity=2;
+		double pointDensity=5;
 		double trackDistance=4;
 		boolean ignoreDirection=true;
 		double angelAllowance=1;
 		double distanceWeight=1;
-		double angleWeight=1;
+		double angleWeight=0;
 		for (String file : getSimpleTestData()) {
 			System.out.println("File: "+file);
 			Statistician statistician = new Statistician();
@@ -106,6 +104,23 @@ public class MainTest {
 						Main.importTracks(file),
 						k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance,statistician),
 				"output/GPXMergeTracks_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
+		}
+	}
+	@Test
+	public void testMergeTracksWithCliqueCloak(){
+		int k=1;
+		int segmentLenght=2;
+		double pointDensity=5;
+		double trackDistance=4;
+		//String file = "input/leipzig2.gpx";
+		for (String file : getSimpleTestData()) {
+			System.out.println("Status: Reading file"+file);
+			Statistician statistician = new Statistician();
+			IOFunctions.exportTracks(
+					Main.mergingTracksWithCliqueCloak(
+							Main.importTracks(file),
+							k, pointDensity,statistician),
+							"output/GPXMergeTracksCC_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
 		}
 	}
 	@Test
