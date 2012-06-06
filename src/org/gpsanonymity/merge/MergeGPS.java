@@ -280,9 +280,12 @@ public class MergeGPS {
 		return true;
 	}
 	public static List<MergedWayPoint> mergeWithKMeans(List<WayPoint> list, int k){
+		return makeMergeCluster(findKMeansCluster(list,k),list);
+				
+	}
+	public static List<WayPoint> findKMeansCluster(List<WayPoint> list, int k) {
 		List<WayPoint> oldClusterPoints,clusterPoints=getRandomEntrys(list,k);
 		List<WayPoint> cluster;
-		//DistanceMatrix distanceMartix = new DistanceMatrix(list, list);
 		int count=0;
 		do{
 			count++;
@@ -290,8 +293,7 @@ public class MergeGPS {
 			oldClusterPoints=clusterPoints;
 			clusterPoints=cluster;
 		}while(!haveSameCoord(oldClusterPoints,clusterPoints));
-		return makeMergeCluster(clusterPoints,list);
-				
+		return clusterPoints;
 	}
 	/**
 	 * Gives better clusters of the waypoints of list back

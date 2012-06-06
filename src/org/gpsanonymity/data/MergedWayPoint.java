@@ -141,12 +141,14 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 
 	private void mergeConnectionGrades(
 			IdentityHashMap<MergedWayPoint,Integer> connectionGrades2) {
-		for(MergedWayPoint mwp : connectionGrades2.keySet()){
-			if(connectionGrades.containsKey(mwp)){
-				connectionGrades.put(mwp, connectionGrades.get(mwp)+connectionGrades2.get(mwp));
-				//System.out.println("Connection Grade:" +connectionGrades.get(mwp));
+		for(MergedWayPoint newNeighbor : connectionGrades2.keySet()){
+			if(connectionGrades.containsKey(newNeighbor)){
+				HashSet<GpxTrack> commonTracks= new HashSet<GpxTrack>(this.sourceTracks.keySet());
+				commonTracks.retainAll(newNeighbor.sourceTracks.keySet());
+				connectionGrades.put(newNeighbor, commonTracks.size());
+				System.out.println("Connection Grade:" +connectionGrades.get(newNeighbor));
 			}else{
-				connectionGrades.put(mwp, connectionGrades2.get(mwp));
+				connectionGrades.put(newNeighbor, connectionGrades2.get(newNeighbor));
 			}
 		}
 		

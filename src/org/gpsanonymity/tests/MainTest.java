@@ -98,22 +98,22 @@ public class MainTest {
 		//String file = "input/leipzig2.gpx";
 		for (String file : getSimpleTestData()) {
 			System.out.println("Status: Reading file"+file);
-		Statistician statistician = new Statistician();
-		IOFunctions.exportTracks(
-				Main.mergingTracksSimpleSimilar(
-						Main.importTracks(file),
-						k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance,statistician),
-				"output/GPXMergeTracks_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
+			Statistician statistician = new Statistician();
+			IOFunctions.exportTracks(
+					Main.mergingTracksSimpleSimilar(
+							Main.importTracks(file),
+							k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance,statistician),
+							"output/GPXMergeTracks_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
 		}
 	}
 	@Test
 	public void testMergeTracksWithCliqueCloak(){
-		int k=1;
+		int k=3;
 		int segmentLenght=2;
-		double pointDensity=5;
+		double pointDensity=0;
 		double trackDistance=4;
-		//String file = "input/leipzig2.gpx";
-		for (String file : getSimpleTestData()) {
+		String file = "leipzig_track_example.gpx";
+		//for (String file : getSimpleTestData()) {
 			System.out.println("Status: Reading file"+file);
 			Statistician statistician = new Statistician();
 			IOFunctions.exportTracks(
@@ -121,7 +121,24 @@ public class MainTest {
 							Main.importTracks(file),
 							k, pointDensity,statistician),
 							"output/GPXMergeTracksCC_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
-		}
+		//}
+	}
+	@Test
+	public void testMergeTracksWithCliqueCloakExtended(){
+		int k=5;
+		int segmentLenght=2;
+		double pointDensity=2;
+		double trackDistance=4;
+		String file = "leipzig_track_example.gpx";
+		//for (String file : getSimpleTestData()) {
+			System.out.println("Status: Reading file"+file);
+			Statistician statistician = new Statistician();
+			IOFunctions.exportTracks(
+					Main.mergingTracksWithCliqueCloakExtended(
+							Main.importTracks(file),
+							k, pointDensity,statistician),
+							"output/GPXMergeTracksCCE_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
+		//}
 	}
 	@Test
 	public void testHashing(){

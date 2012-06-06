@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -160,7 +161,7 @@ public class IOFunctions {
 			r.parse(true);
 			System.out.println("Has RoutePoints:" + r.data.hasRoutePoints());
 			System.out.println("Has Trackpoints:" + r.data.hasTrackPoints());
-			System.out.println("Not Empty:" + !r.data.waypoints.isEmpty());
+			System.out.println("No WayPoints:" + !r.data.waypoints.isEmpty());
 			return r;
 		}catch (IOException e) {
 			System.out.println(fPath + " is not readable.");
@@ -351,6 +352,24 @@ public class IOFunctions {
 			e.printStackTrace();
 		}
 		return allTracks;
+	}
+	public static void exportBoundsAsTracks(Collection<Bounds> bounds, String file) {
+		List<GpxTrackSegment> resultSegments = new LinkedList<GpxTrackSegment>();
+		for (Bounds bound : bounds) {
+			LatLon leftDownCorner = bound.getMin();
+			LatLon rightUpCorner = bound.getMax();
+			LatLon rightDownCorner = new LatLon(leftDownCorner.getY(),rightUpCorner.getX());
+			LatLon leftUpCorner= new LatLon(rightUpCorner.getY(),leftDownCorner.getX());
+			List<WayPoint> wps = new LinkedList<WayPoint>();
+			wps.add(new WayPoint(leftDownCorner));
+			wps.add(new WayPoint(rightDownCorner));
+			wps.add(new WayPoint(rightUpCorner));
+			wps.add(new WayPoint(leftUpCorner));
+			wps.add(new WayPoint(leftDownCorner));
+			resultSegments.add(new ImmutableGpxTrackSegment(wps));
+		}
+		exportTrackSegments(resultSegments, file);
+		
 	}
 
 }
