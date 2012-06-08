@@ -34,20 +34,35 @@ public class IOTest {
 		}
 	}
 	@Test
-	public void TestGetDataFromOSM(){
-		System.setProperty("http.proxySet", "true");
+	public void testGetDataFromOSMWithCutting(){
+		/*System.setProperty("http.proxySet", "true");
 		System.setProperty("http.proxyPort","80");
-		System.setProperty("http.proxyHost","http-proxy.fu-berlin.de");
-		double minLat=52.3501263;
-		double minLon=13.1303787;
-		double maxLat=52.3618687;
+		System.setProperty("http.proxyHost","http-proxy.fu-berlin.de");*/
+		double minLat=52.3386955;
+		double minLon=12.9309082;
+		double maxLat=52.7030187;
+		double maxLon=13.9031982;
+		Bounds bounds = new Bounds(new LatLon(minLat,minLon),new LatLon(maxLat,maxLon));
 		
-		double maxLon=13.1550980;
+		String filename= "output/Berlin.gpx";
+		String tempFilename= "output/tempZossen.gpx";
+		testData();
+		IOFunctions.getDataFromOSMWithCutting(bounds, filename, tempFilename);
+	}
+	@Test
+	public void testGetDataFromOSM(){
+		/*System.setProperty("http.proxySet", "true");
+		System.setProperty("http.proxyPort","80");
+		System.setProperty("http.proxyHost","http-proxy.fu-berlin.de");*/
+		double minLat=52.2010841;
+		double minLon=13.3961105;
+		double maxLat=52.2427277;
+		double maxLon=13.4826279;
 		
 		String filename= "output/Berlin.gpx";
 		String tempFilename= "output/tempBerlin.gpx";
 		testData();
-		IOFunctions.getDataFromOSM(new Bounds(new LatLon(minLat,minLon),new LatLon(maxLat,maxLon)),filename,tempFilename);
+		IOFunctions.getDataFromOSMWithOriginalGPXFiles(new Bounds(new LatLon(minLat,minLon),new LatLon(maxLat,maxLon)),filename,tempFilename);
 	}
 	@Test
 	public void importData(){
