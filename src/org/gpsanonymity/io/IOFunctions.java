@@ -7,12 +7,14 @@ package org.gpsanonymity.io;
 
 
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -184,6 +186,8 @@ public class IOFunctions {
 		return result;
 	}
 	public static void getDataFromOSMWithCutting(Bounds bounds, String filename, String tempFile){
+		int coorMax = (int)Math.ceil(bounds.getArea()/0.01);
+		Integer x=0,y=-1;
 		LinkedList<Bounds> currentBounds = splittingBounds(bounds,0.01);
 		LinkedList<Bounds> spaceBounds= new LinkedList<Bounds>();
 		int resultFileCounter=0;
@@ -196,6 +200,11 @@ public class IOFunctions {
 			Iterator<Bounds> boundsIter = currentBounds.iterator();
 			System.out.println("Downloading and Cutting... ");
 			while(spaceIter.hasNext() && boundsIter.hasNext()){
+				y++;
+				if(x>=coorMax){
+					y=0;
+					x++;
+				}
 				int tempFileCounter=0;
 				resultFileCounter++;
 				Bounds spaceBound = spaceIter.next();
@@ -211,16 +220,21 @@ public class IOFunctions {
 					}
 				}
 				List<GpxTrack> exportTracks = cutAndCleanTracks(currentBound, tempTracks);
-				String coords="Min_"
+				/*String coords="Min_"
 						+currentBound.getMin().getY()
 						+"_"
 						+currentBound.getMin().getX()
 						+currentBound.getMax().getY()
-						+currentBound.getMax().getX();
+						+currentBound.getMax().getX();*/
+				String coords=x.toString()+"_"+y.toString();
 				String realFilename=filename.replace(".gpx", coords+".gpx");
 				System.out.println("Exporting to " + realFilename);
 				exportTracks(exportTracks, realFilename);
 			}	
+			FileOutputStream fos = new FileOutputStream(new File(filename.replace(".gpx", ".dat")));
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(bounds);
+			oos.writeInt(coorMax);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

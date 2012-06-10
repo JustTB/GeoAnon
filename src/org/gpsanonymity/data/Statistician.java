@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.panayotis.gnuplot.GNUPlot;
+
 public class Statistician {
 	private LinkedList<Integer> sourceTrackNumbers = new LinkedList<Integer>();
 	private LinkedList<Integer> mergedTrackNumbers = new LinkedList<Integer>();
