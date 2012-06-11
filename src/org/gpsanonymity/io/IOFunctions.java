@@ -215,6 +215,7 @@ public class IOFunctions {
 							GpxReader tempReader = new GpxReader(fis);
 							tempReader.parse(false);
 							tempTracks.addAll(tempReader.data.tracks);
+							fis.close();
 						}
 					}
 					List<GpxTrack> exportTracks = cutAndCleanTracks(currentBound, tempTracks);
@@ -418,6 +419,7 @@ public class IOFunctions {
 				GpxData tempData = new GpxData();
 				tempData.tracks=resultTracks;
 				tempWriter.write(tempData);
+				fos.close();
 				countTempFiles++;
 				resultTracks = new LinkedList<GpxTrack>();
 			}
