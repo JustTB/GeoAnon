@@ -40,7 +40,7 @@ public class MergeGPS {
 			,int grade) {
 		LinkedList<MergedWayPoint> resultlist = new LinkedList<MergedWayPoint>();
 		for (MergedWayPoint mergedWayPoint : mergeWaypoints) {
-			if (mergedWayPoint.getGrade() >= grade){
+			if (mergedWayPoint.getTrackGrade() >= grade){
 				resultlist.add(mergedWayPoint);
 			}
 		}
