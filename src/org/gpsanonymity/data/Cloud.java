@@ -69,7 +69,7 @@ public abstract class Cloud {
 		List<MergedWayPoint> mwps = new LinkedList<MergedWayPoint>(mergedWayPoints);
 		int count=0;
 		for (MergedWayPoint mwp : mwps) {
-			if(mwp.getTrackGrade()<k){
+			if(mwp.getGrade()<k || mwp.getTrackGrade()<k){
 				mergedWayPoints.remove(mwp);
 				mwp.disconnectAll();
 				count++;

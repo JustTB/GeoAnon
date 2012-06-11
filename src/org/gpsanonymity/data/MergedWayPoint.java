@@ -211,11 +211,11 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		gpxDate=MergeGPS.simpleGeneralizeDate(sourceWaypoints);
 		//TODO
 	}
-	public int getPointGrade(){
+	public int getGrade(){
 		return sourceWaypoints.size();
 	}
 	public String toString() {
-		return "WayPoint {"+ new LatLon(this.lat, this.lon).toString() + "time="+gpxDate+" grade:"+getTrackGrade()+"}";
+		return "WayPoint {"+ new LatLon(this.lat, this.lon).toString() + "time="+gpxDate+" grade:"+getGrade()+"}";
 	}
 	public void connect(MergedWayPoint neighbor){
 		neighbor=neighbor.current();
@@ -399,12 +399,11 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		
 	}
 
-	public int disconnectAll() {
+	public void disconnectAll() {
 		LinkedList<MergedWayPoint> connectionCopy = new LinkedList<MergedWayPoint>(connections.keySet());
 		for (MergedWayPoint mwp : connectionCopy) {
 			disconnect(mwp);
 		}
-		return connectionCopy.size();
 		
 	}
 

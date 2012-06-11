@@ -188,8 +188,7 @@ public class Main {
 	 * @return merged waypoints
 	 */
 	public static List<WayPoint> mergingWaypointsOnGrid(List<WayPoint> waypoints,int k , double gridSize) {
-		Statistician statistician = new Statistician();
-		GridMatrix gridMatrix = new GridMatrix(gridSize, waypoints,statistician);
+		GridMatrix gridMatrix = new GridMatrix(gridSize, waypoints);
 		return MergeGPS.eliminateLowerGrades(
 				gridMatrix.getMergedWaypoints(), k);
 	}
@@ -204,9 +203,8 @@ public class Main {
 	 * @see Main#mergingWaypointsOnGrid(List, int, double)
 	 */
 	public static List<GpxTrack> mergingTracksOnGrid(List<GpxTrack> tracks,int k , double gridSize, double minimalSpeed) {
-		Statistician statistician = new Statistician();
 		List<GpxTrack> newTracks= MergeGPS.createMoreWaypointsOnTracks(tracks, gridSize);
-		GridMatrix gridMatrix = new GridMatrix(newTracks,k, gridSize,minimalSpeed,statistician);
+		GridMatrix gridMatrix = new GridMatrix(newTracks,k, gridSize,minimalSpeed);
 		return gridMatrix.getTracks();
 	}
 	/**
