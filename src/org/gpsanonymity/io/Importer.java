@@ -27,7 +27,7 @@ public class Importer {
 		this.genericPath=path.replace(".dat", ".gpx");
 		try {
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(path)));
-			this.bounds =(Bounds)ois.readObject();
+			this.bounds =((SerilizableBounds)ois.readObject()).getBounds();
 			this.coorMax = ois.readInt();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
