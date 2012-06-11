@@ -201,7 +201,7 @@ public class IOFunctions {
 			System.out.println("Downloading and Cutting... ");
 			while(spaceIter.hasNext() && boundsIter.hasNext()){
 				y++;
-				if(x>=coorMax){
+				if(y>=coorMax){
 					y=0;
 					x++;
 				}
