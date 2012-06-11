@@ -191,7 +191,7 @@ public class IOFunctions {
 		LinkedList<Bounds> currentBounds = splittingBounds(bounds,0.01);
 		LinkedList<Bounds> spaceBounds= new LinkedList<Bounds>();
 		int resultFileCounter=0;
-		try{
+		try{/*
 			for (Bounds bounds2 : currentBounds) {
 				spaceBounds.add(MergeGPS.getBoundsWithSpace(bounds2, 300));
 			}
@@ -201,7 +201,7 @@ public class IOFunctions {
 			System.out.println("Downloading and Cutting... ");
 			while(spaceIter.hasNext() && boundsIter.hasNext()){
 				y++;
-				if(y>=coorMax){
+				if(x>=coorMax){
 					y=0;
 					x++;
 				}
@@ -226,22 +226,22 @@ public class IOFunctions {
 						+currentBound.getMin().getX()
 						+currentBound.getMax().getY()
 						+currentBound.getMax().getX();*/
-				String coords=x.toString()+"_"+y.toString();
+				/*String coords=x.toString()+"_"+y.toString();
 				String realFilename=filename.replace(".gpx", coords+".gpx");
 				System.out.println("Exporting to " + realFilename);
 				exportTracks(exportTracks, realFilename);
-			}	
+			}	*/
 			FileOutputStream fos = new FileOutputStream(new File(filename.replace(".gpx", ".dat")));
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			oos.writeObject(bounds);
+			oos.writeObject(new SerilizableBounds(bounds));
 			oos.writeInt(coorMax);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (SAXException e) {
+		}/* catch (SAXException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 	}
 	public static List<GpxTrack> getDataFromOSMWithOriginalGPXFiles(Bounds bounds, String filename, String tempFile){
 		Integer countTempFiles=0;
