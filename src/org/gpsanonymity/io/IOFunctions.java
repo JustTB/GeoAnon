@@ -7,7 +7,6 @@ package org.gpsanonymity.io;
 
 
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,7 +18,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -68,7 +66,6 @@ public class IOFunctions {
 	}
 	public static void exportTrackSegments(Collection<GpxTrackSegment> segs,
 			String string){
-		GpxData gpxd = new GpxData();
 		List<GpxTrack> tracks = new LinkedList<GpxTrack>();
 		for (GpxTrackSegment seg : segs) {
 			Collection<Collection<WayPoint>> trackSegs = new LinkedList<Collection<WayPoint>>();
@@ -94,7 +91,6 @@ public class IOFunctions {
 			System.out.println("Unsupported encoding.");
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -190,8 +186,7 @@ public class IOFunctions {
 		Integer x=0,y=-1;
 		LinkedList<Bounds> currentBounds = splittingBounds(bounds,0.01);
 		LinkedList<Bounds> spaceBounds= new LinkedList<Bounds>();
-		int resultFileCounter=0;
-		try{/*
+		try{
 			for (Bounds bounds2 : currentBounds) {
 				spaceBounds.add(MergeGPS.getBoundsWithSpace(bounds2, 300));
 			}
@@ -205,49 +200,64 @@ public class IOFunctions {
 					y=0;
 					x++;
 				}
-				int tempFileCounter=0;
-				resultFileCounter++;
-				Bounds spaceBound = spaceIter.next();
-				Bounds currentBound = boundsIter.next();
-				Collection<GpxTrack> tempTracks = new LinkedList<GpxTrack>();
-				tempFileCounter=downloadingArea(spaceBound,tempFile,tempTracks,tempFileCounter);
-				for(int i=-1;i<tempFileCounter;i++){
-					if(i!=-1){
-						FileInputStream fis = new FileInputStream(new File(tempFile.replace(".gpx", i+".gpx")));
-						GpxReader tempReader = new GpxReader(fis);
-						tempReader.parse(false);
-						tempTracks.addAll(tempReader.data.tracks);
+				String coords=x.toString()+"_"+y.toString();
+				String realFilename=filename.replace(".gpx", coords+".gpx");
+				File file = new File(realFilename);
+				if (!file.exists()){
+					int tempFileCounter=0;
+					Bounds spaceBound = spaceIter.next();
+					Bounds currentBound = boundsIter.next();
+					Collection<GpxTrack> tempTracks = new LinkedList<GpxTrack>();
+					tempFileCounter=downloadingArea(spaceBound,tempFile,tempTracks,tempFileCounter);
+					for(int i=-1;i<tempFileCounter;i++){
+						if(i!=-1){
+							FileInputStream fis = new FileInputStream(new File(tempFile.replace(".gpx", i+".gpx")));
+							GpxReader tempReader = new GpxReader(fis);
+							tempReader.parse(false);
+							tempTracks.addAll(tempReader.data.tracks);
+						}
 					}
-				}
-				List<GpxTrack> exportTracks = cutAndCleanTracks(currentBound, tempTracks);
-				/*String coords="Min_"
+					List<GpxTrack> exportTracks = cutAndCleanTracks(currentBound, tempTracks);
+					/*String coords="Min_"
 						+currentBound.getMin().getY()
 						+"_"
 						+currentBound.getMin().getX()
 						+currentBound.getMax().getY()
 						+currentBound.getMax().getX();*/
-				/*String coords=x.toString()+"_"+y.toString();
-				String realFilename=filename.replace(".gpx", coords+".gpx");
-				System.out.println("Exporting to " + realFilename);
-				exportTracks(exportTracks, realFilename);
-			}	*/
-			FileOutputStream fos = new FileOutputStream(new File(filename.replace(".gpx", ".dat")));
+
+					System.out.println("Exporting to " + realFilename);
+					exportTracks(exportTracks, realFilename);
+				}else{
+					System.out.println(realFilename+" exists already.");
+				}
+			}	
+			generateDatFile(filename,bounds,coorMax);
+		}catch (SAXException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	public static void generateDatFile(String filename, Bounds bounds, int coorMax) {
+		try {
+		FileOutputStream fos;
+		
+			fos = new FileOutputStream(new File(filename.replace(".gpx", ".dat"))); 
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(new SerilizableBounds(bounds));
 			oos.writeInt(coorMax);
+			oos.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}/* catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
+		}
+		
 	}
 	public static List<GpxTrack> getDataFromOSMWithOriginalGPXFiles(Bounds bounds, String filename, String tempFile){
 		Integer countTempFiles=0;
 		List<GpxTrack> allTracks = new LinkedList<GpxTrack>();
 		List<GpxTrack> result = null;
-		GpxReader reader=null;
 		try {
 			LinkedList<Bounds> currentBounds = splittingBounds(bounds,0.2);
 			List<GpxTrack> tempTracks=new LinkedList<GpxTrack>();
@@ -295,13 +305,10 @@ public class IOFunctions {
 			System.out.println("Tracks with URLs:" + urlcount+"/"+count);
 			System.out.println("Tracks can't parse:" + notParsedCount+"/"+urlcount);
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return allTracks;

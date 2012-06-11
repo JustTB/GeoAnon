@@ -7,6 +7,7 @@ import java.util.List;
 import com.panayotis.gnuplot.GNUPlot;
 
 public class Statistician {
+	private LinkedList<Integer> ks = new LinkedList<Integer>();
 	private LinkedList<Integer> sourceTrackNumbers = new LinkedList<Integer>();
 	private LinkedList<Integer> mergedTrackNumbers = new LinkedList<Integer>();
 	private LinkedList<Integer> sourceWaypointNumbers = new LinkedList<Integer>();
@@ -39,6 +40,12 @@ public class Statistician {
 		}else{
 			map.put(grade, 1);
 		}
+	}
+	public int getk() {
+		return ks.get(currentIndex);
+	}
+	public void setk(int k) {
+		this.ks.set(currentIndex, k);
 	}
 	public int getSourceTrackNumber() {
 		return sourceTrackNumbers.get(currentIndex);
@@ -98,6 +105,7 @@ public class Statistician {
 	public void newDataSet(){
 		maxIndex++;
 		currentIndex=maxIndex;
+		ks.add(null);
 		sourceTrackNumbers.add(null);
 		sourceWaypointNumbers.add(null);
 		sourceConnectionNumbers.add(null);
@@ -135,6 +143,10 @@ public class Statistician {
 		}
 	}
 	public void writeStats(String fileName){
+		
+	}
+	public void addRemovedConnectionNumber(int count) {
+		removedConnectionNumbers.set(currentIndex, getRemovedConnectionNumber()+count);
 		
 	}
 }

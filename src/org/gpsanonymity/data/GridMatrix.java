@@ -22,23 +22,28 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	protected BiMap<Bounds,MergedWayPoint> mergedWaypoints = new BiMap<Bounds, MergedWayPoint>();
 	protected List<GpxTrack> tracks;
 	protected double minimalSpeed;
+	protected Statistician statistician;
 	/**
 	 * 
-	 * @param tracks MUST BE a Collection from type WayPoint or GpxTrack
+	 * @param tracks GpxTracks given
 	 * @param distance
 	 * @exception throws an exception if it is not a Collection of WayPoint or GpxTrack
 	 * IMPORTANT: through performance reasons we only check the first element of the collection,
 	 * if the collection has not only GpxTracks or not only WayPoints this will bring DOOM!!!!!
 	 */
-	public GridMatrix(List<GpxTrack> tracks,int k, double distance, double minimalSpeed) {
+	public GridMatrix(List<GpxTrack> tracks,int k, double distance, double minimalSpeed, Statistician statistician) {
+		this.statistician = statistician;
 		this.minimalSpeed=minimalSpeed;
 		initWithTracks(tracks,k, distance);
 	}
-	public GridMatrix(double distance, Collection<WayPoint> wps) {
+	public GridMatrix(double distance, Collection<WayPoint> wps, Statistician statistician) {
+		this.statistician = statistician;
 		initWithWayPoints(wps, distance);
 	}
 	protected void initWithTracks(Collection<GpxTrack> ts,int k, double distance){
 		this.k=k;
+		statistician.setk(k);
+		statistician.setSourceTrackNumber(ts.size());
 		Bounds newBounds=null;
 		for (Iterator<GpxTrack> iterator = ts.iterator(); iterator.hasNext();) {
 			GpxTrack gpxTrack = (GpxTrack) iterator.next();
@@ -50,20 +55,42 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		}
 		initialize(newBounds,distance);
 		addTracks(ts);
-		eliminateLowerGrades(k);
+		statistician.setMergedWayPointNumber(mergedWaypoints.values().size());
+		eliminateLowerGradeWayPoints();
+		checkNeighborHood();
 		generateTracks(k);
 	}
-	protected void eliminateLowerGrades(int k) {
-		int size = mergedWaypoints.values().size();
-		int counter=0;
-		Collection<MergedWayPoint> values = new LinkedList<MergedWayPoint>(mergedWaypoints.values());
-		for (MergedWayPoint mwp : values) {
-			if(mwp.getGrade()<k){
-				mergedWaypoints.removeValue(mwp);
-				counter++;
+	protected void checkNeighborHood() {
+		List<MergedWayPoint> mwps = new LinkedList<MergedWayPoint>(mergedWaypoints.values());
+		int count=0;
+		for (MergedWayPoint mwp : mwps) {
+			List<MergedWayPoint> neighbors = new LinkedList(mwp.getNeighbors());
+			for (MergedWayPoint neighbor : neighbors) {
+				if(neighbor.getTrackGrade()<k){
+					mwp.disconnect(neighbor);
+					count++;
+				}else if(mwp.getNeighborGrade(neighbor)<k){
+					mwp.disconnect(neighbor);
+					count++;
+				}
 			}
 		}
-		System.out.println("Pointsremoved:"+counter+"/"+size);
+		statistician.addRemovedConnectionNumber(count);
+		
+	}
+
+	protected void eliminateLowerGradeWayPoints() {
+		List<MergedWayPoint> mwps = new LinkedList<MergedWayPoint>(mergedWaypoints.values());
+		int count=0, removedConnectionCounter=0;
+		for (MergedWayPoint mwp : mwps) {
+			if(mwp.getTrackGrade()<k){
+				mergedWaypoints.removeValue(mwp);
+				removedConnectionCounter+=mwp.disconnectAll();
+				count+=mwp.getPointGrade();
+			}
+		}
+		statistician.setRemovedWaypointsNumber(count);
+		statistician.setRemovedConnectionNumber(removedConnectionCounter);
 		
 	}
 	public void generateTracks(int k) {
@@ -139,21 +166,26 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 		Collection<WayPoint> wps;
 		MergedWayPoint temp;
 		MergedWayPoint neighbor = null;
+		int wpCount=0, connectionCount=0;
 		for (Iterator<GpxTrackSegment> iterator = tss.iterator(); iterator.hasNext();) {
 			GpxTrackSegment gpxTrackSegment = (GpxTrackSegment) iterator.next();
 			wps = gpxTrackSegment.getWayPoints();
 			for (Iterator<WayPoint> wp = wps.iterator(); wp.hasNext();) {
+				wpCount++;
 				WayPoint wayPoint = (WayPoint) wp.next();
 				temp= addWayPoint(wayPoint);
 				temp.addSegment(gpxTrackSegment,wayPoint);
 				temp.addTrack(t,wayPoint);
 				//temp is not the first element in the track and not the same MergedWayPoint
 				if (neighbor!=null && neighbor!=temp){
+					connectionCount++;
 					temp.connect(neighbor);
 				}
 				neighbor=temp;
 			}
 		}
+		statistician.setSourceWaypointNumber(wpCount);
+		statistician.setSourceConnectionNumber(connectionCount);
 	}
 	public void addTracks(Collection<GpxTrack> ts) {
 		for (Iterator<GpxTrack> iter = ts.iterator(); iter.hasNext();) {
