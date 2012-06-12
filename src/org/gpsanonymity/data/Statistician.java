@@ -1,29 +1,79 @@
 package org.gpsanonymity.data;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.panayotis.gnuplot.GNUPlot;
+import org.openstreetmap.josm.data.gpx.GpxTrack;
+import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
 
 public class Statistician {
 	private LinkedList<Integer> ks = new LinkedList<Integer>();
 	private LinkedList<Integer> sourceTrackNumbers = new LinkedList<Integer>();
-	private LinkedList<Integer> mergedTrackNumbers = new LinkedList<Integer>();
+	private LinkedList<Double>  sourceLength = new LinkedList<Double>();
 	private LinkedList<Integer> sourceWaypointNumbers = new LinkedList<Integer>();
-	private LinkedList<Integer> mergedWayPointNumbers = new LinkedList<Integer>();
 	private LinkedList<Integer> sourceConnectionNumbers = new LinkedList<Integer>();
+	private LinkedList<Integer> mergedWayPointNumbers = new LinkedList<Integer>();
 	private LinkedList<Integer> mergedConnectionNumbers = new LinkedList<Integer>();
-	private LinkedList<Integer> removedConnectionNumbers = new LinkedList<Integer>();
-	private LinkedList<Integer> removedWaypointsNumbers = new LinkedList<Integer>();
-	private LinkedList<Integer> removedTracksNumbers = new LinkedList<Integer>();
+	private LinkedList<Integer> mergedTrackNumbers = new LinkedList<Integer>();
+	private LinkedList<Double>  mergedLength = new LinkedList<Double>();
 	private LinkedList<HashMap<Integer,Integer>> mergedWaypointGrade = new LinkedList<HashMap<Integer,Integer>>();
 	private LinkedList<HashMap<Integer,Integer>> neighborGrade = new LinkedList<HashMap<Integer,Integer>>();
 	private int currentIndex=-1;
 	private int maxIndex=-1;
+	private LinkedList<Integer> removedConnectionNumbers = new LinkedList<Integer>();
+	private LinkedList<Integer> removedWaypointsNumbers = new LinkedList<Integer>();
+	private LinkedList<Integer> removedTracksNumbers = new LinkedList<Integer>();
 	
 	public Statistician() {
 		newDataSet();
+	}
+	public void setFromMergedTracks(List<GpxTrack> tracks) {
+		setMergedTrackNumber(tracks.size());
+		int wpCount=0;
+		int connectionCount=0;
+		double length=0;
+		for (GpxTrack gpxTrack : tracks) {
+			length+=gpxTrack.length();
+			for (GpxTrackSegment seg : gpxTrack.getSegments()) {
+				wpCount+=seg.getWayPoints().size();
+				connectionCount+=seg.getWayPoints().size();
+			}
+			connectionCount--;
+		}
+		setMergedWayPointNumber(wpCount);
+		setMergedConnectionNumber(connectionCount);
+		setMergedLength(length);
+		
+	}
+	public void setFromMergedWayPoints(Collection<MergedWayPoint> mwps) {
+		setMergedWayPointNumber(mwps.size());
+		for (MergedWayPoint mwp : mwps) {
+			incrementMergedWayPointGrade(mwp.getTrackGrade());
+			for(MergedWayPoint neighbor: mwp.getNeighbors()){
+				incrementNeighborGrade(mwp.getNeighborGrade(neighbor));
+			}
+		}
+	}
+	public void setFromSourceTracks(int k,Collection<GpxTrack> sourceTracks){
+		setk(k);
+		setSourceTrackNumber(sourceTracks.size());
+		int wpCount=0;
+		int connectionCount=0;
+		double length=0;
+		for (GpxTrack gpxTrack : sourceTracks) {
+			length+=gpxTrack.length();
+			for (GpxTrackSegment seg : gpxTrack.getSegments()) {
+				wpCount+=seg.getWayPoints().size();
+				connectionCount+=seg.getWayPoints().size();
+			}
+			connectionCount--;
+		}
+		setSourceWaypointNumber(wpCount);
+		setSourceConnectionNumber(connectionCount);
+		setSourceLength(length);
+		
 	}
 	public void incrementMergedWayPointGrade(int grade){
 		HashMap<Integer, Integer> map = mergedWaypointGrade.get(currentIndex);
@@ -47,8 +97,20 @@ public class Statistician {
 	public void setk(int k) {
 		this.ks.set(currentIndex, k);
 	}
+	public double getSourceLength() {
+		return sourceLength.get(currentIndex);
+	}
+	public void setSourceLength(double length) {
+		this.sourceLength.set(currentIndex, length);
+	}
 	public int getSourceTrackNumber() {
 		return sourceTrackNumbers.get(currentIndex);
+	}
+	public void setMergedLength(double length) {
+		this.mergedLength.set(currentIndex, length);
+	}
+	public double getMergedLength() {
+		return mergedLength.get(currentIndex);
 	}
 	public void setSourceTrackNumber(int sourceTrackNumber) {
 		this.sourceTrackNumbers.set(currentIndex, sourceTrackNumber);

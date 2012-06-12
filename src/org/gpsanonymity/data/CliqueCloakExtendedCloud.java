@@ -25,18 +25,17 @@ public class CliqueCloakExtendedCloud extends CliqueCloakCloud {
 		findWholeBounds();
 		System.out.println("Status: Build MergedWayPoints.");
 		buildMergedWayPoint();
-		statistician.setSourceConnectionNumber(mergedWayPoints.size()-sourceTracks.size());
 		System.out.println("Status: Find Bounds");
 		allBounds=new HashMap<Bounds, List<MergedWayPoint>>();
 		makeBounds(wholeBounds,mergedWayPoints);
-		IOFunctions.exportBoundsAsTracks(allBounds.keySet(),"output/CCEBounds.gpx");
 		System.out.println("Status: Merge WayPoints");
 		mergeWayPoints();
+		statistician.setFromMergedWayPoints(mergedWayPoints);
 		System.out.println("Status: Check Neighborhood");
 		checkNeighborHood();
 		System.out.println("Status: Build tracks!!");
-		IOFunctions.exportWayPoints((List)mergedWayPoints, "output/MergedWayPoints.gpx");
 		buildTracks();
+		statistician.setFromMergedTracks(tracks);
 		System.out.println("Status: Done!!");
 	}
 	protected boolean makeBounds(Bounds bounds,List<MergedWayPoint> mwps) {

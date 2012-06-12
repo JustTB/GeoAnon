@@ -22,16 +22,17 @@ public class KMeansCloud extends SegmentCloud{
 	protected void initialize() {
 		System.out.println("Status: Build MergedWayPoints.");
 		buildMergedWayPoint();
-		statistician.setSourceConnectionNumber(mergedWayPoints.size()-sourceTracks.size());
 		System.out.println("Status: Find Cluster");
 		findCluster();
 		System.out.println("Status: Eliminate wayPoints with grade<"+k);
+		statistician.setFromMergedWayPoints(mergedWayPoints);
 		eliminateLowerGradeWayPoints();
 		System.out.println("Status: Check Neighborhood");
 		checkNeighborHood();
 		System.out.println("Status: Build tracks!!");
 		IOFunctions.exportWayPoints((List)mergedWayPoints, "output/MergedWayPoints.gpx");
 		buildTracks();
+		statistician.setFromMergedTracks(tracks);
 		System.out.println("Status: Done!!");
 	}
 	private void findCluster() {

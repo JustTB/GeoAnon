@@ -34,12 +34,10 @@ public abstract class Cloud {
 		this.k = k;
 		this.statistician = statistician;
 		initializeStatistician();
-		initialize();
 	}
 
 	protected void initializeStatistician() {
-		statistician.setSourceTrackNumber(sourceTracks.size());
-		statistician.setSourceWaypointNumber(MergeGPS.getWayPointNumber(sourceTracks));
+		statistician.setFromSourceTracks(k,sourceTracks);
 	}
 
 	protected void initialize(){
@@ -50,7 +48,7 @@ public abstract class Cloud {
 		List<MergedWayPoint> mwps = new LinkedList<MergedWayPoint>(mergedWayPoints);
 		int count=0;
 		for (MergedWayPoint mwp : mwps) {
-			List<MergedWayPoint> neighbors = new LinkedList(mwp.getNeighbors());
+			List<MergedWayPoint> neighbors = new LinkedList<MergedWayPoint>(mwp.getNeighbors());
 			for (MergedWayPoint neighbor : neighbors) {
 				if(neighbor.getTrackGrade()<k){
 					mwp.disconnect(neighbor);
@@ -61,21 +59,22 @@ public abstract class Cloud {
 				}
 			}
 		}
-		System.out.println("Disconnections: "+count);
+		statistician.addRemovedConnectionNumber(count);
 		
 	}
 
 	protected void eliminateLowerGradeWayPoints() {
 		List<MergedWayPoint> mwps = new LinkedList<MergedWayPoint>(mergedWayPoints);
-		int count=0;
+		int count=0, removedConnectionCounter=0;
 		for (MergedWayPoint mwp : mwps) {
 			if(mwp.getTrackGrade()<k){
 				mergedWayPoints.remove(mwp);
-				mwp.disconnectAll();
+				removedConnectionCounter+=mwp.disconnectAll();
 				count++;
 			}
 		}
-		
+		statistician.setRemovedWaypointsNumber(count);
+		statistician.setRemovedConnectionNumber(removedConnectionCounter);
 	}
 
 	protected void deleteShortTracks() {

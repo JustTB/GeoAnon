@@ -52,44 +52,24 @@ public class SegmentCloud extends Cloud{
 		System.out.println("Status: Build segments.");
 		buildSegments();
 		IOFunctions.exportTrackSegments(segments, "output/BuildedSegments.gpx");
-		//System.out.println("Status: Find Segmentcluster");
-		//findSegmentCluster();
-		statistician.setSourceConnectionNumber(segments.size());
 		System.out.println("Status: Find Similar Segments");
 		findSimilarSegments();
 		System.out.println("Status: Eliminate similar segments with grade<"+k);
-		eliminateLowerGradeSegments();
-		IOFunctions.exportTrackSegments(similarSegments.keySet(), "output/SimilarSegments.gpx");
+		//eliminateLowerGradeSegments();
+		//IOFunctions.exportTrackSegments(similarSegments.keySet(), "output/SimilarSegments.gpx");
 		System.out.println("Status: Merge similar Segments");
 		mergeSimilarSegments();
-		for (MergedWayPoint mwp : mergedWayPoints) {
-			if(!mwp.isConnectionGradeCorrect()){
-				System.out.println("its here");
-			}
-		}
 		IOFunctions.exportWayPoints((List)mergedWayPoints, "output/MergedWayPoints.gpx");
 		System.out.println("Status: Eliminate wayPoints with grade<"+k);
+		statistician.setFromMergedWayPoints(mergedWayPoints);
 		eliminateLowerGradeWayPoints();
 		System.out.println("Status: Check Neighborhood");
-		for (MergedWayPoint mwp : mergedWayPoints) {
-			if(!mwp.isConnectionGradeCorrect()){
-				System.out.println("its here");
-			}
-		}
 		checkNeighborHood();
-		//System.out.println("Status:Delete big distances");
-		//deleteBigDistances();
 		System.out.println("Status: Build tracks!!");
 		//mergeNearWayPoints();
-		for (MergedWayPoint mwp : mergedWayPoints) {
-			if(!mwp.isConnectionGradeCorrect()){
-				System.out.println("its here");
-			}
-		}
 		IOFunctions.exportWayPoints((List)mergedWayPoints, "output/EliminatedMergedWayPoints.gpx");
 		buildTracks();
-		//System.out.println("Status:Delete short tracks");
-		//deleteShortTracks();
+		statistician.setFromMergedTracks(tracks);
 		System.out.println("Status: Done!!");
 	}
 

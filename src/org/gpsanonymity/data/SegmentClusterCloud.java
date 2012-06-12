@@ -58,27 +58,20 @@ public class SegmentClusterCloud extends SegmentCloud {
 	protected void initialize() {
 		System.out.println("Status: Build segments.");
 		buildSegments();
-		IOFunctions.exportTrackSegments(segments, "output/BuildedSegments.gpx");
 		System.out.println("Status: Find Similar Segments");
 		findSimilarSegments();
-		System.out.println("Status: Eliminate similar segments with grade<"+k);
-		eliminateLowerGradeSegments();
-		IOFunctions.exportTrackSegments(similarSegments.keySet(), "output/SimilarSegments.gpx");
+		//System.out.println("Status: Eliminate similar segments with grade<"+k);
+		//eliminateLowerGradeSegments();
 		System.out.println("Status: Merge similar Segments");
 		mergeSimilarSegments();
-		IOFunctions.exportWayPoints((List)mergedWayPoints, "output/MergedWayPoints.gpx");
+		statistician.setFromMergedWayPoints(mergedWayPoints);
 		System.out.println("Status: Eliminate wayPoints with grade<"+k);
 		eliminateLowerGradeWayPoints();
 		System.out.println("Status: Check Neighborhood");
 		checkNeighborHood();
-		//System.out.println("Status:Delete big distances");
-		//deleteBigDistances();
 		System.out.println("Status: Build tracks!!");
-		//mergeNearWayPoints();
-		IOFunctions.exportWayPoints((List)mergedWayPoints, "output/EliminatedMergedWayPoints.gpx");
 		buildTracks();
-		//System.out.println("Status:Delete short tracks");
-		//deleteShortTracks();
+		statistician.setFromMergedTracks(tracks);
 		System.out.println("Status: Done!!");
 	}
 }
