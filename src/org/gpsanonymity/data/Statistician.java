@@ -1,5 +1,13 @@
 package org.gpsanonymity.data;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -8,7 +16,9 @@ import java.util.List;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
 
-public class Statistician {
+public class Statistician implements Serializable{
+	private static final long serialVersionUID = 1L;
+	private transient String filePath="";
 	private LinkedList<Integer> ks = new LinkedList<Integer>();
 	private LinkedList<Integer> sourceTrackNumbers = new LinkedList<Integer>();
 	private LinkedList<Double>  sourceLength = new LinkedList<Double>();
@@ -28,6 +38,39 @@ public class Statistician {
 	
 	public Statistician() {
 		newDataSet();
+	}
+	public Statistician(String path) {
+		filePath=path;
+		try {
+			ObjectInputStream oos = new ObjectInputStream(new FileInputStream(new File(path)));
+			Statistician statistician =(Statistician)oos.readObject();
+			Statistician(statistician);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}	
+	}
+	public void Statistician(Statistician stati) {
+		ks = stati.ks;
+		sourceTrackNumbers = stati.sourceTrackNumbers;
+		sourceLength = stati.sourceLength;
+		sourceWaypointNumbers = stati.sourceConnectionNumbers;
+		sourceConnectionNumbers = stati.sourceConnectionNumbers;
+		mergedWayPointNumbers = stati.mergedWayPointNumbers;
+		mergedConnectionNumbers = stati.mergedConnectionNumbers;
+		mergedTrackNumbers = stati.mergedTrackNumbers;
+		mergedLength = stati.mergedLength;
+		mergedWaypointGrade = stati.mergedWaypointGrade;
+		neighborGrade = stati.neighborGrade;
+		currentIndex=stati.currentIndex;
+		maxIndex=stati.maxIndex;
+		removedConnectionNumbers = stati.removedConnectionNumbers;
+		removedWaypointsNumbers = stati.removedWaypointsNumbers;
+		removedTracksNumbers = stati.removedTracksNumbers;
+		
 	}
 	public void setFromMergedTracks(List<GpxTrack> tracks) {
 		setMergedTrackNumber(tracks.size());
@@ -179,6 +222,9 @@ public class Statistician {
 		removedTracksNumbers.add(null);
 		removedWaypointsNumbers.add(null);
 		removedConnectionNumbers.add(null);
+		if(Runtime.getRuntime().freeMemory()/Runtime.getRuntime().maxMemory()<0.2){
+			
+		}
 	}
 	public boolean setPreviusDataSet(){
 		if (currentIndex<1)
@@ -209,6 +255,65 @@ public class Statistician {
 	}
 	public void addRemovedConnectionNumber(int count) {
 		removedConnectionNumbers.set(currentIndex, getRemovedConnectionNumber()+count);
+		
+	}
+	public void write(String path) {
+		try {
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(path)));
+			oos.writeObject(this);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	public String getFilePath() {
+		return filePath;
+	}
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if(!obj.getClass().equals(this.getClass())){
+			return false;
+		}else{
+			Statistician stati = (Statistician)obj;
+			if(!ks.equals(stati.ks)){
+				return false;
+			}else if(!sourceTrackNumbers.equals(stati.sourceTrackNumbers)){
+				return false;
+			}else if(!sourceLength.equals(stati.sourceLength)){
+				return false;
+			}else if(!sourceWaypointNumbers.equals(stati.sourceWaypointNumbers)){
+				return false;
+			}else if(!sourceConnectionNumbers.equals(stati.sourceConnectionNumbers)){
+				return false;
+			}else if(!mergedWayPointNumbers.equals(stati.mergedWayPointNumbers)){
+				return false;
+			}else if(!mergedConnectionNumbers.equals(stati.mergedConnectionNumbers)){
+				return false;
+			}else if(!mergedLength.equals(stati.mergedLength)){
+				return false;
+			}else if(!mergedWaypointGrade.equals(stati.mergedWaypointGrade)){
+				return false;
+			}else if(!neighborGrade.equals(stati.neighborGrade)){
+				return false;
+			}else if(currentIndex!=stati.currentIndex){
+				return false;
+			}else if(maxIndex!=stati.maxIndex){
+				return false;
+			}else if(!removedConnectionNumbers.equals(stati.removedConnectionNumbers)){
+				return false;
+			}else if(!removedWaypointsNumbers.equals(stati.removedWaypointsNumbers)){
+				return false;
+			}else if(!removedTracksNumbers.equals(stati.removedTracksNumbers)){
+				return false;
+			}else{
+				return true;
+			}
+		}
 		
 	}
 }
