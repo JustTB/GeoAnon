@@ -190,7 +190,7 @@ public class IOFunctions {
 			for (Bounds bounds2 : currentBounds) {
 				spaceBounds.add(MergeGPS.getBoundsWithSpace(bounds2, 300));
 			}
-			exportBoundsAsTracks(spaceBounds, "output/CuttingSpaceBounds.gpx");
+			//exportBoundsAsTracks(spaceBounds, "output/CuttingSpaceBounds.gpx");
 			Iterator<Bounds> spaceIter = spaceBounds.iterator();
 			Iterator<Bounds> boundsIter = currentBounds.iterator();
 			System.out.println("Downloading and Cutting... ");
@@ -448,7 +448,7 @@ public class IOFunctions {
 		}else{
 			currentBounds.add(bounds);
 		}
-		exportBoundsAsTracks(currentBounds, "output/CuttingBounds.gpx");
+		//exportBoundsAsTracks(currentBounds, "output/CuttingBounds.gpx");
 		return currentBounds;
 	}
 	public static void exportBoundsAsTracks(Collection<Bounds> bounds, String file) {
