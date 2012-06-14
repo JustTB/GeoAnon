@@ -1,5 +1,6 @@
 package org.gpsanonymity;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,6 +14,8 @@ import org.gpsanonymity.data.Statistician;
 import org.gpsanonymity.io.IOFunctions;
 import org.gpsanonymity.io.Importer;
 import org.gpsanonymity.merge.MergeGPS;
+import org.openstreetmap.josm.data.Bounds;
+import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.WayPoint;
 
@@ -27,6 +30,8 @@ public class Main {
 	private static LinkedList<Double> angelAllowanceList;
 	private static LinkedList<Integer> intoleranceList;
 	private static LinkedList<Double> minimalAreaDistanceList;
+	private static HashMap<Bounds, String> boundsAndFilenames;
+	private static String tempFilename;
 	
 	public static void initialize(){
 		kList=new LinkedList<Integer>();
@@ -84,6 +89,32 @@ public class Main {
 		inputFileList = new LinkedList<String>();
 		inputFileList.add(inputFolder+"Berlin.dat");
 		inputFileList.add(inputFolder+"MecklenBurg-Vorp..dat");
+		//////////////////////Bounds and Filenames ///////////////////////////
+		boundsAndFilenames = new HashMap<Bounds, String>();
+		//Belluno
+		double minLat=45.940;
+		double minLon=11.646;
+		double maxLat=46.279;
+		double maxLon=12.328;
+		Bounds bounds = new Bounds(new LatLon(minLat,minLon),new LatLon(maxLat,maxLon));
+		String filename= "input/Belluno/Belluno.gpx";
+		boundsAndFilenames.put(bounds, filename);
+		//Berlin
+		minLat=52.286;
+		minLon=12.914;
+		maxLat=52.701;
+		maxLon=13.867;
+		bounds = new Bounds(new LatLon(minLat,minLon),new LatLon(maxLat,maxLon));
+		filename= "input/Berlin/Berlin.gpx";
+		boundsAndFilenames.put(bounds, filename);
+		//South of Cairo
+		minLat=27.595;
+		minLon=30.333;
+		maxLat=29.907;
+		maxLon=31.508;
+		bounds = new Bounds(new LatLon(minLat,minLon),new LatLon(maxLat,maxLon));
+		filename= "input/SoCairo/SoCairo.gpx";
+		boundsAndFilenames.put(bounds, filename);
 	}
 	/**
 	 * @param args
@@ -95,6 +126,15 @@ public class Main {
 		simulateTrackSegmentCloudMerge();
 		simulateTrackCliqueCloakMerge();
 		simulateTrackCliqueCloakExtendedMerge();
+	}
+	private static void downloadData(){
+		tempFilename= "output/temp.gpx";
+		if (boundsAndFilenames==null){
+			initialize();
+		}
+		for (Bounds key : boundsAndFilenames.keySet()) {
+			IOFunctions.getDataFromOSMWithCutting(key, boundsAndFilenames.get(key), tempFilename);
+		}
 	}
 	private static void simulateTrackGridMerge(){
 		for(String path : inputFileList){
