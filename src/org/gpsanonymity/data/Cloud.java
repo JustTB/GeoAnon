@@ -1,20 +1,11 @@
 package org.gpsanonymity.data;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.gpsanonymity.data.comparator.CoordinateWayPointComparator;
-import org.gpsanonymity.io.IOFunctions;
 import org.gpsanonymity.merge.MergeGPS;
-import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
-import org.openstreetmap.josm.data.gpx.ImmutableGpxTrackSegment;
-import org.openstreetmap.josm.data.gpx.WayPoint;
 
 public abstract class Cloud {
 
@@ -114,6 +105,23 @@ public abstract class Cloud {
 
 	public List<GpxTrack> getMergedTracks() {
 		return tracks;
+	}
+	public void initAgainWithHigherK(int k, Statistician newStatistician){
+		if(k<=this.k){
+			return;
+		}
+		newStatistician.copyFrom(statistician);
+		statistician=newStatistician;
+		this.k=k;
+		statistician.setk(k);
+		System.out.println("Status: Eliminate wayPoints with grade<"+k);
+		eliminateLowerGradeWayPoints();
+		System.out.println("Status: Check Neighborhood");
+		checkNeighborHood();
+		System.out.println("Status: Build tracks!!");
+		buildTracks();
+		statistician.setFromMergedTracks(tracks);
+		System.out.println("Status: Done!!");
 	}
 
 }

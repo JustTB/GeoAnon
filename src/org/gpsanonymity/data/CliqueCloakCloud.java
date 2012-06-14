@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.gpsanonymity.io.IOFunctions;
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
@@ -16,13 +15,40 @@ import org.openstreetmap.josm.data.gpx.WayPoint;
 public class CliqueCloakCloud extends Cloud {
 	HashMap<Bounds,List<MergedWayPoint>> allBounds;
 	Bounds wholeBounds;
+	protected CliqueCloakCloud(){
+		super();
+	}
 	public CliqueCloakCloud(List<GpxTrack> tracks, int k,
 			Statistician statistician) {
 		super(tracks, k, statistician);
+		initialize();
 	}
 	
 	protected void initialize() {
 		findWholeBounds();
+		System.out.println("Status: Build MergedWayPoints.");
+		buildMergedWayPoint();
+		System.out.println("Status: Find Bounds");
+		allBounds=new HashMap<Bounds, List<MergedWayPoint>>();
+		makeBounds(wholeBounds,mergedWayPoints);
+		System.out.println("Status: Merge WayPoints");
+		mergeWayPoints();
+		statistician.setFromMergedWayPoints(mergedWayPoints);
+		System.out.println("Status: Check Neighborhood");
+		checkNeighborHood();
+		System.out.println("Status: Build tracks!!");
+		buildTracks();
+		statistician.setFromMergedTracks(tracks);
+		System.out.println("Status: Done!!");
+	}
+	public void initAgainWithHigherK(int k, Statistician newStatistician){
+		if(k<=this.k){
+			return;
+		}
+		newStatistician.copyFrom(statistician);
+		statistician=newStatistician;
+		this.k=k;
+		statistician.setk(k);
 		System.out.println("Status: Build MergedWayPoints.");
 		buildMergedWayPoint();
 		System.out.println("Status: Find Bounds");
@@ -148,5 +174,8 @@ public class CliqueCloakCloud extends Cloud {
 				}
 			}
 		}
+	}
+	public void plotData(String path){
+		
 	}
 }

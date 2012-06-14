@@ -33,6 +33,7 @@ public class MergeGPSTest {
 		Assert.assertTrue(MergeGPS.differenceInAngleIsLowerThan(segmentNorth, segmentWest, Math.PI*0.6));//108°
 		Assert.assertFalse(MergeGPS.differenceInAngleIsLowerThan(segmentNorth, segmentWest, Math.PI*0.25));//45°
 	}
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void kMeansTest(){
 		LinkedList<WayPoint> wps =  IOFunctions.getAllWaypoints(
@@ -52,6 +53,7 @@ public class MergeGPSTest {
 		}
 		IOFunctions.exportTracks(newTracks, "output/TestCreateMorePoints.gpx");
 	}
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void kMeansMoreWayPointsTest(){
 		List<GpxTrack> tracks = IOFunctions.getAllTracks(

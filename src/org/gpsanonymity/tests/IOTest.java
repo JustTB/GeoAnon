@@ -49,6 +49,7 @@ public class IOTest {
 		String tempFilename= "output/temp.gpx";
 		testData();
 		IOFunctions.getDataFromOSMWithCutting(bounds, filename, tempFilename);
+		@SuppressWarnings("unused")
 		Importer importer = new Importer("output/Berlin.dat");
 	}
 	@Test
@@ -59,7 +60,6 @@ public class IOTest {
 		double maxLon=13.4826279;
 		
 		String filename= "output/Berlin.gpx";
-		String tempFilename= "output/tempBerlin.gpx";
 		testData();
 		Bounds bounds = new Bounds(new LatLon(minLat,minLon),new LatLon(maxLat,maxLon));
 		IOFunctions.generateDatFile(filename,bounds , 10);

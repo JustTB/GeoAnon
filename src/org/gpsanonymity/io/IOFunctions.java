@@ -203,12 +203,14 @@ public class IOFunctions {
 				String coords=x.toString()+"_"+y.toString();
 				String realFilename=filename.replace(".gpx", coords+".gpx");
 				File file = new File(realFilename);
+				Bounds spaceBound = spaceIter.next();
+				Bounds currentBound = boundsIter.next();
 				if (!file.exists()){
 					int tempFileCounter=0;
-					Bounds spaceBound = spaceIter.next();
-					Bounds currentBound = boundsIter.next();
 					Collection<GpxTrack> tempTracks = new LinkedList<GpxTrack>();
+					System.out.println("Downloading ...");
 					tempFileCounter=downloadingArea(spaceBound,tempFile,tempTracks,tempFileCounter);
+					System.out.println("Downloading done!");
 					for(int i=-1;i<tempFileCounter;i++){
 						if(i!=-1){
 							FileInputStream fis = new FileInputStream(new File(tempFile.replace(".gpx", i+".gpx")));
@@ -228,6 +230,7 @@ public class IOFunctions {
 
 					System.out.println("Exporting to " + realFilename);
 					exportTracks(exportTracks, realFilename);
+					System.out.println("Exporting done!");
 				}else{
 					System.out.println(realFilename+" exists already.");
 				}

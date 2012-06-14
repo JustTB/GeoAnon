@@ -12,7 +12,8 @@ public class ImmutableGpxTrackSegment implements GpxTrackSegment {
 
     protected Collection<WayPoint> wayPoints;
     private final Bounds bounds;
-    private final double length;
+    @SuppressWarnings("unused")
+	private final double length;//unused cause i need the calculated length
 
     public ImmutableGpxTrackSegment(Collection<WayPoint> wayPoints) {
         this.wayPoints = Collections.unmodifiableCollection(new ArrayList<WayPoint>(wayPoints));

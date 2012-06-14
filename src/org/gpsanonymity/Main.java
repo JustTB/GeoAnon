@@ -11,75 +11,257 @@ import org.gpsanonymity.data.SegmentCloud;
 import org.gpsanonymity.data.SegmentClusterCloud;
 import org.gpsanonymity.data.Statistician;
 import org.gpsanonymity.io.IOFunctions;
+import org.gpsanonymity.io.Importer;
 import org.gpsanonymity.merge.MergeGPS;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.WayPoint;
-import org.openstreetmap.josm.io.GpxReader;
 
 public class Main {
 	public static int n = 5;
 	public static List<Integer> kList;
 	public static double minSpeed=0.5;
-	public static List<Double> gridDistanceList;
+	public static List<Double> distanceList;
+	public static List<Double> pointDensityList;
 	public static List<String> inputFileList;
 	public static String inputFolder="input/";
+	private static LinkedList<Double> angelAllowanceList;
+	private static LinkedList<Integer> intoleranceList;
+	private static LinkedList<Double> minimalAreaDistanceList;
 	
 	public static void initialize(){
 		kList=new LinkedList<Integer>();
-		kList.add(1);
 		kList.add(2);
 		kList.add(3);
 		kList.add(4);
 		kList.add(5);
+		kList.add(6);
+		kList.add(7);
+		kList.add(8);
+		kList.add(9);
 		kList.add(10);
 		kList.add(20);
 		kList.add(50);
 		kList.add(100);
 		kList.add(200);
-		gridDistanceList=new LinkedList<Double>();
-		gridDistanceList.add(0.5);
-		gridDistanceList.add(1.0);
-		gridDistanceList.add(2.0);
-		gridDistanceList.add(4.0);
-		gridDistanceList.add(5.0);
-		gridDistanceList.add(6.0);
-		gridDistanceList.add(7.0);
-		gridDistanceList.add(8.0);
-		gridDistanceList.add(10.0);
-		gridDistanceList.add(20.0);
+		distanceList=new LinkedList<Double>();
+		distanceList.add(0.5);
+		distanceList.add(1.0);
+		distanceList.add(2.0);
+		distanceList.add(4.0);
+		distanceList.add(5.0);
+		distanceList.add(6.0);
+		distanceList.add(7.0);
+		distanceList.add(8.0);
+		distanceList.add(10.0);
+		distanceList.add(20.0);
+		pointDensityList= new LinkedList<Double>();
+		pointDensityList.add(0.0);
+		pointDensityList.add(1.0);
+		pointDensityList.add(3.0);
+		pointDensityList.add(2.0);
+		pointDensityList.add(4.0);
+		pointDensityList.add(8.0);
+		pointDensityList.add(16.0);
+		angelAllowanceList = new LinkedList<Double>();
+		angelAllowanceList.add(0.0);
+		angelAllowanceList.add(0.25);
+		angelAllowanceList.add(0.5);
+		angelAllowanceList.add(0.75);
+		angelAllowanceList.add(1.0);
+		intoleranceList= new LinkedList<Integer>();
+		intoleranceList.add(1);
+		intoleranceList.add(2);
+		intoleranceList.add(3);
+		intoleranceList.add(4);
+		intoleranceList.add(5);
+		intoleranceList.add(10);
+		minimalAreaDistanceList=new LinkedList<Double>();
+		minimalAreaDistanceList.add(0.0);
+		minimalAreaDistanceList.add(1.0);
+		minimalAreaDistanceList.add(2.0);
+		minimalAreaDistanceList.add(4.0);
+		minimalAreaDistanceList.add(8.0);
 		inputFileList = new LinkedList<String>();
-		inputFileList.add("Berlin.gpx");
-		inputFileList.add(inputFolder+"Leipzig.gpx");
-		inputFileList.add(inputFolder+"Toronto.gpx");
-		inputFileList.add(inputFolder+"Tokyo.gpx");
-		inputFileList.add(inputFolder+"Prignitz.gpx");
-		inputFileList.add(inputFolder+"Dolomites.gpx");
+		inputFileList.add(inputFolder+"Berlin.dat");
+		inputFileList.add(inputFolder+"MecklenBurg-Vorp..dat");
 	}
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		int k=2;
-		double gridSize = 2;
-		GpxReader importReader= IOFunctions.importGPX("leipzig_track_example.gpx");
-		List<WayPoint> waypoints = IOFunctions.getAllWaypoints(importReader);
-		List<GpxTrack> tracks = IOFunctions.getAllTracks(importReader);
-		
-		IOFunctions.exportWayPoints(mergingWaypointsOnGrid(waypoints, k, gridSize), "output/PointGridMergeTest.gpx");
-		//IOFunctions.exportTracks(mergingTracksOnGrid(tracks, k, gridSize), "/Distance/output/TrackGridMergeTest.gpx");
-	}
-	public static void simulateTrackGridMerge(){
 		initialize();
-		for (Integer k : kList) {
-			for (Double gridDistance : gridDistanceList){
-				for (String inputFile : inputFileList){
-					String exportFile= inputFile+"_"+k+"_"+gridDistance+".gpx";
-					IOFunctions.exportTracks(
-							mergingTracksOnGrid(importTracks(inputFolder+inputFile+".gpx"),
-									k,
-									gridDistance,
-									minSpeed),
-							exportFile);
+		simulateTrackGridMerge();
+		simulateTrackKMeansMerge();
+		simulateTrackSegmentCloudMerge();
+		simulateTrackCliqueCloakMerge();
+		simulateTrackCliqueCloakExtendedMerge();
+	}
+	private static void simulateTrackGridMerge(){
+		for(String path : inputFileList){
+			Importer importer= new Importer(path);
+			while(importer.hasnext()){
+				GridMatrix gridmatrix=null;
+				Statistician statistician = new Statistician();
+				for(Double gridSize : distanceList){
+					for(Integer k: kList){
+						if(kList.get(0)==k){
+							gridmatrix=mergingTracksOnGrid(importer.next(), k, gridSize, minSpeed,statistician);
+						}else{
+							gridmatrix.initAgainWithHigherK(k, statistician);
+						}
+						String statisticianPath = "output/stats/"
+								+ "GridMerge"
+								+ path.replace(".dat", "")
+								+ importer.getCurrentX()
+								+ "_"
+								+ importer.getCurrentY()
+								+ "_"
+								+ "k"+k
+								+ "_"
+								+ "gS" +gridSize
+								+ "_"
+								+ "mS" + minSpeed
+								+".ps";
+						statistician.write(statisticianPath);
+					}
+				}
+			}
+		}
+	}
+	private static void simulateTrackKMeansMerge(){
+		for(String path : inputFileList){
+			Importer importer= new Importer(path);
+			while(importer.hasnext()){
+				KMeansCloud kMeansCloud=null;
+				Statistician statistician = new Statistician();
+				for(Double pointDensity :pointDensityList){
+					for(Integer k: kList){
+						if(kList.get(0)==k){
+							kMeansCloud=mergingTracksWithKMeans(importer.next(), k,pointDensity, statistician);
+						}else{
+							kMeansCloud.initAgainWithHigherK(k, statistician);
+						}
+						String statisticianPath = "output/stats/"
+								+ "KMeansMerge"
+								+ path.replace(".dat", "")
+								+ importer.getCurrentX()
+								+ "_"
+								+ importer.getCurrentY()
+								+ "_"
+								+ "k"+k
+								+ "_"
+								+ "pD" +pointDensity
+								+".ps";
+						statistician.write(statisticianPath);
+					}
+				}
+			}
+		}
+	}
+	private static void simulateTrackSegmentCloudMerge(){
+		for(String path : inputFileList){
+			Importer importer= new Importer(path);
+			while(importer.hasnext()){
+				SegmentCloud segmentCloud=null;
+				Statistician statistician = new Statistician();
+				for(Double trackDistance : distanceList){
+					for(Double pointDensity :pointDensityList){
+						for(Double angelAllowance: angelAllowanceList){
+							for(Integer k: kList){
+								if(trackDistance<pointDensity){
+									if(kList.get(0)==k){
+										segmentCloud=mergingTracksWithSegmentCloud(importer.next(), k,pointDensity, trackDistance, true,angelAllowance,statistician);
+									}else{
+										segmentCloud.initAgainWithHigherK(k, statistician);
+									}
+									String statisticianPath = "output/stats/"
+											+ "SegmentCloudMerge"
+											+ path.replace(".dat", "")
+											+ importer.getCurrentX()
+											+ "_"
+											+ importer.getCurrentY()
+											+ "_"
+											+ "k"+k
+											+ "_"
+											+ "tD" +trackDistance
+											+ "_"
+											+ "pD" +pointDensity
+											+ "_"
+											+ "iD" +true
+											+ "_"
+											+ "aA" +angelAllowance
+											+".ps";
+									statistician.write(statisticianPath);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	private static void simulateTrackCliqueCloakMerge(){
+		for(String path : inputFileList){
+			Importer importer= new Importer(path);
+			while(importer.hasnext()){
+				CliqueCloakCloud cliqueCloakCloud=null;
+				Statistician statistician = new Statistician();
+				for(Double pointDensity :pointDensityList){
+					for(Integer k: kList){
+						if(kList.get(0)==k){
+							cliqueCloakCloud=mergingTracksWithCliqueCloak(importer.next(), k,pointDensity, statistician);
+						}else{
+							cliqueCloakCloud.initAgainWithHigherK(k, statistician);
+						}
+						String statisticianPath = "output/stats/"
+								+ "CliqueCloakMerge"
+								+ path.replace(".dat", "")
+								+ importer.getCurrentX()
+								+ "_"
+								+ importer.getCurrentY()
+								+ "_"
+								+ "k"+k
+								+ "_"
+								+ "pD" +pointDensity
+								+".ps";
+						statistician.write(statisticianPath);
+					}
+				}
+			}
+		}
+	}
+	private static void simulateTrackCliqueCloakExtendedMerge(){
+		for(String path : inputFileList){
+			Importer importer= new Importer(path);
+			while(importer.hasnext()){
+				CliqueCloakExtendedCloud cliqueExtendedCloakCloud=null;
+				Statistician statistician = new Statistician();
+				for(Double pointDensity :pointDensityList){
+					for(Integer intolerance : intoleranceList){
+						for(Double minimalAreaDistance : minimalAreaDistanceList){
+							for(Integer k: kList){
+								if (k>intolerance){
+									if(kList.get(0)==k){
+										cliqueExtendedCloakCloud=mergingTracksWithCliqueCloakExtended(importer.next(), k,pointDensity,intolerance,minimalAreaDistance, statistician);
+									}else{
+										cliqueExtendedCloakCloud.initAgainWithHigherK(k, statistician);
+									}
+									String statisticianPath = "output/stats/"
+											+ "CliqueCloakExtendedMerge"
+											+ path.replace(".dat", "")
+											+ importer.getCurrentX()
+											+ "_"
+											+ importer.getCurrentY()
+											+ "_"
+											+ "k"+k
+											+ "_"
+											+ "pD" +pointDensity
+											+".ps";
+									statistician.write(statisticianPath);
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -143,7 +325,7 @@ public class Main {
 	 * @return new merged Tracks
 	 * @see Main#merginWayPoints(List, int, double)
 	 */
-	public static List<GpxTrack> mergingTracksSimpleSimilar(List<GpxTrack> tracks,int k , double pointDensity, double trackDistance, int segmentLength, boolean ignoreDirection, double angelAllowance, Statistician statistician) {
+	public static SegmentCloud mergingTracksWithSegmentCloud(List<GpxTrack> tracks,int k , double pointDensity, double trackDistance, boolean ignoreDirection, double angelAllowance, Statistician statistician) {
 		List<GpxTrack> morePointTracks;
 		if (pointDensity!=0){
 			System.out.println("Status: Create more Waypoints");
@@ -151,8 +333,8 @@ public class Main {
 		}else{
 			morePointTracks = new LinkedList<GpxTrack>(tracks);
 		}
-		SegmentCloud sc= new SegmentCloud(morePointTracks,k,trackDistance, segmentLength,ignoreDirection, angelAllowance, statistician);
-		return sc.getMergedTracks();
+		SegmentCloud sc= new SegmentCloud(morePointTracks,k,trackDistance, ignoreDirection, angelAllowance, statistician);
+		return sc;
 	}
 	/**
 	 * merges given Tracks by cutting them into peaces and find segment clusters
@@ -169,7 +351,7 @@ public class Main {
 	 * @return new merged Tracks
 	 * @see Main#merginWayPoints(List, int, double)
 	 */
-	public static List<GpxTrack> mergingTracksWithSegmentClusters(List<GpxTrack> tracks,int k , double pointDensity, double trackDistance, int segmentLength, boolean ignoreDirection, double angelAllowance, Statistician statistician, double angleWeight, double distanceWeight) {
+	public static SegmentClusterCloud mergingTracksWithSegmentClusters(List<GpxTrack> tracks,int k , double pointDensity, double trackDistance, int segmentLength, boolean ignoreDirection, double angelAllowance, Statistician statistician, double angleWeight, double distanceWeight) {
 		List<GpxTrack> morePointTracks;
 		if (pointDensity!=0){
 			System.out.println("Status: Create more Waypoints");
@@ -177,8 +359,8 @@ public class Main {
 		}else{
 			morePointTracks = new LinkedList<GpxTrack>(tracks);
 		}
-		SegmentClusterCloud scc= new SegmentClusterCloud(morePointTracks,k,trackDistance, segmentLength,ignoreDirection, angelAllowance,statistician,angleWeight, distanceWeight);
-		return scc.getMergedTracks();
+		SegmentClusterCloud scc= new SegmentClusterCloud(morePointTracks,k,trackDistance, ignoreDirection, angelAllowance,statistician,angleWeight, distanceWeight);
+		return scc;
 	}
 	/**
 	 * Merges Waypoints with a grid over the map. WayPoints in the same grid coordinates will be merged. 
@@ -203,11 +385,10 @@ public class Main {
 	 * @return
 	 * @see Main#mergingWaypointsOnGrid(List, int, double)
 	 */
-	public static List<GpxTrack> mergingTracksOnGrid(List<GpxTrack> tracks,int k , double gridSize, double minimalSpeed) {
-		Statistician statistician = new Statistician();
+	public static GridMatrix mergingTracksOnGrid(List<GpxTrack> tracks,int k , double gridSize, double minimalSpeed,Statistician statistician) {
 		List<GpxTrack> newTracks= MergeGPS.createMoreWaypointsOnTracks(tracks, gridSize);
 		GridMatrix gridMatrix = new GridMatrix(newTracks,k, gridSize,minimalSpeed,statistician);
-		return gridMatrix.getTracks();
+		return gridMatrix;
 	}
 	/**
 	 * merges given Tracks by cutting them into peaces and find similar peaces in a radius of trackDistance
@@ -222,7 +403,7 @@ public class Main {
 	 * @return new merged Tracks
 	 * @see Main#merginWayPoints(List, int, double)
 	 */
-	public static List<GpxTrack> mergingTracksWithKMeans(List<GpxTrack> tracks,int k , double pointDensity, double trackDistance, int segmentLength, boolean ignoreDirection, double angelAllowance, Statistician statistician) {
+	public static KMeansCloud mergingTracksWithKMeans(List<GpxTrack> tracks,int k , double pointDensity, Statistician statistician) {
 		List<GpxTrack> morePointTracks;
 		if (pointDensity!=0){
 			System.out.println("Status: Create more Waypoints");
@@ -230,10 +411,10 @@ public class Main {
 		}else{
 			morePointTracks = new LinkedList<GpxTrack>(tracks);
 		}
-		SegmentCloud sc= new KMeansCloud(morePointTracks,k,trackDistance, segmentLength,ignoreDirection, angelAllowance, statistician);
-		return sc.getMergedTracks();
+		KMeansCloud kmc= new KMeansCloud(morePointTracks,k, statistician);
+		return kmc;
 	}
-	public static List<GpxTrack> mergingTracksWithCliqueCloak(List<GpxTrack> tracks,int k , double pointDensity, Statistician statistician) {
+	public static CliqueCloakCloud mergingTracksWithCliqueCloak(List<GpxTrack> tracks,int k , double pointDensity, Statistician statistician) {
 		List<GpxTrack> morePointTracks;
 		if (pointDensity!=0){
 			System.out.println("Status: Create more Waypoints");
@@ -242,9 +423,9 @@ public class Main {
 			morePointTracks = new LinkedList<GpxTrack>(tracks);
 		}
 		CliqueCloakCloud ccc= new CliqueCloakCloud(morePointTracks,k, statistician);
-		return ccc.getMergedTracks();
+		return ccc;
 	}
-	public static List<GpxTrack> mergingTracksWithCliqueCloakExtended(List<GpxTrack> tracks,int k , double pointDensity, Statistician statistician) {
+	public static CliqueCloakExtendedCloud mergingTracksWithCliqueCloakExtended(List<GpxTrack> tracks,int k , double pointDensity, int intolerance, double minimalAreaDistance, Statistician statistician) {
 		List<GpxTrack> morePointTracks;
 		if (pointDensity!=0){
 			System.out.println("Status: Create more Waypoints");
@@ -252,7 +433,7 @@ public class Main {
 		}else{
 			morePointTracks = new LinkedList<GpxTrack>(tracks);
 		}
-		CliqueCloakExtendedCloud ccc= new CliqueCloakExtendedCloud(morePointTracks,k, statistician);
-		return ccc.getMergedTracks();
+		CliqueCloakExtendedCloud ccc= new CliqueCloakExtendedCloud(morePointTracks,k,intolerance,minimalAreaDistance, statistician);
+		return ccc;
 	}
 }

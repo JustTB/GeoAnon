@@ -33,12 +33,13 @@ public abstract class Matrix<E,F> {
 		public int hashCode() {
 			return x.hashCode()*5+y.hashCode()*7;
 		}
+		@SuppressWarnings("unchecked")
 		@Override
 		public boolean equals(Object o) {
 			if(o==this){
 				return true;
 			}else if (o!=null
-					&& getClass()==o.getClass() 
+					&& getClass().equals(o.getClass()) 
 					&& ((Tupel<E>)o).x.equals(x)
 					&& ((Tupel<E>)o).y.equals(y)){
 				return true;

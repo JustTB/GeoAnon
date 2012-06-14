@@ -4,24 +4,28 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.gpsanonymity.io.IOFunctions;
 import org.gpsanonymity.merge.MergeGPS;
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
-import org.openstreetmap.josm.data.gpx.WayPoint;
 
 public class CliqueCloakExtendedCloud extends CliqueCloakCloud {
 
 	private int intolerance;
-	private double minimalDistance;
-	public CliqueCloakExtendedCloud(List<GpxTrack> tracks, int k,
-			Statistician statistician) {
-		super(tracks, k, statistician);
+	private double minimalAreaDistance;
+	public CliqueCloakExtendedCloud(List<GpxTrack> tracks, int k, int intolerance, double minimalAreaDistance
+			,Statistician statistician) {
+		super();
+		this.sourceTracks=new LinkedList<GpxTrack>(tracks);
+		this.k = k;
+		this.intolerance = intolerance;
+		this.statistician = statistician;
+		this.minimalAreaDistance=minimalAreaDistance;
+		initializeStatistician();
+		initialize();
 	}
 	protected void initialize() {
-		intolerance=2;
-		minimalDistance=4;
+		
 		findWholeBounds();
 		System.out.println("Status: Build MergedWayPoints.");
 		buildMergedWayPoint();
@@ -38,8 +42,31 @@ public class CliqueCloakExtendedCloud extends CliqueCloakCloud {
 		statistician.setFromMergedTracks(tracks);
 		System.out.println("Status: Done!!");
 	}
+	public void initAgainWithHigherK(int k, Statistician newStatistician){
+		if(k<=this.k){
+			return;
+		}
+		newStatistician.copyFrom(statistician);
+		statistician=newStatistician;
+		this.k=k;
+		statistician.setk(k);
+		System.out.println("Status: Build MergedWayPoints.");
+		buildMergedWayPoint();
+		System.out.println("Status: Find Bounds");
+		allBounds=new HashMap<Bounds, List<MergedWayPoint>>();
+		makeBounds(wholeBounds,mergedWayPoints);
+		System.out.println("Status: Merge WayPoints");
+		mergeWayPoints();
+		statistician.setFromMergedWayPoints(mergedWayPoints);
+		System.out.println("Status: Check Neighborhood");
+		checkNeighborHood();
+		System.out.println("Status: Build tracks!!");
+		buildTracks();
+		statistician.setFromMergedTracks(tracks);
+		System.out.println("Status: Done!!");
+	}
 	protected boolean makeBounds(Bounds bounds,List<MergedWayPoint> mwps) {
-		if(bounds.getMin().greatCircleDistance(bounds.getMax())<minimalDistance){
+		if(bounds.getMin().greatCircleDistance(bounds.getMax())<minimalAreaDistance){
 			allBounds.put(bounds,mwps);
 			return true;
 		}
@@ -77,27 +104,8 @@ public class CliqueCloakExtendedCloud extends CliqueCloakCloud {
 			List<MergedWayPoint> mwps) {
 		LatLon downRightCorner = new LatLon(bounds.getMin().getY(), bounds.getMax().getX());
 		LinkedList<Bounds> result = new LinkedList<Bounds>();
-		/*HashMap<GpxTrack, List<MergedWayPoint>> trackCluster = new HashMap<GpxTrack, List<MergedWayPoint>>(); 
-		for (MergedWayPoint mwp : mwps) {
-			//Assumption: only one Track in each mwp
-			for(GpxTrack track :mwp.getTracks()){
-				if(trackCluster.containsKey(track)){
-					trackCluster.get(track).add(mwp);
-				}else{
-					List<MergedWayPoint> newList = new LinkedList<MergedWayPoint>();
-					newList.add(mwp);
-					trackCluster.put(track, newList);
-				}
-			}
-		}
-		LinkedList<WayPoint> centroids = new LinkedList<WayPoint>();
-		for (List<MergedWayPoint> mwps1 : trackCluster.values()) {
-			centroids.add(new WayPoint(MergeGPS.calculateCentroid((List)mwps1)));
-		}
-		LatLon centroid=MergeGPS.calculateCentroid(centroids);
-		*/
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		LatLon centroid=MergeGPS.calculateCentroid((MergeGPS.findKMeansCluster((List)mwps, k)));
-		//LatLon centroid=MergeGPS.calculateCentroid((List)mwps);
 		LatLon seperator;
 		if(downRightCorner.greatCircleDistance(bounds.getMin())//width
 				>downRightCorner.greatCircleDistance(bounds.getMax())){//height

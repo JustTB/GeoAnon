@@ -7,11 +7,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import javax.swing.DebugGraphics;
 
 import org.gpsanonymity.data.MergedWayPoint;
 import org.gpsanonymity.data.comparator.ReferenceWayPointComparator;
@@ -227,27 +222,11 @@ public class MergeGPS {
 		tracklist.add(resultseq);
 		return new ImmutableGpxTrack(tracklist, new HashMap<String, Object>());
 	}
-	/**
-	 * Simple approach
-	 * @param waypoints
-	 * @param accuracy
-	 * @return
-	 */
-	static public LinkedList<MergedWayPoint> mergeTrackSegments(LinkedList<WayPoint> trackSeqs1,LinkedList<WayPoint> trackSeqs2, double hausDorffAccuracy, double pointAccuracy) {
-		if (hausDorffDistance(trackSeqs1, trackSeqs2)<=hausDorffAccuracy){
-			return mergeTrackSegments(trackSeqs1, trackSeqs2,pointAccuracy);
-		}
-	
-		return null;//mergedWaypoints;
-	
-	}
 	public static List<GpxTrackSegment> mergeSegmentsWithKMeans(List<GpxTrackSegment> list, int k, boolean ignoreDirection, double angleWeight, double distanceWeight){
+		@SuppressWarnings("unchecked")
 		List<GpxTrackSegment> oldClusterSegs,clusterSegs=getRandomEntrys(list,k);
 		List<GpxTrackSegment> cluster;
-		//DistanceMatrix distanceMartix = new DistanceMatrix(list, list);
-		int count=0;
 		do{
-			count++;
 			cluster= makeSegmentCluster(clusterSegs, list,angleWeight, distanceWeight);
 			oldClusterSegs=clusterSegs;
 			clusterSegs=cluster;
@@ -260,7 +239,8 @@ public class MergeGPS {
 	private static boolean areSameSegments(
 			List<GpxTrackSegment> oldClusterSegs,
 			List<GpxTrackSegment> clusterSegs) {
-		SegmentComparator comp = new SegmentComparator();
+		//needed if more the one thread
+		//SegmentComparator comp = new SegmentComparator();
 		//Collections.sort(oldClusterSegs,comp);
 		//Collections.sort(clusterSegs,comp);
 		int count=-1;
@@ -284,11 +264,10 @@ public class MergeGPS {
 				
 	}
 	public static List<WayPoint> findKMeansCluster(List<WayPoint> list, int k) {
+		@SuppressWarnings("unchecked")
 		List<WayPoint> oldClusterPoints,clusterPoints=getRandomEntrys(list,k);
 		List<WayPoint> cluster;
-		int count=0;
 		do{
-			count++;
 			cluster= makeCluster(clusterPoints, list);
 			oldClusterPoints=clusterPoints;
 			clusterPoints=cluster;
@@ -322,6 +301,7 @@ public class MergeGPS {
 		}
 		return result;
 	}
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static List getRandomEntrys(List list,
 			int clusterNumber) {
 		if (clusterNumber<list.size()){
@@ -386,14 +366,12 @@ public class MergeGPS {
 	}
 	private static List<GpxTrackSegment> makeSegmentCluster(
 			List<GpxTrackSegment> clusterSegs, List<GpxTrackSegment> list, double angleWeight, double distanceWeight) {
-		List<GpxTrackSegment> syncClusterSegs = Collections.synchronizedList(clusterSegs);
-		List<GpxTrackSegment> synList = Collections.synchronizedList(list);
-		List<List<GpxTrackSegment>> clusterGroups= Collections.synchronizedList(new LinkedList<List<GpxTrackSegment>>());
+		List<GpxTrackSegment> synList = list;
+		List<List<GpxTrackSegment>> clusterGroups= new LinkedList<List<GpxTrackSegment>>();
 		//initialize result
 		for (int i = 0; i < clusterSegs.size(); i++) {
 			clusterGroups.add(Collections.synchronizedList(new LinkedList<GpxTrackSegment>()));
 		}
-		ExecutorService threadPool = Executors.newCachedThreadPool();
 		for (GpxTrackSegment seg : synList) {
 			if(seg.length()!=0){
 				MergeGPS.findClusterAndAdd(seg,clusterSegs,angleWeight, distanceWeight,clusterGroups);
@@ -415,7 +393,6 @@ public class MergeGPS {
 	}
 	private static GpxTrackSegment calculateSegmentCentroid(
 			List<GpxTrackSegment> cluster) {
-		double length=0,vectorLon=0, vectorLat=0;
 		List<WayPoint> all1Wps = new LinkedList<WayPoint>();
 		List<WayPoint> all2Wps = new LinkedList<WayPoint>();
 		LatLon reference1=null;
@@ -451,7 +428,6 @@ public class MergeGPS {
 			double currentDistance;
 			currentDistance = segmentDistance(list.get(i),seg,angleWeight,distanceWeight);
 			if (currentDistance<distance){
-				List<WayPoint> notSameTrackWps = new LinkedList<WayPoint>();
 				distance=currentDistance;
 				result=i;
 				
@@ -563,31 +539,6 @@ public class MergeGPS {
 			
 		return true;
 	}
-	private static LinkedList<MergedWayPoint> mergeTrackSegments(
-			LinkedList<WayPoint> trackSeqs1,
-			LinkedList<WayPoint> trackSeqs2, double pointAccuracy) {
-		LinkedList<WayPoint> mergedTrackSegments= new LinkedList<WayPoint>(trackSeqs1);
-		LinkedList<WayPoint> tempTrackSegments= new LinkedList<WayPoint>(trackSeqs2);
-		MergedWayPoint mwp;
-		//sorting content of second List
-		ReferenceWayPointComparator wpc = new ReferenceWayPointComparator();
-		for (int j = 0; j < mergedTrackSegments.size(); j++) {
-			mwp = new MergedWayPoint(mergedTrackSegments.get(j));
-			wpc.setReferencePoint(mergedTrackSegments.get(j));
-			Collections.sort(tempTrackSegments, wpc);
-			for (int i = 0; i < tempTrackSegments.size() && (tempTrackSegments.get(i).getCoor()
-					.greatCircleDistance(
-							mergedTrackSegments.getFirst().getCoor()
-							)<=pointAccuracy) ; i++) {
-				mwp.addWayPoint(mergedTrackSegments.get(i));
-				tempTrackSegments.remove(i);
-				i--;
-			}
-			mergedTrackSegments.set(j, mwp);
-		}
-		//TODO
-		return null;
-	}
 	static public Double hausDorffDistance(Collection<? extends WayPoint> trackSeqs1, Collection<? extends WayPoint> trackSeqs2) {
 		
 		LinkedList<WayPoint> tempList1= new LinkedList<WayPoint>(trackSeqs1);
@@ -637,6 +588,7 @@ static public Double additiveMinDistance(Collection<? extends WayPoint> trackSeq
 		}
 		return result;
 	}
+	@SuppressWarnings("unused")
 	static private void sort(WayPoint wayPoint, LinkedList<WayPoint> tempList2) {
 		ReferenceWayPointComparator wpc = new ReferenceWayPointComparator();
 		wpc.setReferencePoint(wayPoint);
@@ -650,12 +602,9 @@ static public Double additiveMinDistance(Collection<? extends WayPoint> trackSeq
 	 * @return
 	 */
 	static public LinkedList<MergedWayPoint> rasterMergeWaypoints(LinkedList<WayPoint> waypoints, double gridSize) {
-		LinkedList<WayPoint> tempWaypoints = new LinkedList<WayPoint>(waypoints);
 		LinkedList<MergedWayPoint> mergedWaypoints = new LinkedList<MergedWayPoint>();
 		Bounds border = getBounds(waypoints);
 		getBoundsGrid(border);
-		
-	
 		return mergedWaypoints;
 	
 	}
@@ -700,6 +649,7 @@ static public Double additiveMinDistance(Collection<? extends WayPoint> trackSeq
 		}
 		return segs;
 	}
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static List<GpxTrack> buildTracks(List<MergedWayPoint> mergedWayPointsList, int k) {
 		List<List<MergedWayPoint>> segs;
 		LinkedList<GpxTrack> tracks = new LinkedList<GpxTrack>();
@@ -707,7 +657,6 @@ static public Double additiveMinDistance(Collection<? extends WayPoint> trackSeq
 		segs=createSegments(mergedWayPointsList, k);
 		for (List<MergedWayPoint> seg : segs) {
 			virtualSeq = new LinkedList<Collection<WayPoint>>();
-			//FIXME: not type safe but should be fast
 			virtualSeq.add((List<WayPoint>)(List)seg);
 			tracks.add(new ImmutableGpxTrack(virtualSeq,new HashMap<String, Object>()));
 		}
@@ -722,7 +671,6 @@ static public Double additiveMinDistance(Collection<? extends WayPoint> trackSeq
 		//get min
 		LinkedList<Double> allDiffs1 = new LinkedList<Double>();
 		LinkedList<Double> allDiffs2 = new LinkedList<Double>();
-		//FIXME: here dynamic programming? maybe only for bigger segments
 		for (WayPoint wayPoint : tempList1) {
 			double wpMin =getMinDifference(wayPoint,tempList2);
 			if(wpMin>trackDistance){

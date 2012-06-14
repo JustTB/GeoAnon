@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.gpsanonymity.io.IOFunctions;
 import org.gpsanonymity.merge.MergeGPS;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
@@ -16,12 +15,11 @@ public class SegmentClusterCloud extends SegmentCloud {
 	private double angleWeight;
 	private double distanceWeight;
 	public SegmentClusterCloud(List<GpxTrack> morePointTracks, int k,
-			double trackDistance, int segmentLength, boolean ignoreDirection,
+			double trackDistance, boolean ignoreDirection,
 			double angelAllowance, Statistician statistician, double angleWeight, double distanceWeight) {
 		this.sourceTracks=new LinkedList<GpxTrack>(morePointTracks);
 		this.k = k;
 		this.trackDistance=trackDistance;
-		this.segmentLength=segmentLength;
 		this.angelAllowance=angelAllowance;
 		this.ignoreDirection=ignoreDirection;
 		this.statistician = statistician;
@@ -49,6 +47,7 @@ public class SegmentClusterCloud extends SegmentCloud {
 		
 	}
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void mergeSimilarSegments() {
 		for (GpxTrackSegment seg : similarSegments.keySet()) {
 			mergedWayPoints.addAll((Collection<MergedWayPoint>)(Collection)seg.getWayPoints());

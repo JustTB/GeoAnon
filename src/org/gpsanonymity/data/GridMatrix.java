@@ -312,4 +312,17 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	public void setWidth(int width) {
 		this.widthSize = width;
 	}
+	public void initAgainWithHigherK(int k, Statistician newStatistician){
+		if(k<=this.k){
+			return;
+		}
+		newStatistician.copyFrom(statistician);
+		statistician=newStatistician;
+		this.k=k;
+		newStatistician.setk(k);
+		eliminateLowerGradeWayPoints();
+		checkNeighborHood();
+		generateTracks(k);
+		newStatistician.setFromMergedTracks(getTracks());
+	}
 }

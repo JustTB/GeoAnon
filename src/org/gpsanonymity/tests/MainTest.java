@@ -8,10 +8,8 @@ import java.util.List;
 import org.gpsanonymity.Main;
 import org.gpsanonymity.data.Statistician;
 import org.gpsanonymity.io.IOFunctions;
-import org.gpsanonymity.merge.MergeGPS;
 import org.junit.Assert;
 import org.junit.Test;
-import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.ImmutableGpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.WayPoint;
@@ -45,10 +43,11 @@ public class MainTest {
 	}
 	@Test
 	public void testMergeTracksOnGrid(){
+		Statistician statistician = new Statistician();
 		IOFunctions.exportTracks(
 				Main.mergingTracksOnGrid(
 						Main.importTracks("input/leipzig.gpx"),
-						3, 4,0.5),
+						3, 4.0,0.5, statistician).getTracks(),
 				"output/GPXMergeTracksOnGrid_1_2_0.5.gpx");
 	}
 	@Test
@@ -57,15 +56,13 @@ public class MainTest {
 		int segmentLenght=2;
 		double pointDensity=2;
 		double trackDistance=4;
-		boolean ignoreDirection=true;
-		double angelAllowance=1;
 		for (String file : getSimpleTestData()) {
 			System.out.println("File: "+file);
 			Statistician statistician = new Statistician();
 			IOFunctions.exportTracks(
 					Main.mergingTracksWithKMeans(
 							Main.importTracks(file),
-							k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance,statistician),
+							k, pointDensity,statistician).getMergedTracks(),
 							"output/GPXKMeansCloud_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
 		}
 	}
@@ -85,7 +82,7 @@ public class MainTest {
 			IOFunctions.exportTracks(
 					Main.mergingTracksWithSegmentClusters(
 							Main.importTracks(file),
-							k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance,statistician,angleWeight,distanceWeight),
+							k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance,statistician,angleWeight,distanceWeight).getMergedTracks(),
 							"output/GPXSegmentCloud_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
 		}
 	}
@@ -102,9 +99,9 @@ public class MainTest {
 			System.out.println("Status: Reading file"+file);
 			Statistician statistician = new Statistician();
 			IOFunctions.exportTracks(
-					Main.mergingTracksSimpleSimilar(
+					Main.mergingTracksWithSegmentCloud(
 							Main.importTracks(file),
-							k, pointDensity,trackDistance,segmentLenght,ignoreDirection,angelAllowance,statistician),
+							k, pointDensity,trackDistance,ignoreDirection,angelAllowance,statistician).getMergedTracks(),
 							"output/GPXMergeTracks_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
 		}
 	}
@@ -121,14 +118,15 @@ public class MainTest {
 			IOFunctions.exportTracks(
 					Main.mergingTracksWithCliqueCloak(
 							Main.importTracks(file),
-							k, pointDensity,statistician),
+							k, pointDensity,statistician).getMergedTracks(),
 							"output/GPXMergeTracksCC_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
 		//}
 	}
 	@Test
 	public void testMergeTracksWithCliqueCloakExtended(){
 		int k=5;
-		int segmentLenght=2;
+		int intolerance=3;
+		int minimalAreaDistance=3;
 		double pointDensity=2;
 		double trackDistance=4;
 		String file = "leipzig_track_example.gpx";
@@ -138,8 +136,8 @@ public class MainTest {
 			IOFunctions.exportTracks(
 					Main.mergingTracksWithCliqueCloakExtended(
 							Main.importTracks(file),
-							k, pointDensity,statistician),
-							"output/GPXMergeTracksCCE_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
+							k, pointDensity,intolerance,minimalAreaDistance,statistician).getMergedTracks(),
+							"output/GPXMergeTracksCCE_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+".gpx");
 		//}
 	}
 	@Test
