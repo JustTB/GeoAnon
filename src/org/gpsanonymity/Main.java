@@ -87,8 +87,9 @@ public class Main {
 		minimalAreaDistanceList.add(4.0);
 		minimalAreaDistanceList.add(8.0);
 		inputFileList = new LinkedList<String>();
-		inputFileList.add(inputFolder+"Berlin.dat");
-		inputFileList.add(inputFolder+"MecklenBurg-Vorp..dat");
+		inputFileList.add("input/Belluno/Belluno.dat");
+		inputFileList.add("input/Berlin/Berlin.dat");
+		inputFileList.add("input/SoCairo/SoCairo.dat");
 		//////////////////////Bounds and Filenames ///////////////////////////
 		boundsAndFilenames = new HashMap<Bounds, String>();
 		//Belluno
