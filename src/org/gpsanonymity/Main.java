@@ -500,7 +500,11 @@ public class Main {
 //		}else{
 			morePointTracks = new LinkedList<GpxTrack>(tracks);
 //		}
+<<<<<<< HEAD
 		MinimalAreaCloud ccc= new MinimalAreaCloud(morePointTracks,k, statistician);
+=======
+		CliqueCloakCloud ccc= new CliqueCloakCloud(morePointTracks,k, statistician);
+>>>>>>> b367ecb620f2f63e32edd401fe30903350cb2429
 		return ccc;
 	}
 	public static MinimalAreaExtendedCloud mergingTracksWithCliqueCloakExtended(List<GpxTrack> tracks,int k , double pointDensity, int intolerance, double minimalAreaDistance, Statistician statistician) {
@@ -511,7 +515,11 @@ public class Main {
 //		}else{
 			morePointTracks = new LinkedList<GpxTrack>(tracks);
 //		}
+<<<<<<< HEAD
 		MinimalAreaExtendedCloud ccc= new MinimalAreaExtendedCloud(morePointTracks,k,intolerance,minimalAreaDistance, statistician);
+=======
+		CliqueCloakExtendedCloud ccc= new CliqueCloakExtendedCloud(morePointTracks,k,intolerance,minimalAreaDistance, statistician);
+>>>>>>> b367ecb620f2f63e32edd401fe30903350cb2429
 		return ccc;
 	}
 }

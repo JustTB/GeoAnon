@@ -609,6 +609,13 @@ static public Double additiveMinDistance(Collection<? extends WayPoint> trackSeq
 		}
 		if(mergedWayPoints.size()==0){
 			return null;
+<<<<<<< HEAD
+=======
+	}
+	public static List<List<MergedWayPoint>> createSegments(List<MergedWayPoint> mergedWayPoints, int k) {
+		if(mergedWayPoints.size()==0){
+			return null;
+>>>>>>> b367ecb620f2f63e32edd401fe30903350cb2429
 		}
 		List<List<MergedWayPoint>> segs= new LinkedList<List<MergedWayPoint>>();
 		LinkedList<MergedWayPoint> mergedWayPointsList = new LinkedList<MergedWayPoint>(mergedWayPoints);

@@ -2,6 +2,7 @@ package org.gpsanonymity.data;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -74,30 +75,50 @@ public class MinimalAreaCloud extends Cloud {
 			mergedWaypoints.add(tempMwp);
 		}
 	}
-	protected boolean makeBounds(Bounds bounds,List<MergedWayPoint> mwps) {
-		LinkedList<Bounds> halfBounds = getHalfBounds(bounds);
-		assert(halfBounds.size()==2);
-		LinkedList<MergedWayPoint> mwp0s = new LinkedList<MergedWayPoint>();
-		LinkedList<MergedWayPoint> mwp1s = new LinkedList<MergedWayPoint>();
-		for (MergedWayPoint mwp : mwps) {
-			if(halfBounds.get(0).contains(mwp.getCoor())){
-				mwp0s.add(mwp);
-			}else if (halfBounds.get(1).contains(mwp.getCoor())){
-				mwp1s.add(mwp);
-			}else{
-				System.out.println("WHAT!!!");
-				throw new Error();
+	protected void makeBounds(Bounds bounds,List<MergedWayPoint> mwps) {
+		IdentityHashMap<Bounds, List<MergedWayPoint>> toCalculateBounds = new IdentityHashMap<Bounds, List<MergedWayPoint>>();
+		toCalculateBounds.put(bounds, mwps);
+		Bounds currentBounds = bounds;
+		List<MergedWayPoint> currentMwps = mwps;
+		while(!toCalculateBounds.isEmpty()){
+			currentBounds=toCalculateBounds.keySet().iterator().next();
+			currentMwps=toCalculateBounds.get(currentBounds);
+			double minimalAreaDistance=0.0000001;
+			if(currentBounds.getMin().distance(currentBounds.getMax())<minimalAreaDistance){
+				allBounds.put(currentBounds,currentMwps);
+				toCalculateBounds.remove(currentBounds);
+				if(toCalculateBounds.isEmpty()){
+					break;
+				}else{
+					currentBounds=toCalculateBounds.keySet().iterator().next();
+					currentMwps = toCalculateBounds.get(currentBounds);
+				}
 			}
-		}
-		if(trackGradeHigherOrEqualThen(mwp0s,k) && trackGradeHigherOrEqualThen(mwp1s,k)){
-			return makeBounds(halfBounds.get(0),mwp0s) && makeBounds(halfBounds.get(1),mwp1s);
-		}else if(trackGradeHigherOrEqualThen(mwp0s,k) && mwp1s.size()==0){
-			return makeBounds(halfBounds.get(0),mwp0s);
-		}else if(trackGradeHigherOrEqualThen(mwp1s,k) && mwp0s.size()==0){
-			return makeBounds(halfBounds.get(1),mwp1s);
-		}else{
-			allBounds.put(bounds,mwps);
-			return true;
+			LinkedList<Bounds> halfBounds = getHalfBounds(currentBounds);
+			assert(halfBounds.size()==2);
+			LinkedList<MergedWayPoint> mwp0s = new LinkedList<MergedWayPoint>();
+			LinkedList<MergedWayPoint> mwp1s = new LinkedList<MergedWayPoint>();
+			for (MergedWayPoint mwp : currentMwps) {
+				if(halfBounds.get(0).contains(mwp.getCoor())){
+					mwp0s.add(mwp);
+				}else if (halfBounds.get(1).contains(mwp.getCoor())){
+					mwp1s.add(mwp);
+				}else{
+					System.out.println("WHAT!!!"+ currentMwps.indexOf(mwp));
+					throw new Error();
+				}
+			}
+			if(trackGradeHigherOrEqualThen(mwp0s,k) && trackGradeHigherOrEqualThen(mwp1s,k)){
+				toCalculateBounds.put(halfBounds.get(0),mwp0s);
+				toCalculateBounds.put(halfBounds.get(1),mwp1s);
+			}else if(trackGradeHigherOrEqualThen(mwp0s,k) && mwp1s.size()==0 && mwp0s.size()!=k){
+				toCalculateBounds.put(halfBounds.get(0),mwp0s);
+			}else if(trackGradeHigherOrEqualThen(mwp1s,k) && mwp0s.size()==0 && mwp1s.size()!=k){
+				toCalculateBounds.put(halfBounds.get(1),mwp1s);
+			}else{
+				allBounds.put(currentBounds,currentMwps);
+			}
+			toCalculateBounds.remove(currentBounds);
 		}
 	}
 	protected boolean trackGradeHigherOrEqualThen(LinkedList<MergedWayPoint> mwp0s, int k) {
@@ -146,6 +167,9 @@ public class MinimalAreaCloud extends Cloud {
 				}else{
 					resultBounds.extend(track.getBounds());
 				}
+			}else if (resultBounds==null){
+				resultBounds=new Bounds(track.getSegments().iterator().next()
+						.getWayPoints().iterator().next().getCoor());
 			}
 		}
 		wholeBounds=resultBounds;
@@ -170,7 +194,14 @@ public class MinimalAreaCloud extends Cloud {
 					if(antecessor!=null){
 						mwp.connect(antecessor);
 					}
+<<<<<<< HEAD
 					mergedWaypoints.add(mwp);
+=======
+					if(!wholeBounds.contains(mwp.getCoor())){
+						wholeBounds.extend(mwp.getCoor());
+					}
+					mergedWayPoints.add(mwp);
+>>>>>>> b367ecb620f2f63e32edd401fe30903350cb2429
 				}
 			}
 		}

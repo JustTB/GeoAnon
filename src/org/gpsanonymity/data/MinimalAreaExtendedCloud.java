@@ -65,6 +65,7 @@ public class MinimalAreaExtendedCloud extends MinimalAreaCloud {
 		statistician.setFromMergedTracks(tracks);
 		System.out.println("Status: Done!!");
 	}
+<<<<<<< HEAD
 	protected boolean makeBounds(Bounds bounds,List<MergedWayPoint> mwps) {
 		if(bounds.getMin().greatCircleDistance(bounds.getMax())<minimalDiagonalLength){
 			allBounds.put(bounds,mwps);
@@ -79,27 +80,86 @@ public class MinimalAreaExtendedCloud extends MinimalAreaCloud {
 				mwp0s.add(mwp);
 			}else if (halfBounds.get(1).contains(mwp.getCoor())){
 				mwp1s.add(mwp);
+=======
+	protected void makeBounds(Bounds bounds,List<MergedWayPoint> mwps) {
+		HashMap<Bounds, List<MergedWayPoint>> toCalculateBounds = new HashMap<Bounds, List<MergedWayPoint>>();
+		toCalculateBounds.put(bounds, mwps);
+		Bounds currentBounds = bounds;
+		List<MergedWayPoint> currentMwps = mwps;
+		while(!toCalculateBounds.isEmpty()){
+			currentBounds=toCalculateBounds.keySet().iterator().next();
+			currentMwps = toCalculateBounds.get(currentBounds);
+			if(currentBounds.getMin().greatCircleDistance(currentBounds.getMax())<minimalAreaDistance){
+				allBounds.put(currentBounds,currentMwps);
+				toCalculateBounds.remove(currentBounds);
+				if(toCalculateBounds.isEmpty()){
+					break;
+				}else{
+					currentBounds=toCalculateBounds.keySet().iterator().next();
+					currentMwps = toCalculateBounds.get(currentBounds);
+				}
+			}
+			LinkedList<Bounds> halfBounds = getCentroidBounds(currentBounds,currentMwps);
+			assert(halfBounds.size()==2);
+			LinkedList<MergedWayPoint> mwp0s = new LinkedList<MergedWayPoint>();
+			LinkedList<MergedWayPoint> mwp1s = new LinkedList<MergedWayPoint>();
+			for (MergedWayPoint mwp : currentMwps) {
+				if(halfBounds.get(0).contains(mwp.getCoor())){
+					mwp0s.add(mwp);
+				}else if (halfBounds.get(1).contains(mwp.getCoor())){
+					mwp1s.add(mwp);
+				}else{
+					System.out.println("WHAT!!!");
+					throw new Error();
+				}
+			}
+			boolean higher0=trackGradeHigherOrEqualThen(mwp0s,k);
+			boolean higher1=trackGradeHigherOrEqualThen(mwp1s,k);
+			if(higher0 && higher1){
+				toCalculateBounds.put(halfBounds.get(0),mwp0s);
+				toCalculateBounds.put(halfBounds.get(1),mwp1s);
+			}else if(higher0 && !trackGradeHigherOrEqualThen(mwp1s,intolerance+1)){
+				toCalculateBounds.put(halfBounds.get(0),mwp0s);
+			}else if(higher1 && !trackGradeHigherOrEqualThen(mwp0s,intolerance+1)){
+				toCalculateBounds.put(halfBounds.get(1),mwp1s);
+>>>>>>> b367ecb620f2f63e32edd401fe30903350cb2429
 			}else{
-				System.out.println("WHAT!!!");
-				throw new Error();
+				allBounds.put(currentBounds,currentMwps);
 			}
-		}
-		boolean higher0=trackGradeHigherOrEqualThen(mwp0s,k);
-		boolean higher1=trackGradeHigherOrEqualThen(mwp1s,k);
-		if(higher0 && higher1){
-			return makeBounds(halfBounds.get(0),mwp0s) && makeBounds(halfBounds.get(1),mwp1s);
-		}else if(higher0 && !trackGradeHigherOrEqualThen(mwp1s,intolerance+1)){
-			return makeBounds(halfBounds.get(0),mwp0s);
-		}else if(higher1 && !trackGradeHigherOrEqualThen(mwp0s,intolerance+1)){
-			return makeBounds(halfBounds.get(1),mwp1s);
-		}else{
-			if(bounds.getMin().greatCircleDistance(bounds.getMax())>1000){
-				System.out.println("How much is the Fish!");
-			}
-			allBounds.put(bounds,mwps);
-			return true;
+			toCalculateBounds.remove(currentBounds);
 		}
 	}
+	private LinkedList<Bounds> getCentroidBounds(Bounds bounds,
+			List<MergedWayPoint> mwps) {
+		LatLon downRightCorner = new LatLon(bounds.getMin().getY(), bounds.getMax().getX());
+		LinkedList<Bounds> result = new LinkedList<Bounds>();
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		LatLon centroid=MergeGPS.calculateCentroid((List)mwps);
+		LatLon seperator;
+		if(downRightCorner.greatCircleDistance(bounds.getMin())//width
+				>downRightCorner.greatCircleDistance(bounds.getMax())){//height
+			//left right tiling
+			seperator=new LatLon(
+					bounds.getMin().getY(),
+					centroid.getX());
+			result.add(new Bounds(
+					bounds.getMin(),
+					new LatLon(bounds.getMax().getY()
+						,seperator.getX())));
+		}else{//top down tiling
+			seperator=new LatLon(
+					centroid.getY()
+					,bounds.getMin().getX());
+			result.add(new Bounds(
+					bounds.getMin(),
+					new LatLon(seperator.getY()
+						,bounds.getMax().getX())
+					));
+		}
+		result.add(new Bounds(seperator,bounds.getMax()));
+		return result;
+	}
+
 	private LinkedList<Bounds> getKMeansBounds(Bounds bounds,
 			List<MergedWayPoint> mwps) {
 		LatLon downRightCorner = new LatLon(bounds.getMin().getY(), bounds.getMax().getX());

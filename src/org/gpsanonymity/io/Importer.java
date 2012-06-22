@@ -41,7 +41,7 @@ public class Importer {
 	public boolean hasnext() {
 		if(currentY+1<coorMax){
 			return true;
-		}else if(currentX+1<=coorMax){
+		}else if(currentX+1<coorMax){
 			return true;
 		}else{
 			return false;
@@ -73,6 +73,11 @@ public class Importer {
 		}else if (currentX>=coorMax){
 			return null;
 		}
+		String currentFileName = genericPath.replace(".gpx", currentX+"_"+currentY+".gpx");
+		System.out.println("Current file: "+currentFileName);
+		return IOFunctions.getAllTracks(IOFunctions.importGPX(currentFileName));
+	}
+	public List<GpxTrack> current(){
 		String currentFileName = genericPath.replace(".gpx", currentX+"_"+currentY+".gpx");
 		return IOFunctions.getAllTracks(IOFunctions.importGPX(currentFileName));
 	}
