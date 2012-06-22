@@ -39,14 +39,14 @@ public class Statistician implements Serializable{
 	
 	public Statistician() {
 	}
-	public Statistician(String path) {
+	public Statistician(String path) throws FileNotFoundException {
 		filePath=path;
 		try {
 			ObjectInputStream oos = new ObjectInputStream(new FileInputStream(new File(path)));
 			Statistician statistician =(Statistician)oos.readObject();
 			copyFrom(statistician);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			throw e;
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
@@ -159,7 +159,7 @@ public class Statistician implements Serializable{
 		this.mergedConnectionNumbers=sourceTrackNumber;
 	}
 	public int getRemovedConnectionNumber() {
-		return removedConnectionNumbers;
+		return (removedConnectionNumbers==null?0:removedConnectionNumbers);
 	}
 	public void setRemovedConnectionNumber(int sourceTrackNumber) {
 		this.removedConnectionNumbers=sourceTrackNumber;
@@ -277,9 +277,17 @@ public class Statistician implements Serializable{
 		this.usedWaypointNumbers=usedWaypointNumbers;
 	}
 	public void incrementMergedWaypointGrade(int grade) {
-		this.mergedWaypointGrade.put(grade, this.mergedWaypointGrade.get(grade)+1);
+		if(this.mergedWaypointGrade.containsKey(grade)){
+			this.mergedWaypointGrade.put(grade, this.mergedWaypointGrade.get(grade)+1);
+		}else{
+			this.mergedWaypointGrade.put(grade, 1);
+		}
 	}
 	public void incrementNeighborGrade(int grade) {
-		this.neighborGrade.put(grade, this.neighborGrade.get(grade)+1);
+		if(this.neighborGrade.containsKey(grade)){
+			this.neighborGrade.put(grade, this.neighborGrade.get(grade)+1);
+		}else{
+			this.neighborGrade.put(grade, 1);
+		}
 	}
 }
