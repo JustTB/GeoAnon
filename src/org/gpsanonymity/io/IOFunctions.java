@@ -153,9 +153,10 @@ public class IOFunctions {
 			FileInputStream fis = new FileInputStream(f);
 			final GpxReader r = new GpxReader(fis);
 			r.parse(true);
-			System.out.println("Has RoutePoints:" + r.data.hasRoutePoints());
-			System.out.println("Has Trackpoints:" + r.data.hasTrackPoints());
-			System.out.println("No WayPoints:" + !r.data.waypoints.isEmpty());
+			fis.close();
+//			System.out.println("Has RoutePoints:" + r.data.hasRoutePoints());
+//			System.out.println("Has Trackpoints:" + r.data.hasTrackPoints());
+//			System.out.println("No WayPoints:" + !r.data.waypoints.isEmpty());
 			return r;
 		}catch (IOException e) {
 			System.out.println(fPath + " is not readable.");

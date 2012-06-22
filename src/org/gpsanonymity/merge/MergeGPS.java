@@ -623,6 +623,9 @@ static public Double additiveMinDistance(Collection<? extends WayPoint> trackSeq
 			return null;
 	}
 	public static List<List<MergedWayPoint>> createSegments(List<MergedWayPoint> mergedWayPoints, int k) {
+		if(mergedWayPoints.size()==0){
+			return null;
+		}
 		List<List<MergedWayPoint>> segs= new LinkedList<List<MergedWayPoint>>();
 		LinkedList<MergedWayPoint> mergedWayPointsList = new LinkedList<MergedWayPoint>(mergedWayPoints);
 		List<MergedWayPoint> list = new LinkedList<MergedWayPoint>();
@@ -655,11 +658,15 @@ static public Double additiveMinDistance(Collection<? extends WayPoint> trackSeq
 		LinkedList<GpxTrack> tracks = new LinkedList<GpxTrack>();
 		Collection<Collection<WayPoint>> virtualSeq;
 		segs=createSegments(mergedWayPointsList, k);
+		if(segs==null){
+			return tracks;
+		}
 		for (List<MergedWayPoint> seg : segs) {
 			virtualSeq = new LinkedList<Collection<WayPoint>>();
 			virtualSeq.add((List<WayPoint>)(List)seg);
 			tracks.add(new ImmutableGpxTrack(virtualSeq,new HashMap<String, Object>()));
 		}
+		
 		return tracks;
 		
 	}

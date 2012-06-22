@@ -14,7 +14,7 @@ public class KMeansCloud extends Cloud{
 	public KMeansCloud(List<GpxTrack> morePointTracks, int k,
 			Statistician statistician) {
 		super();
-		this.sourceTracks=new LinkedList<GpxTrack>(tracks);
+		this.sourceTracks=new LinkedList<GpxTrack>(morePointTracks);
 		this.k = k;
 		this.statistician = statistician;
 		initializeStatistician();

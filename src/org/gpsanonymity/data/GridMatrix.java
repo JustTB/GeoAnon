@@ -287,10 +287,10 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	protected void initialize (Bounds border, double distance){
 		this.distance=distance;
 		LatLon downRightCorner = new LatLon(border.getMin().getY(), border.getMax().getX());
-		System.out.println("Width in m:"+ border.getMin()
-				.greatCircleDistance(downRightCorner));
-		System.out.println("Height in m:"+ border.getMax()
-				.greatCircleDistance(downRightCorner));
+//		System.out.println("Width in m:"+ border.getMin()
+//				.greatCircleDistance(downRightCorner));
+//		System.out.println("Height in m:"+ border.getMax()
+//				.greatCircleDistance(downRightCorner));
 		this.widthSize =1+ (int)Math.floor(
 				border.getMin()
 				.greatCircleDistance(downRightCorner)/distance);
