@@ -12,7 +12,7 @@ public abstract class Cloud {
 	protected List<GpxTrack> sourceTracks;
 	protected int k;
 	protected List<GpxTrack> tracks;
-	protected List<MergedWayPoint> mergedWayPoints=new LinkedList<MergedWayPoint>();
+	protected List<MergedWayPoint> mergedWaypoints=new LinkedList<MergedWayPoint>();
 	protected Statistician statistician;
 	
 	
@@ -36,7 +36,7 @@ public abstract class Cloud {
 	}
 
 	protected void checkNeighborHood() {
-		List<MergedWayPoint> mwps = new LinkedList<MergedWayPoint>(mergedWayPoints);
+		List<MergedWayPoint> mwps = new LinkedList<MergedWayPoint>(mergedWaypoints);
 		int count=0;
 		for (MergedWayPoint mwp : mwps) {
 			List<MergedWayPoint> neighbors = new LinkedList<MergedWayPoint>(mwp.getNeighbors());
@@ -54,12 +54,12 @@ public abstract class Cloud {
 		
 	}
 
-	protected void eliminateLowerGradeWayPoints() {
-		List<MergedWayPoint> mwps = new LinkedList<MergedWayPoint>(mergedWayPoints);
+	protected void eliminateLowerGradeWaypoints() {
+		List<MergedWayPoint> mwps = new LinkedList<MergedWayPoint>(mergedWaypoints);
 		int count=0, removedConnectionCounter=0;
 		for (MergedWayPoint mwp : mwps) {
 			if(mwp.getTrackGrade()<k){
-				mergedWayPoints.remove(mwp);
+				mergedWaypoints.remove(mwp);
 				removedConnectionCounter+=mwp.disconnectAll();
 				count++;
 			}
@@ -79,12 +79,7 @@ public abstract class Cloud {
 	}
 
 	protected void buildTracks() {
-		for (MergedWayPoint mwp : mergedWayPoints) {
-			if(!mwp.isConnectionGradeCorrect()){
-				System.out.println("its here");
-			}
-		}
-		tracks=MergeGPS.buildTracks(mergedWayPoints , k);
+		tracks=MergeGPS.buildTracks(mergedWaypoints , k);
 	}
 
 	protected double getDistance(GpxTrackSegment seg,
@@ -115,7 +110,7 @@ public abstract class Cloud {
 		this.k=k;
 		statistician.setk(k);
 		System.out.println("Status: Eliminate wayPoints with grade<"+k);
-		eliminateLowerGradeWayPoints();
+		eliminateLowerGradeWaypoints();
 		System.out.println("Status: Check Neighborhood");
 		checkNeighborHood();
 		System.out.println("Status: Build tracks!!");

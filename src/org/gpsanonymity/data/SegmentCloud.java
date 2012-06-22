@@ -58,7 +58,7 @@ public class SegmentCloud extends Cloud{
 		mergeSimilarSegments();
 		statistician.setFromMergedWayPoints(mergedWayPoints);
 		System.out.println("Status: Eliminate wayPoints with grade<"+k);
-		eliminateLowerGradeWayPoints();
+		eliminateLowerGradeWaypoints();
 		System.out.println("Status: Check Neighborhood");
 		checkNeighborHood();
 		System.out.println("Status: Build tracks!!");
@@ -88,52 +88,18 @@ public class SegmentCloud extends Cloud{
 		
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void mergeSimilarSegments() {
-		List<WayPoint> maxWPs,minWPs;
 		while(!similarSegments.isEmpty()) {
 			LinkedList<HashSet<GpxTrackSegment>> hashSetList = new LinkedList<HashSet<GpxTrackSegment>>(similarSegments.values());
-			HashSet<GpxTrackSegment> list = hashSetList.get(0);
-			maxWPs =new LinkedList<WayPoint>();
-			minWPs =new LinkedList<WayPoint>();
+			LinkedList<GpxTrackSegment> list = new LinkedList<GpxTrackSegment>(hashSetList.get(0));
 			//this only works with segmentsLength=2
-			boolean maxMin = false;
-			List<MergedWayPoint> newMwps;
-			if(maxMin){
-				CoordinateWayPointComparator cwpc= new CoordinateWayPointComparator();
-				for (GpxTrackSegment gpxTrackSegment : list) {
-					similarSegments.remove(gpxTrackSegment);
-					List<WayPoint> wps = new LinkedList<WayPoint>(gpxTrackSegment.getWayPoints());
-					Collections.sort(wps,cwpc);
-					maxWPs.add(wps.get(0));
-					minWPs.add(wps.get(1));
-				}
-				newMwps = MergeGPS.mergeWithKMeans(maxWPs, 1);
-				newMwps.addAll(MergeGPS.mergeWithKMeans(minWPs, 1));
-			}else{
-				LinkedList<WayPoint> wps = new LinkedList<WayPoint>();
-				for (GpxTrackSegment gpxTrackSegment : list) {
-					similarSegments.remove(gpxTrackSegment);
-					wps.addAll(gpxTrackSegment.getWayPoints());
-				}
-				LinkedList<WayPoint> newWps = new LinkedList<WayPoint>();
-				for (WayPoint wp : wps) {
-					MergedWayPoint mwp = ((MergedWayPoint) wp).current();
-					newWps.add(mwp);
-				}
-				newMwps=MergeGPS.mergeWithKMeans(newWps, segmentLength);
+			GpxTrackSegment seg=MergeGPS.calculateMergeSegmentCentroid(list);
+			for (GpxTrackSegment gpxTrackSegment : list) {
+				similarSegments.remove(gpxTrackSegment);
 			}
-			MergedWayPoint ancessor=null;
-			for (Iterator<MergedWayPoint> iterator = newMwps.iterator(); iterator.hasNext();) {
-				MergedWayPoint mwp = (MergedWayPoint) iterator
-						.next();
-				if (ancessor!=null && mwp.getNeighborGrade(ancessor)==0){
-					mwp.connect(ancessor,list.size());
-				}
-				ancessor=mwp;
-				
-			}
-			//System.out.println("NeighborGrade: "+newWps.get(0).getNeighborGrade(newWps.get(newWps.size()-1)));
-			mergedWayPoints.addAll(newMwps);
+			
+			mergedWayPoints.addAll((List<MergedWayPoint>)(List)seg.getWayPoints());
 		}
 	}
 

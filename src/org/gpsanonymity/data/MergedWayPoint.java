@@ -146,7 +146,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 				HashSet<GpxTrack> commonTracks= new HashSet<GpxTrack>(this.sourceTracks.keySet());
 				commonTracks.retainAll(newNeighbor.sourceTracks.keySet());
 				connectionGrades.put(newNeighbor, commonTracks.size());
-				System.out.println("Connection Grade:" +connectionGrades.get(newNeighbor));
+				//System.out.println("Connection Grade:" +connectionGrades.get(newNeighbor));
 			}else{
 				connectionGrades.put(newNeighbor, connectionGrades2.get(newNeighbor));
 			}
@@ -204,8 +204,10 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 	 */
 	public void calculateNewCoordinates() {
 		LatLon result = MergeGPS.calculateCentroid(sourceWaypoints);
-		this.lat=result.lat();
-		this.lon=result.lon();
+		if (result!=null){
+			this.lat=Math.round(result.lat()*10000000)/10000000.0;
+			this.lon=Math.round(result.lon()*10000000)/10000000.0;
+		}
 	}
 	public void calculateNewDate() {
 		gpxDate=MergeGPS.simpleGeneralizeDate(sourceWaypoints);
@@ -291,7 +293,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 
 
 
-	public void colorConnection(MergedWayPoint neighbor){
+	public void markConnection(MergedWayPoint neighbor){
 		neighbor=neighbor.current();
 		if(connections.containsKey(neighbor)){
 			connections.put(neighbor, true);
@@ -299,7 +301,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 		}
 		assert(connections.size()==connectionGrades.size());
 	}
-	public Boolean getColor(MergedWayPoint neighbor){
+	public Boolean isMarked(MergedWayPoint neighbor){
 		neighbor=neighbor.current();
 		if(connections.containsKey(neighbor)){
 			assert(connections.size()==connectionGrades.size());
@@ -352,7 +354,7 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 	}
 
 	public void removeIfExist(WayPoint wayPoint) {
-		if (sourceWaypoints.contains(wayPoint)) {
+		if (sourceWaypoints.contains(wayPoint) && wayPoint!=null) {
 			sourceWaypoints.remove(wayPoint);
 			calculateNewCoordinates();
 			calculateNewDate();

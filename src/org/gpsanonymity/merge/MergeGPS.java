@@ -337,31 +337,38 @@ public class MergeGPS {
 		//for each clusterGroup find new centroid
 		for (List<GpxTrackSegment> cluster : clusterGroups) {
 			if(!cluster.isEmpty()){
-				result.add(MergeGPS.calculateMergeSegmentCentroid(cluster, ignoreDirection));
+				result.add(MergeGPS.calculateMergeSegmentCentroid(cluster));
 			}
 		}
 		return result;
 	}
-	private static GpxTrackSegment calculateMergeSegmentCentroid(
-			List<GpxTrackSegment> cluster, boolean ignoreDirection) {
-		List<WayPoint> minWps = new LinkedList<WayPoint>();
-		List<WayPoint> maxWps = new LinkedList<WayPoint>();
+	public static GpxTrackSegment calculateMergeSegmentCentroid(
+			List<GpxTrackSegment> cluster) {
+		List<WayPoint> all1Wps = new LinkedList<WayPoint>();
+		List<WayPoint> all2Wps = new LinkedList<WayPoint>();
+		LatLon reference1=null;
+		LatLon reference2=null;
 		for (GpxTrackSegment gpxTrackSegment : cluster) {
 			List<WayPoint> wps = new LinkedList<WayPoint>(gpxTrackSegment.getWayPoints());
-			if (wps.get(0).getCoor().equals(gpxTrackSegment.getBounds().getMin()) 
-				|| ignoreDirection){
-				minWps.add(wps.get(0));
-				maxWps.add(wps.get(1));
+			if(reference1==null || reference2==null){
+				reference1=wps.get(0).getCoor();
+				reference2=wps.get(1).getCoor();
+				all1Wps.add(wps.get(0));
+				all2Wps.add(wps.get(1));
+			}else if(reference1.distance(wps.get(0).getCoor())//if 0 is closer to reference1
+					<reference1.distance(wps.get(1).getCoor())){
+				all1Wps.add(wps.get(0));
+				all2Wps.add(wps.get(1));
 			}else{
-				minWps.add(wps.get(1));
-				maxWps.add(wps.get(0));
+				all1Wps.add(wps.get(1));
+				all2Wps.add(wps.get(0));
 			}
 		}
-		MergedWayPoint minWp= new MergedWayPoint(minWps);
-		MergedWayPoint maxWp= new MergedWayPoint(maxWps);
+		WayPoint wp1= new MergedWayPoint(all1Wps);
+		WayPoint wp2= new MergedWayPoint(all2Wps);
 		LinkedList<WayPoint> newWps = new LinkedList<WayPoint>();
-		newWps.add(minWp);
-		newWps.add(maxWp);
+		newWps.add(wp1);
+		newWps.add(wp2);
 		return new ImmutableGpxTrackSegment(newWps);
 	}
 	private static List<GpxTrackSegment> makeSegmentCluster(
@@ -391,7 +398,7 @@ public class MergeGPS {
 		}
 		return result;
 	}
-	private static GpxTrackSegment calculateSegmentCentroid(
+	public static GpxTrackSegment calculateSegmentCentroid(
 			List<GpxTrackSegment> cluster) {
 		List<WayPoint> all1Wps = new LinkedList<WayPoint>();
 		List<WayPoint> all2Wps = new LinkedList<WayPoint>();
@@ -595,34 +602,14 @@ static public Double additiveMinDistance(Collection<? extends WayPoint> trackSeq
 		Collections.sort(tempList2, wpc);
 		
 	}
-	/**
-	 * Simple approach
-	 * @param waypoints
-	 * @param accuracy
-	 * @return
-	 */
-	static public LinkedList<MergedWayPoint> rasterMergeWaypoints(LinkedList<WayPoint> waypoints, double gridSize) {
-		LinkedList<MergedWayPoint> mergedWaypoints = new LinkedList<MergedWayPoint>();
-		Bounds border = getBounds(waypoints);
-		getBoundsGrid(border);
-		return mergedWaypoints;
-	
-	}
-	private static void getBoundsGrid(Bounds border) {
-		
-		
-	}
-	private static Bounds getBounds(List<WayPoint> list) {
-		if (list!=null){
-		Bounds result = new Bounds(list.get(0).getCoor());
-		for (WayPoint wayPoint : list) {
-			result.extend(wayPoint.getCoor());
-		}
-		return result;
-		}else
-			return null;
-	}
+
 	public static List<List<MergedWayPoint>> createSegments(List<MergedWayPoint> mergedWayPoints, int k) {
+		if(mergedWayPoints.size()==0){
+			return null;
+		}
+		if(mergedWayPoints.size()==0){
+			return null;
+		}
 		List<List<MergedWayPoint>> segs= new LinkedList<List<MergedWayPoint>>();
 		LinkedList<MergedWayPoint> mergedWayPointsList = new LinkedList<MergedWayPoint>(mergedWayPoints);
 		List<MergedWayPoint> list = new LinkedList<MergedWayPoint>();
@@ -643,7 +630,7 @@ static public Double additiveMinDistance(Collection<? extends WayPoint> trackSeq
 					list = new LinkedList<MergedWayPoint>();
 				}
 			}else{
-				temp.colorConnection(neighbor);
+				temp.markConnection(neighbor);
 				temp=neighbor;
 			}
 		}
@@ -655,11 +642,15 @@ static public Double additiveMinDistance(Collection<? extends WayPoint> trackSeq
 		LinkedList<GpxTrack> tracks = new LinkedList<GpxTrack>();
 		Collection<Collection<WayPoint>> virtualSeq;
 		segs=createSegments(mergedWayPointsList, k);
+		if(segs==null){
+			return tracks;
+		}
 		for (List<MergedWayPoint> seg : segs) {
 			virtualSeq = new LinkedList<Collection<WayPoint>>();
 			virtualSeq.add((List<WayPoint>)(List)seg);
 			tracks.add(new ImmutableGpxTrack(virtualSeq,new HashMap<String, Object>()));
 		}
+		
 		return tracks;
 		
 	}

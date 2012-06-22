@@ -1,11 +1,12 @@
 package org.gpsanonymity;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.gpsanonymity.data.CliqueCloakCloud;
-import org.gpsanonymity.data.CliqueCloakExtendedCloud;
+import org.gpsanonymity.data.MinimalAreaCloud;
+import org.gpsanonymity.data.MinimalAreaExtendedCloud;
 import org.gpsanonymity.data.GridMatrix;
 import org.gpsanonymity.data.KMeansCloud;
 import org.gpsanonymity.data.SegmentCloud;
@@ -87,8 +88,9 @@ public class Main {
 		minimalAreaDistanceList.add(4.0);
 		minimalAreaDistanceList.add(8.0);
 		inputFileList = new LinkedList<String>();
-		inputFileList.add(inputFolder+"Berlin.dat");
-		inputFileList.add(inputFolder+"MecklenBurg-Vorp..dat");
+		inputFileList.add("input/Belluno/Belluno.dat");
+		inputFileList.add("input/Berlin/Berlin.dat");
+		inputFileList.add("input/SoCairo/SoCairo.dat");
 		//////////////////////Bounds and Filenames ///////////////////////////
 		boundsAndFilenames = new HashMap<Bounds, String>();
 		//Belluno
@@ -121,12 +123,12 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		initialize();
-		downloadData();
-		simulateTrackGridMerge();
-		simulateTrackKMeansMerge();
-		simulateTrackSegmentCloudMerge();
+		//downloadData();
+		//simulateTrackGridMerge();
 		simulateTrackCliqueCloakMerge();
 		simulateTrackCliqueCloakExtendedMerge();
+		simulateTrackKMeansMerge();
+		simulateTrackSegmentCloudMerge();
 	}
 	private static void downloadData(){
 		tempFilename= "output/temp.gpx";
@@ -139,31 +141,41 @@ public class Main {
 	}
 	private static void simulateTrackGridMerge(){
 		for(String path : inputFileList){
+			System.out.println("Simulating"+ path);
 			Importer importer= new Importer(path);
 			while(importer.hasnext()){
-				GridMatrix gridmatrix=null;
-				Statistician statistician = new Statistician();
-				for(Double gridSize : distanceList){
-					for(Integer k: kList){
-						if(kList.get(0)==k){
-							gridmatrix=mergingTracksOnGrid(importer.next(), k, gridSize, minSpeed,statistician);
-						}else{
-							gridmatrix.initAgainWithHigherK(k, statistician);
+				importer.next();
+				if(importer.current().size()!=0){
+					GridMatrix gridmatrix=null;
+					Statistician statistician = new Statistician();
+					for(Double gridSize : distanceList){
+						System.out.println("Gridsize: "+ gridSize);
+						for(Integer k: kList){
+							System.out.println("K: "+ k);
+							if(gridSize>2){
+								String statisticianPath = "output/stats/"
+										+ "GridMerge"
+										+ path.substring(path.lastIndexOf("/")+1).replace(".dat", "")
+										+ importer.getCurrentX()
+										+ "_"
+										+ importer.getCurrentY()
+										+ "_"
+										+ "k"+k
+										+ "_"
+										+ "gS" +gridSize
+										+ "_"
+										+ "mS" + minSpeed
+										+".ps";
+								if(!(new File(statisticianPath)).exists()){
+									if(gridmatrix==null){
+										gridmatrix=mergingTracksOnGrid(importer.current(), k, gridSize, minSpeed,statistician);
+									}else{
+										gridmatrix.initAgainWithHigherK(k, statistician);
+									}
+									statistician.write(statisticianPath);
+								}
+							}
 						}
-						String statisticianPath = "output/stats/"
-								+ "GridMerge"
-								+ path.replace(".dat", "")
-								+ importer.getCurrentX()
-								+ "_"
-								+ importer.getCurrentY()
-								+ "_"
-								+ "k"+k
-								+ "_"
-								+ "gS" +gridSize
-								+ "_"
-								+ "mS" + minSpeed
-								+".ps";
-						statistician.write(statisticianPath);
 					}
 				}
 			}
@@ -173,27 +185,35 @@ public class Main {
 		for(String path : inputFileList){
 			Importer importer= new Importer(path);
 			while(importer.hasnext()){
-				KMeansCloud kMeansCloud=null;
-				Statistician statistician = new Statistician();
-				for(Double pointDensity :pointDensityList){
-					for(Integer k: kList){
-						if(kList.get(0)==k){
-							kMeansCloud=mergingTracksWithKMeans(importer.next(), k,pointDensity, statistician);
-						}else{
-							kMeansCloud.initAgainWithHigherK(k, statistician);
+				importer.next();
+				if(importer.current().size()!=0){
+					KMeansCloud kMeansCloud=null;
+					Statistician statistician = new Statistician();
+					for(Double pointDensity :pointDensityList){
+						if(pointDensity>7 || pointDensity==0){
+							for(Integer k: kList){
+								String statisticianPath = "output/stats/"
+										+ "KMeansMerge"
+										+ path.substring(path.lastIndexOf("/")+1).replace(".dat", "")
+										+ importer.getCurrentX()
+										+ "_"
+										+ importer.getCurrentY()
+										+ "_"
+										+ "k"+k
+										+ "_"
+										+ "pD" +pointDensity
+										+".ps";
+								if(!(new File(statisticianPath)).exists()){
+									if(kList.get(0)==k){
+										kMeansCloud=mergingTracksWithKMeans(importer.current(), k,pointDensity, statistician);
+									}else{
+										kMeansCloud.initAgainWithHigherK(k, statistician);
+									}
+
+									statistician.write(statisticianPath);
+								}
+							}
 						}
-						String statisticianPath = "output/stats/"
-								+ "KMeansMerge"
-								+ path.replace(".dat", "")
-								+ importer.getCurrentX()
-								+ "_"
-								+ importer.getCurrentY()
-								+ "_"
-								+ "k"+k
-								+ "_"
-								+ "pD" +pointDensity
-								+".ps";
-						statistician.write(statisticianPath);
 					}
 				}
 			}
@@ -203,36 +223,42 @@ public class Main {
 		for(String path : inputFileList){
 			Importer importer= new Importer(path);
 			while(importer.hasnext()){
-				SegmentCloud segmentCloud=null;
-				Statistician statistician = new Statistician();
-				for(Double trackDistance : distanceList){
-					for(Double pointDensity :pointDensityList){
-						for(Double angelAllowance: angelAllowanceList){
-							for(Integer k: kList){
-								if(trackDistance<pointDensity){
-									if(kList.get(0)==k){
-										segmentCloud=mergingTracksWithSegmentCloud(importer.next(), k,pointDensity, trackDistance, true,angelAllowance,statistician);
-									}else{
-										segmentCloud.initAgainWithHigherK(k, statistician);
+				importer.next();
+				if(importer.current().size()!=0){
+					SegmentCloud segmentCloud=null;
+					Statistician statistician = new Statistician();
+					for(Double trackDistance : distanceList){
+						for(Double pointDensity :pointDensityList){
+							for(Double angelAllowance: angelAllowanceList){
+								for(Integer k: kList){
+									if(trackDistance<pointDensity){
+										String statisticianPath = "output/stats/"
+												+ "SegmentCloudMerge"
+												+ path.substring(path.lastIndexOf("/")+1).replace(".dat", "")
+												+ importer.getCurrentX()
+												+ "_"
+												+ importer.getCurrentY()
+												+ "_"
+												+ "k"+k
+												+ "_"
+												+ "tD" +trackDistance
+												+ "_"
+												+ "pD" +pointDensity
+												+ "_"
+												+ "iD" +true
+												+ "_"
+												+ "aA" +angelAllowance
+												+".ps";
+										if(!(new File(statisticianPath)).exists()){
+											if(kList.get(0)==k){
+												segmentCloud=mergingTracksWithSegmentCloud(importer.current(), k,pointDensity, trackDistance, true,angelAllowance,statistician);
+											}else{
+												segmentCloud.initAgainWithHigherK(k, statistician);
+											}
+
+											statistician.write(statisticianPath);
+										}
 									}
-									String statisticianPath = "output/stats/"
-											+ "SegmentCloudMerge"
-											+ path.replace(".dat", "")
-											+ importer.getCurrentX()
-											+ "_"
-											+ importer.getCurrentY()
-											+ "_"
-											+ "k"+k
-											+ "_"
-											+ "tD" +trackDistance
-											+ "_"
-											+ "pD" +pointDensity
-											+ "_"
-											+ "iD" +true
-											+ "_"
-											+ "aA" +angelAllowance
-											+".ps";
-									statistician.write(statisticianPath);
 								}
 							}
 						}
@@ -245,27 +271,32 @@ public class Main {
 		for(String path : inputFileList){
 			Importer importer= new Importer(path);
 			while(importer.hasnext()){
-				CliqueCloakCloud cliqueCloakCloud=null;
-				Statistician statistician = new Statistician();
-				for(Double pointDensity :pointDensityList){
-					for(Integer k: kList){
-						if(kList.get(0)==k){
-							cliqueCloakCloud=mergingTracksWithCliqueCloak(importer.next(), k,pointDensity, statistician);
-						}else{
-							cliqueCloakCloud.initAgainWithHigherK(k, statistician);
+				importer.next();
+				if(importer.current().size()!=0){
+					for(Double pointDensity :pointDensityList){
+						CliqueCloakCloud cliqueCloakCloud=null;
+						Statistician statistician = new Statistician();
+						for(Integer k: kList){
+							String statisticianPath = "output/stats/"
+									+ "CliqueCloakMerge"
+									+ path.substring(path.lastIndexOf("/")+1).replace(".dat", "")
+									+ importer.getCurrentX()
+									+ "_"
+									+ importer.getCurrentY()
+									+ "_"
+									+ "k"+k
+									+ "_"
+					//				+ "pD" +pointDensity
+									+".ps";
+							if(!(new File(statisticianPath)).exists()){
+								if(cliqueCloakCloud==null){
+									cliqueCloakCloud=mergingTracksWithCliqueCloak(importer.current(), k,pointDensity, statistician);
+								}else{
+									cliqueCloakCloud.initAgainWithHigherK(k, statistician);
+								}
+								statistician.write(statisticianPath);
+							}
 						}
-						String statisticianPath = "output/stats/"
-								+ "CliqueCloakMerge"
-								+ path.replace(".dat", "")
-								+ importer.getCurrentX()
-								+ "_"
-								+ importer.getCurrentY()
-								+ "_"
-								+ "k"+k
-								+ "_"
-								+ "pD" +pointDensity
-								+".ps";
-						statistician.write(statisticianPath);
 					}
 				}
 			}
@@ -275,30 +306,36 @@ public class Main {
 		for(String path : inputFileList){
 			Importer importer= new Importer(path);
 			while(importer.hasnext()){
-				CliqueCloakExtendedCloud cliqueExtendedCloakCloud=null;
-				Statistician statistician = new Statistician();
-				for(Double pointDensity :pointDensityList){
-					for(Integer intolerance : intoleranceList){
-						for(Double minimalAreaDistance : minimalAreaDistanceList){
-							for(Integer k: kList){
-								if (k>intolerance){
-									if(kList.get(0)==k){
-										cliqueExtendedCloakCloud=mergingTracksWithCliqueCloakExtended(importer.next(), k,pointDensity,intolerance,minimalAreaDistance, statistician);
-									}else{
-										cliqueExtendedCloakCloud.initAgainWithHigherK(k, statistician);
+				importer.next();
+				if(importer.current().size()!=0){
+					CliqueCloakExtendedCloud cliqueExtendedCloakCloud=null;
+					Statistician statistician = new Statistician();
+					for(Double pointDensity :pointDensityList){
+						for(Integer intolerance : intoleranceList){
+							for(Double minimalAreaDistance : minimalAreaDistanceList){
+								for(Integer k: kList){
+									if (k>intolerance){
+										String statisticianPath = "output/stats/"
+												+ "CliqueCloakExtendedMerge"
+												+ path.substring(path.lastIndexOf("/")+1).replace(".dat", "")
+												+ importer.getCurrentX()
+												+ "_"
+												+ importer.getCurrentY()
+												+ "_"
+												+ "k"+k
+												+ "_"
+						//						+ "pD" +pointDensity
+												+".ps";
+										if(!(new File(statisticianPath)).exists()){
+											if(cliqueExtendedCloakCloud==null){
+												cliqueExtendedCloakCloud=mergingTracksWithCliqueCloakExtended(importer.current(), k,pointDensity,intolerance,minimalAreaDistance, statistician);
+											}else{
+												cliqueExtendedCloakCloud.initAgainWithHigherK(k, statistician);
+											}
+
+											statistician.write(statisticianPath);
+										}
 									}
-									String statisticianPath = "output/stats/"
-											+ "CliqueCloakExtendedMerge"
-											+ path.replace(".dat", "")
-											+ importer.getCurrentX()
-											+ "_"
-											+ importer.getCurrentY()
-											+ "_"
-											+ "k"+k
-											+ "_"
-											+ "pD" +pointDensity
-											+".ps";
-									statistician.write(statisticianPath);
 								}
 							}
 						}
@@ -455,26 +492,26 @@ public class Main {
 		KMeansCloud kmc= new KMeansCloud(morePointTracks,k, statistician);
 		return kmc;
 	}
-	public static CliqueCloakCloud mergingTracksWithCliqueCloak(List<GpxTrack> tracks,int k , double pointDensity, Statistician statistician) {
+	public static MinimalAreaCloud mergingTracksWithCliqueCloak(List<GpxTrack> tracks,int k , double pointDensity, Statistician statistician) {
 		List<GpxTrack> morePointTracks;
-		if (pointDensity!=0){
-			System.out.println("Status: Create more Waypoints");
-			morePointTracks = MergeGPS.createMoreWaypointsOnTracks(tracks, pointDensity);
-		}else{
+//		if (pointDensity!=0){
+//			System.out.println("Status: Create more Waypoints");
+//			morePointTracks = MergeGPS.createMoreWaypointsOnTracks(tracks, pointDensity);
+//		}else{
 			morePointTracks = new LinkedList<GpxTrack>(tracks);
-		}
-		CliqueCloakCloud ccc= new CliqueCloakCloud(morePointTracks,k, statistician);
+//		}
+		MinimalAreaCloud ccc= new MinimalAreaCloud(morePointTracks,k, statistician);
 		return ccc;
 	}
-	public static CliqueCloakExtendedCloud mergingTracksWithCliqueCloakExtended(List<GpxTrack> tracks,int k , double pointDensity, int intolerance, double minimalAreaDistance, Statistician statistician) {
+	public static MinimalAreaExtendedCloud mergingTracksWithCliqueCloakExtended(List<GpxTrack> tracks,int k , double pointDensity, int intolerance, double minimalAreaDistance, Statistician statistician) {
 		List<GpxTrack> morePointTracks;
-		if (pointDensity!=0){
-			System.out.println("Status: Create more Waypoints");
-			morePointTracks = MergeGPS.createMoreWaypointsOnTracks(tracks, pointDensity);
-		}else{
+//		if (pointDensity!=0){
+//			System.out.println("Status: Create more Waypoints");
+//			morePointTracks = MergeGPS.createMoreWaypointsOnTracks(tracks, pointDensity);
+//		}else{
 			morePointTracks = new LinkedList<GpxTrack>(tracks);
-		}
-		CliqueCloakExtendedCloud ccc= new CliqueCloakExtendedCloud(morePointTracks,k,intolerance,minimalAreaDistance, statistician);
+//		}
+		MinimalAreaExtendedCloud ccc= new MinimalAreaExtendedCloud(morePointTracks,k,intolerance,minimalAreaDistance, statistician);
 		return ccc;
 	}
 }

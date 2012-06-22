@@ -12,13 +12,13 @@ import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.WayPoint;
 
-public class CliqueCloakCloud extends Cloud {
+public class MinimalAreaCloud extends Cloud {
 	HashMap<Bounds,List<MergedWayPoint>> allBounds;
 	Bounds wholeBounds;
-	protected CliqueCloakCloud(){
+	protected MinimalAreaCloud(){
 		super();
 	}
-	public CliqueCloakCloud(List<GpxTrack> tracks, int k,
+	public MinimalAreaCloud(List<GpxTrack> tracks, int k,
 			Statistician statistician) {
 		super(tracks, k, statistician);
 		initialize();
@@ -30,10 +30,10 @@ public class CliqueCloakCloud extends Cloud {
 		buildMergedWayPoint();
 		System.out.println("Status: Find Bounds");
 		allBounds=new HashMap<Bounds, List<MergedWayPoint>>();
-		makeBounds(wholeBounds,mergedWayPoints);
+		makeBounds(wholeBounds,mergedWaypoints);
 		System.out.println("Status: Merge WayPoints");
 		mergeWayPoints();
-		statistician.setFromMergedWayPoints(mergedWayPoints);
+		statistician.setFromMergedWayPoints(mergedWaypoints);
 		System.out.println("Status: Check Neighborhood");
 		checkNeighborHood();
 		System.out.println("Status: Build tracks!!");
@@ -53,10 +53,10 @@ public class CliqueCloakCloud extends Cloud {
 		buildMergedWayPoint();
 		System.out.println("Status: Find Bounds");
 		allBounds=new HashMap<Bounds, List<MergedWayPoint>>();
-		makeBounds(wholeBounds,mergedWayPoints);
+		makeBounds(wholeBounds,mergedWaypoints);
 		System.out.println("Status: Merge WayPoints");
 		mergeWayPoints();
-		statistician.setFromMergedWayPoints(mergedWayPoints);
+		statistician.setFromMergedWayPoints(mergedWaypoints);
 		System.out.println("Status: Check Neighborhood");
 		checkNeighborHood();
 		System.out.println("Status: Build tracks!!");
@@ -65,13 +65,13 @@ public class CliqueCloakCloud extends Cloud {
 		System.out.println("Status: Done!!");
 	}
 	protected void mergeWayPoints() {
-		mergedWayPoints=new LinkedList<MergedWayPoint>();
+		mergedWaypoints=new LinkedList<MergedWayPoint>();
 		for (List<MergedWayPoint> mwpList : allBounds.values()) {
 			MergedWayPoint tempMwp=mwpList.get(0);
 			for (MergedWayPoint mwp : mwpList) {
 				tempMwp.mergeWith(mwp);
 			}
-			mergedWayPoints.add(tempMwp);
+			mergedWaypoints.add(tempMwp);
 		}
 	}
 	protected boolean makeBounds(Bounds bounds,List<MergedWayPoint> mwps) {
@@ -170,7 +170,7 @@ public class CliqueCloakCloud extends Cloud {
 					if(antecessor!=null){
 						mwp.connect(antecessor);
 					}
-					mergedWayPoints.add(mwp);
+					mergedWaypoints.add(mwp);
 				}
 			}
 		}

@@ -26,15 +26,15 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	/**
 	 * 
 	 * @param tracks GpxTracks given
-	 * @param distance
+	 * @param tileSideLength
 	 * @exception throws an exception if it is not a Collection of WayPoint or GpxTrack
 	 * IMPORTANT: through performance reasons we only check the first element of the collection,
 	 * if the collection has not only GpxTracks or not only WayPoints this will bring DOOM!!!!!
 	 */
-	public GridMatrix(List<GpxTrack> tracks,int k, double distance, double minimalSpeed, Statistician statistician) {
+	public GridMatrix(List<GpxTrack> tracks,int k, double tileSideLength, double minimalSpeed, Statistician statistician) {
 		this.statistician = statistician;
 		this.minimalSpeed=minimalSpeed;
-		initWithTracks(tracks,k, distance);
+		initWithTracks(tracks,k, tileSideLength);
 	}
 	public GridMatrix(double distance, Collection<WayPoint> wps, Statistician statistician) {
 		this.statistician = statistician;
@@ -287,10 +287,10 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	protected void initialize (Bounds border, double distance){
 		this.distance=distance;
 		LatLon downRightCorner = new LatLon(border.getMin().getY(), border.getMax().getX());
-		System.out.println("Width in m:"+ border.getMin()
-				.greatCircleDistance(downRightCorner));
-		System.out.println("Height in m:"+ border.getMax()
-				.greatCircleDistance(downRightCorner));
+//		System.out.println("Width in m:"+ border.getMin()
+//				.greatCircleDistance(downRightCorner));
+//		System.out.println("Height in m:"+ border.getMax()
+//				.greatCircleDistance(downRightCorner));
 		this.widthSize =1+ (int)Math.floor(
 				border.getMin()
 				.greatCircleDistance(downRightCorner)/distance);

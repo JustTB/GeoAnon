@@ -9,18 +9,18 @@ import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 
-public class CliqueCloakExtendedCloud extends CliqueCloakCloud {
+public class MinimalAreaExtendedCloud extends MinimalAreaCloud {
 
 	private int intolerance;
-	private double minimalAreaDistance;
-	public CliqueCloakExtendedCloud(List<GpxTrack> tracks, int k, int intolerance, double minimalAreaDistance
+	private double minimalDiagonalLength;
+	public MinimalAreaExtendedCloud(List<GpxTrack> tracks, int k, int intolerance, double minimalAreaDistance
 			,Statistician statistician) {
 		super();
 		this.sourceTracks=new LinkedList<GpxTrack>(tracks);
 		this.k = k;
 		this.intolerance = intolerance;
 		this.statistician = statistician;
-		this.minimalAreaDistance=minimalAreaDistance;
+		this.minimalDiagonalLength=minimalAreaDistance;
 		initializeStatistician();
 		initialize();
 	}
@@ -31,10 +31,10 @@ public class CliqueCloakExtendedCloud extends CliqueCloakCloud {
 		buildMergedWayPoint();
 		System.out.println("Status: Find Bounds");
 		allBounds=new HashMap<Bounds, List<MergedWayPoint>>();
-		makeBounds(wholeBounds,mergedWayPoints);
+		makeBounds(wholeBounds,mergedWaypoints);
 		System.out.println("Status: Merge WayPoints");
 		mergeWayPoints();
-		statistician.setFromMergedWayPoints(mergedWayPoints);
+		statistician.setFromMergedWayPoints(mergedWaypoints);
 		System.out.println("Status: Check Neighborhood");
 		checkNeighborHood();
 		System.out.println("Status: Build tracks!!");
@@ -54,10 +54,10 @@ public class CliqueCloakExtendedCloud extends CliqueCloakCloud {
 		buildMergedWayPoint();
 		System.out.println("Status: Find Bounds");
 		allBounds=new HashMap<Bounds, List<MergedWayPoint>>();
-		makeBounds(wholeBounds,mergedWayPoints);
+		makeBounds(wholeBounds,mergedWaypoints);
 		System.out.println("Status: Merge WayPoints");
 		mergeWayPoints();
-		statistician.setFromMergedWayPoints(mergedWayPoints);
+		statistician.setFromMergedWayPoints(mergedWaypoints);
 		System.out.println("Status: Check Neighborhood");
 		checkNeighborHood();
 		System.out.println("Status: Build tracks!!");
@@ -66,7 +66,7 @@ public class CliqueCloakExtendedCloud extends CliqueCloakCloud {
 		System.out.println("Status: Done!!");
 	}
 	protected boolean makeBounds(Bounds bounds,List<MergedWayPoint> mwps) {
-		if(bounds.getMin().greatCircleDistance(bounds.getMax())<minimalAreaDistance){
+		if(bounds.getMin().greatCircleDistance(bounds.getMax())<minimalDiagonalLength){
 			allBounds.put(bounds,mwps);
 			return true;
 		}

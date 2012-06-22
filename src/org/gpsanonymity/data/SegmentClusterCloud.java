@@ -65,7 +65,7 @@ public class SegmentClusterCloud extends SegmentCloud {
 		mergeSimilarSegments();
 		statistician.setFromMergedWayPoints(mergedWayPoints);
 		System.out.println("Status: Eliminate wayPoints with grade<"+k);
-		eliminateLowerGradeWayPoints();
+		eliminateLowerGradeWaypoints();
 		System.out.println("Status: Check Neighborhood");
 		checkNeighborHood();
 		System.out.println("Status: Build tracks!!");

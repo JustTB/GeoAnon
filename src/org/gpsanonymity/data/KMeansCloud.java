@@ -14,7 +14,7 @@ public class KMeansCloud extends Cloud{
 	public KMeansCloud(List<GpxTrack> morePointTracks, int k,
 			Statistician statistician) {
 		super();
-		this.sourceTracks=new LinkedList<GpxTrack>(tracks);
+		this.sourceTracks=new LinkedList<GpxTrack>(morePointTracks);
 		this.k = k;
 		this.statistician = statistician;
 		initializeStatistician();
@@ -27,8 +27,8 @@ public class KMeansCloud extends Cloud{
 		System.out.println("Status: Find Cluster");
 		findCluster();
 		System.out.println("Status: Eliminate wayPoints with grade<"+k);
-		statistician.setFromMergedWayPoints(mergedWayPoints);
-		eliminateLowerGradeWayPoints();
+		statistician.setFromMergedWayPoints(mergedWaypoints);
+		eliminateLowerGradeWaypoints();
 		System.out.println("Status: Check Neighborhood");
 		checkNeighborHood();
 		System.out.println("Status: Build tracks!!");
@@ -49,8 +49,8 @@ public class KMeansCloud extends Cloud{
 		System.out.println("Status: Find Cluster");
 		findCluster();
 		System.out.println("Status: Eliminate wayPoints with grade<"+k);
-		statistician.setFromMergedWayPoints(mergedWayPoints);
-		eliminateLowerGradeWayPoints();
+		statistician.setFromMergedWayPoints(mergedWaypoints);
+		eliminateLowerGradeWaypoints();
 		System.out.println("Status: Check Neighborhood");
 		checkNeighborHood();
 		System.out.println("Status: Build tracks!!");
@@ -60,7 +60,7 @@ public class KMeansCloud extends Cloud{
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void findCluster() {
-		mergedWayPoints = MergeGPS.mergeWithKMeans((List)mergedWayPoints, mergedWayPoints.size()/k);
+		mergedWaypoints = MergeGPS.mergeWithKMeans((List)mergedWaypoints, mergedWaypoints.size()/k);
 		
 	}
 	private void buildMergedWayPoint() {
@@ -83,7 +83,7 @@ public class KMeansCloud extends Cloud{
 					if(antecessor!=null){
 						mwp.connect(antecessor);
 					}
-					mergedWayPoints.add(mwp);
+					mergedWaypoints.add(mwp);
 				}
 			}
 		}
