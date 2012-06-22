@@ -194,14 +194,10 @@ public class MinimalAreaCloud extends Cloud {
 					if(antecessor!=null){
 						mwp.connect(antecessor);
 					}
-<<<<<<< HEAD
-					mergedWaypoints.add(mwp);
-=======
 					if(!wholeBounds.contains(mwp.getCoor())){
 						wholeBounds.extend(mwp.getCoor());
 					}
-					mergedWayPoints.add(mwp);
->>>>>>> b367ecb620f2f63e32edd401fe30903350cb2429
+					mergedWaypoints.add(mwp);
 				}
 			}
 		}

@@ -65,22 +65,6 @@ public class MinimalAreaExtendedCloud extends MinimalAreaCloud {
 		statistician.setFromMergedTracks(tracks);
 		System.out.println("Status: Done!!");
 	}
-<<<<<<< HEAD
-	protected boolean makeBounds(Bounds bounds,List<MergedWayPoint> mwps) {
-		if(bounds.getMin().greatCircleDistance(bounds.getMax())<minimalDiagonalLength){
-			allBounds.put(bounds,mwps);
-			return true;
-		}
-		LinkedList<Bounds> halfBounds = getKMeansBounds(bounds,mwps);
-		assert(halfBounds.size()==2);
-		LinkedList<MergedWayPoint> mwp0s = new LinkedList<MergedWayPoint>();
-		LinkedList<MergedWayPoint> mwp1s = new LinkedList<MergedWayPoint>();
-		for (MergedWayPoint mwp : mwps) {
-			if(halfBounds.get(0).contains(mwp.getCoor())){
-				mwp0s.add(mwp);
-			}else if (halfBounds.get(1).contains(mwp.getCoor())){
-				mwp1s.add(mwp);
-=======
 	protected void makeBounds(Bounds bounds,List<MergedWayPoint> mwps) {
 		HashMap<Bounds, List<MergedWayPoint>> toCalculateBounds = new HashMap<Bounds, List<MergedWayPoint>>();
 		toCalculateBounds.put(bounds, mwps);
@@ -89,7 +73,7 @@ public class MinimalAreaExtendedCloud extends MinimalAreaCloud {
 		while(!toCalculateBounds.isEmpty()){
 			currentBounds=toCalculateBounds.keySet().iterator().next();
 			currentMwps = toCalculateBounds.get(currentBounds);
-			if(currentBounds.getMin().greatCircleDistance(currentBounds.getMax())<minimalAreaDistance){
+			if(currentBounds.getMin().greatCircleDistance(currentBounds.getMax())<minimalDiagonalLength){
 				allBounds.put(currentBounds,currentMwps);
 				toCalculateBounds.remove(currentBounds);
 				if(toCalculateBounds.isEmpty()){
@@ -122,7 +106,6 @@ public class MinimalAreaExtendedCloud extends MinimalAreaCloud {
 				toCalculateBounds.put(halfBounds.get(0),mwp0s);
 			}else if(higher1 && !trackGradeHigherOrEqualThen(mwp0s,intolerance+1)){
 				toCalculateBounds.put(halfBounds.get(1),mwp1s);
->>>>>>> b367ecb620f2f63e32edd401fe30903350cb2429
 			}else{
 				allBounds.put(currentBounds,currentMwps);
 			}
