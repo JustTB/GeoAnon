@@ -34,6 +34,7 @@ public class MinimalAreaExtendedCloud extends MinimalAreaCloud {
 		makeBounds(wholeBounds,mergedWaypoints);
 		System.out.println("Status: Merge WayPoints");
 		mergeWayPoints();
+		updateMergedWaypoints();
 		statistician.setFromMergedWayPoints(mergedWaypoints);
 		System.out.println("Status: Check Neighborhood");
 		checkNeighborHood();

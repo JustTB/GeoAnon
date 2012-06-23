@@ -464,7 +464,7 @@ public class Main {
 	 * @see Main#mergingWaypointsOnGrid(List, int, double)
 	 */
 	public static GridMatrix mergingTracksOnGrid(List<GpxTrack> tracks,int k , double gridSize, double minimalSpeed,Statistician statistician) {
-		List<GpxTrack> newTracks= MergeGPS.createMoreWaypointsOnTracks(tracks, gridSize);
+		List<GpxTrack> newTracks= MergeGPS.createMoreWaypointsOnTracks(tracks, gridSize/2);
 		GridMatrix gridMatrix = new GridMatrix(newTracks,k, gridSize,minimalSpeed,statistician);
 		return gridMatrix;
 	}

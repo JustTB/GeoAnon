@@ -18,18 +18,13 @@ import org.openstreetmap.josm.data.gpx.WayPoint;
 
 public class SegmentCloud extends Cloud{
 
-	protected List<GpxTrack> sourceTracks;
-	protected int k;
 	protected double trackDistance;
 	static protected int segmentLength=2;
 	protected IdentityHashMap<GpxTrackSegment,HashSet<GpxTrackSegment>> similarSegments=new IdentityHashMap<GpxTrackSegment, HashSet<GpxTrackSegment>>();
 	protected List<GpxTrackSegment> segments=new LinkedList<GpxTrackSegment>();
-	protected List<GpxTrack> tracks;
-	protected List<MergedWayPoint> mergedWayPoints=new LinkedList<MergedWayPoint>();
 	protected IdentityHashMap<GpxTrackSegment,HashSet<GpxTrack>> tracksOfSimilarSegments= new IdentityHashMap<GpxTrackSegment, HashSet<GpxTrack>>();
 	protected boolean ignoreDirection;
 	protected double angelAllowance;
-	protected Statistician statistician;
 	
 	protected SegmentCloud(){}
 
@@ -56,7 +51,8 @@ public class SegmentCloud extends Cloud{
 		//eliminateLowerGradeSegments();
 		System.out.println("Status: Merge similar Segments");
 		mergeSimilarSegments();
-		statistician.setFromMergedWayPoints(mergedWayPoints);
+		updateMergedWaypoints();
+		statistician.setFromMergedWayPoints(mergedWaypoints);
 		System.out.println("Status: Eliminate wayPoints with grade<"+k);
 		eliminateLowerGradeWaypoints();
 		System.out.println("Status: Check Neighborhood");
@@ -68,9 +64,9 @@ public class SegmentCloud extends Cloud{
 	}
 
 	protected void mergeNearWayPoints() {
-		for (MergedWayPoint mwp : mergedWayPoints) {
+		for (MergedWayPoint mwp : mergedWaypoints) {
 			Bounds mwpsBounds = MergeGPS.getBoundsWithSpace(new Bounds(mwp.getCoor()), trackDistance);
-			for (MergedWayPoint mwp2 : mergedWayPoints) {
+			for (MergedWayPoint mwp2 : mergedWaypoints) {
 				if(mwp!=mwp2
 						&& mwpsBounds.contains(mwp2.getCoor())){
 					mwp.mergeWith(mwp2);
@@ -82,7 +78,7 @@ public class SegmentCloud extends Cloud{
 
 	@SuppressWarnings("unused")
 	private void deleteBigDistances() {
-		for(MergedWayPoint mwp : mergedWayPoints){
+		for(MergedWayPoint mwp : mergedWaypoints){
 			mwp.deleteDistantNeighbors(trackDistance);
 		}
 		
@@ -98,8 +94,9 @@ public class SegmentCloud extends Cloud{
 			for (GpxTrackSegment gpxTrackSegment : list) {
 				similarSegments.remove(gpxTrackSegment);
 			}
-			
-			mergedWayPoints.addAll((List<MergedWayPoint>)(List)seg.getWayPoints());
+			for(WayPoint wp : seg.getWayPoints()){
+				mergedWaypoints.add((MergedWayPoint)wp);
+			}
 		}
 	}
 

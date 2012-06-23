@@ -82,6 +82,17 @@ public abstract class Cloud {
 		tracks=MergeGPS.buildTracks(mergedWaypoints , k);
 	}
 
+	protected void updateMergedWaypoints() {
+		LinkedList<MergedWayPoint> mwps = new LinkedList<MergedWayPoint>(mergedWaypoints);
+		for(MergedWayPoint mwp : mwps){
+			if(mwp!=mwp.current()){
+				mergedWaypoints.remove(mwp);
+				mergedWaypoints.add(mwp.current());
+			}
+		}
+		
+	}
+
 	protected double getDistance(GpxTrackSegment seg,
 			GpxTrackSegment seg2) {
 		Double distance =null;

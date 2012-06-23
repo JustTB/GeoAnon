@@ -23,6 +23,7 @@ public class MainTest {
 		result.add("input/top_down_x.gpx");
 		result.add("input/left_right.gpx");
 		result.add("input/V.gpx");
+		result.add("input/Berlin/Berlin23_20.gpx");
 		return result;
 	}
 	@Test
@@ -46,16 +47,14 @@ public class MainTest {
 		Statistician statistician = new Statistician();
 		IOFunctions.exportTracks(
 				Main.mergingTracksOnGrid(
-						Main.importTracks("input/leipzig.gpx"),
+						Main.importTracks("input/Berlin/Berlin23_20.gpx"),
 						3, 4.0,0.5, statistician).getTracks(),
 				"output/GPXMergeTracksOnGrid_1_2_0.5.gpx");
 	}
 	@Test
 	public void testMergeTracksKMeansCloud(){
-		int k=2;
-		int segmentLenght=2;
-		double pointDensity=2;
-		double trackDistance=4;
+		int k=3;
+		double pointDensity=0;
 		for (String file : getSimpleTestData()) {
 			System.out.println("File: "+file);
 			Statistician statistician = new Statistician();
@@ -63,7 +62,7 @@ public class MainTest {
 					Main.mergingTracksWithKMeans(
 							Main.importTracks(file),
 							k, pointDensity,statistician).getMergedTracks(),
-							"output/GPXKMeansCloud_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+segmentLenght+".gpx");
+							"output/GPXKMeansCloud_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+".gpx");
 		}
 	}
 	@Test
@@ -88,7 +87,7 @@ public class MainTest {
 	}
 	@Test
 	public void testMergeTracks(){
-		int k=1;
+		int k=3;
 		int segmentLenght=2;
 		double pointDensity=5;
 		double trackDistance=4;
@@ -111,7 +110,7 @@ public class MainTest {
 		int segmentLenght=2;
 		double pointDensity=0;
 		double trackDistance=4;
-		String file = "leipzig_track_example.gpx";
+		String file = "input/Berlin/Berlin23_20.gpx";
 		//for (String file : getSimpleTestData()) {
 			System.out.println("Status: Reading file"+file);
 			Statistician statistician = new Statistician();
@@ -124,12 +123,12 @@ public class MainTest {
 	}
 	@Test
 	public void testMergeTracksWithCliqueCloakExtended(){
-		int k=5;
-		int intolerance=3;
-		int minimalAreaDistance=3;
+		int k=3;
+		int intolerance=1;
+		int minimalAreaDistance=1;
 		double pointDensity=2;
 		double trackDistance=4;
-		String file = "leipzig_track_example.gpx";
+		String file = "input/Berlin/Berlin23_20.gpx";
 		//for (String file : getSimpleTestData()) {
 			System.out.println("Status: Reading file"+file);
 			Statistician statistician = new Statistician();
@@ -137,7 +136,7 @@ public class MainTest {
 					Main.mergingTracksWithCliqueCloakExtended(
 							Main.importTracks(file),
 							k, pointDensity,intolerance,minimalAreaDistance,statistician).getMergedTracks(),
-							"output/GPXMergeTracksCCE_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+".gpx");
+							"output/GPXMergeTracksCCE_"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+pointDensity+"_"+trackDistance+"_"+intolerance+".gpx");
 		//}
 	}
 	@Test

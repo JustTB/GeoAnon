@@ -50,7 +50,7 @@ public class SegmentClusterCloud extends SegmentCloud {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void mergeSimilarSegments() {
 		for (GpxTrackSegment seg : similarSegments.keySet()) {
-			mergedWayPoints.addAll((Collection<MergedWayPoint>)(Collection)seg.getWayPoints());
+			mergedWaypoints.addAll((Collection<MergedWayPoint>)(Collection)seg.getWayPoints());
 		}
 	}
 	@Override
@@ -63,7 +63,8 @@ public class SegmentClusterCloud extends SegmentCloud {
 		//eliminateLowerGradeSegments();
 		System.out.println("Status: Merge similar Segments");
 		mergeSimilarSegments();
-		statistician.setFromMergedWayPoints(mergedWayPoints);
+		updateMergedWaypoints();
+		statistician.setFromMergedWayPoints(mergedWaypoints);
 		System.out.println("Status: Eliminate wayPoints with grade<"+k);
 		eliminateLowerGradeWaypoints();
 		System.out.println("Status: Check Neighborhood");

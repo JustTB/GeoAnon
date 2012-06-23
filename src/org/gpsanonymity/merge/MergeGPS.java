@@ -523,7 +523,7 @@ public class MergeGPS {
 					currentDistance = list.get(i).getCoor().greatCircleDistance(wayPoint.getCoor());
 				}
 			}else{*/
-				currentDistance = list.get(i).getCoor().greatCircleDistance(wayPoint.getCoor());
+				currentDistance = list.get(i).getCoor().distance(wayPoint.getCoor());
 			/*}*/
 			if (currentDistance<distance){
 				distance=currentDistance;

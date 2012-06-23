@@ -27,6 +27,7 @@ public class KMeansCloud extends Cloud{
 		System.out.println("Status: Find Cluster");
 		findCluster();
 		System.out.println("Status: Eliminate wayPoints with grade<"+k);
+		updateMergedWaypoints();
 		statistician.setFromMergedWayPoints(mergedWaypoints);
 		eliminateLowerGradeWaypoints();
 		System.out.println("Status: Check Neighborhood");
