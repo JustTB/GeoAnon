@@ -63,6 +63,7 @@ public class Statistician implements Serializable{
 		mergedConnectionNumbers = stati.mergedConnectionNumbers;
 		mergedTrackNumbers = stati.mergedTrackNumbers;
 		usedTrackNumbers = stati.usedTrackNumbers;
+		usedWaypointNumbers= stati.usedWaypointNumbers;
 		mergedLength = stati.mergedLength;
 		mergedWaypointGrade = new HashMap<Integer, Integer>(stati.mergedWaypointGrade);
 		neighborGrade = new HashMap<Integer, Integer>(stati.neighborGrade);
@@ -129,31 +130,31 @@ public class Statistician implements Serializable{
 		
 	}
 	public int getk() {
-		return ks;
+		return ks==null?0:ks;
 	}
 	public void setk(int k) {
 		this.ks=k;
 	}
 	public double getSourceLength() {
-		return sourceLength;
+		return sourceLength==null?0:sourceLength;
 	}
 	public void setSourceLength(double length) {
 		this.sourceLength=length;
 	}
 	public int getSourceTrackNumber() {
-		return sourceTrackNumbers;
+		return sourceTrackNumbers==null?0:sourceTrackNumbers;
 	}
 	public void setMergedLength(double length) {
 		this.mergedLength= length;
 	}
 	public double getMergedLength() {
-		return mergedLength;
+		return mergedLength==null?0:mergedLength;
 	}
 	public void setSourceTrackNumber(int sourceTrackNumber) {
 		this.sourceTrackNumbers=sourceTrackNumber;
 	}
 	public int getMergedConnectionNumber() {
-		return mergedConnectionNumbers;
+		return mergedConnectionNumbers==null?0:mergedConnectionNumbers;
 	}
 	public void setMergedConnectionNumber(int sourceTrackNumber) {
 		this.mergedConnectionNumbers=sourceTrackNumber;
@@ -165,38 +166,38 @@ public class Statistician implements Serializable{
 		this.removedConnectionNumbers=sourceTrackNumber;
 	}
 	public int getSourceConnectionNumber() {
-		return sourceConnectionNumbers;
+		return sourceConnectionNumbers==null?0:sourceConnectionNumbers;
 	}
 	public void setSourceConnectionNumber(int sourceTrackNumber) {
 		this.sourceConnectionNumbers=sourceTrackNumber;
 	}
 	public int getMergedTrackNumber() {
-		return mergedTrackNumbers;
+		return mergedTrackNumbers==null?0:mergedTrackNumbers;
 	}
 	
 	public void setMergedTrackNumber(int mergedSourceTrackNumber) {
 		this.mergedTrackNumbers=mergedSourceTrackNumber;
 	}
 	public int getSourceWaypointNumber() {
-		return sourceWaypointNumbers;
+		return sourceWaypointNumbers==null?0:sourceWaypointNumbers;
 	}
 	public void setSourceWaypointNumber(int sourceWaypointNumber) {
 		this.sourceWaypointNumbers=sourceWaypointNumber;
 	}
 	public int getMergedWayPointNumber() {
-		return mergedWaypointNumbers;
+		return mergedWaypointNumbers==null?0:mergedWaypointNumbers;
 	}
 	public void setMergedWayPointNumber(int mergedWayPointNumber) {
 		this.mergedWaypointNumbers=mergedWayPointNumber;
 	}
 	public int getRemovedWaypointsNumber() {
-		return removedWaypointsNumbers;
+		return removedWaypointsNumbers==null?0:removedWaypointsNumbers;
 	}
 	public void setRemovedWaypointsNumber(int removedWaypoints) {
 		this.removedWaypointsNumbers=removedWaypoints;
 	}
 	public int getRemovedTracksNumber() {
-		return removedTracksNumbers;
+		return removedTracksNumbers==null?0:removedTracksNumbers;
 	}
 	public void setRemovedTracksNumber(int removedTracks) {
 		this.removedTracksNumbers=removedTracks;
@@ -271,7 +272,7 @@ public class Statistician implements Serializable{
 		this.usedTrackNumbers=usedTrackNumbers;
 	}
 	public int getUsedWaypointNumbers() {
-		return usedWaypointNumbers;
+		return usedWaypointNumbers==null?0:usedWaypointNumbers;
 	}
 	public void setUsedWaypointNumbers(int usedWaypointNumbers) {
 		this.usedWaypointNumbers=usedWaypointNumbers;

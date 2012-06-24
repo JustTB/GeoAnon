@@ -28,9 +28,9 @@ public class Main {
 	public static List<Double> pointDensityList;
 	public static List<String> inputFileList;
 	public static String inputFolder="input/";
-	private static LinkedList<Double> angelAllowanceList;
-	private static LinkedList<Integer> intoleranceList;
-	private static LinkedList<Double> minimalAreaDistanceList;
+	public static LinkedList<Double> angelAllowanceList;
+	public static LinkedList<Integer> intoleranceList;
+	public static LinkedList<Double> minimalAreaDistanceList;
 	private static HashMap<Bounds, String> boundsAndFilenames;
 	private static String tempFilename;
 	
@@ -88,9 +88,9 @@ public class Main {
 		minimalAreaDistanceList.add(4.0);
 		minimalAreaDistanceList.add(8.0);
 		inputFileList = new LinkedList<String>();
-		inputFileList.add("input/Belluno/Belluno.dat");
-		inputFileList.add("input/Berlin/Berlin.dat");
-		inputFileList.add("input/SoCairo/SoCairo.dat");
+		inputFileList.add("output/Belluno.dat");
+		inputFileList.add("output/Berlin.dat");
+		inputFileList.add("output/McPomm.dat");
 		//////////////////////Bounds and Filenames ///////////////////////////
 		boundsAndFilenames = new HashMap<Bounds, String>();
 		//Belluno
@@ -124,7 +124,7 @@ public class Main {
 	public static void main(String[] args) {
 		initialize();
 		//downloadData();
-		//simulateTrackGridMerge();
+		simulateTrackGridMerge();
 		simulateTrackCliqueCloakMerge();
 		simulateTrackCliqueCloakExtendedMerge();
 		simulateTrackKMeansMerge();
@@ -231,7 +231,7 @@ public class Main {
 						for(Double pointDensity :pointDensityList){
 							for(Double angelAllowance: angelAllowanceList){
 								for(Integer k: kList){
-									if(trackDistance<pointDensity){
+									if(trackDistance<pointDensity && pointDensity>=2){
 										String statisticianPath = "output/stats/"
 												+ "SegmentCloudMerge"
 												+ path.substring(path.lastIndexOf("/")+1).replace(".dat", "")
@@ -286,7 +286,7 @@ public class Main {
 									+ "_"
 									+ "k"+k
 									+ "_"
-					//				+ "pD" +pointDensity
+									+ "pD" +pointDensity
 									+".ps";
 							if(!(new File(statisticianPath)).exists()){
 								if(cliqueCloakCloud==null){
@@ -324,7 +324,9 @@ public class Main {
 												+ "_"
 												+ "k"+k
 												+ "_"
-						//						+ "pD" +pointDensity
+												+ "pD" +pointDensity
+												+ "_"
+												+ "mAD" +minimalAreaDistance
 												+".ps";
 										if(!(new File(statisticianPath)).exists()){
 											if(cliqueExtendedCloakCloud==null){

@@ -39,18 +39,16 @@ public class IOTest {
 		/*System.setProperty("http.proxySet", "true");
 		System.setProperty("http.proxyPort","80");
 		System.setProperty("http.proxyHost","http-proxy.fu-berlin.de");*/
-		double minLat=53.110;
-		double minLon=10.594;
-		double maxLat=54.867;
-		double maxLon=14.412;
+		double minLat=53.233;
+		double minLon=12.664;
+		double maxLat=53.293;
+		double maxLon=12.803;
 		Bounds bounds = new Bounds(new LatLon(minLat,minLon),new LatLon(maxLat,maxLon));
 		
-		String filename= "output/MecklenBurg-Vorp.gpx";
+		String filename= "output/McPomm.gpx";
 		String tempFilename= "output/temp.gpx";
 		testData();
 		IOFunctions.getDataFromOSMWithCutting(bounds, filename, tempFilename);
-		@SuppressWarnings("unused")
-		Importer importer = new Importer("output/Berlin.dat");
 	}
 	@Test
 	public void testDatFile(){
