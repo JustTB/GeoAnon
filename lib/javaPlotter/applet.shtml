@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+<title>VASE Lab - Cellular Automata Demo</title>
+<link rel="stylesheet" type="text/css" href="../../new-vase.css" />
+
+<!--#include virtual="../../header.html" -->
+
+<h1>Java Function Plotter Demo Applet</h1>
+
+<p>
+You can use the mouse and scroll wheel to move around the graph.
+</p>
+
+<center>
+<applet code="ac.essex.graphing.swing.GraphApplet"
+          archive="lib/java_plotter_1.1.jar"
+          height="480" width="640" >
+</applet>
+</center>
+
+<p>
+<a href="index.shtml">Back to Java Function Plotter</a>
+</p>
+
+<!--#include virtual="../../footer.html" -->

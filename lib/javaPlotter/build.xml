@@ -1,0 +1,54 @@
+<project name="JavaPlotter" default="dist" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="src" location="src"/>
+  <property name="build" location="classes"/>
+  <property name="dist"  location="lib"/>
+
+  <property name="product_name" value="java_plotter_1.1" />
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Get the Build Number -->
+    <buildnumber/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init" description="compile the source " >
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}"/>
+  </target>
+
+  <target name="dist" depends="clean, compile" description="generate the distribution" >
+
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}/"/>
+
+    <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+    <jar jarfile="${dist}/${product_name}.jar" basedir="${build}"/>
+
+    <!-- Now zip up all the files -->
+    <zip destfile="${product_name}_build${build.number}.zip" basedir="" excludes="Probability*, JavaPlot.iml, *.zip, *.tar" />
+    <tar destfile="${product_name}_build${build.number}.tar" basedir="" excludes="Probability*, JavaPlot.iml, *.zip, *.tar" />
+
+  </target>
+
+  <target name="clean" description="clean up" >
+
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+
+    <!-- Delete previous Zip and Tar Files -->
+    <delete>
+        <fileset dir="." includes="*.zip"/>
+        <fileset dir="." includes="*.tar"/>
+    </delete>
+
+  </target>
+
+
+
+</project>

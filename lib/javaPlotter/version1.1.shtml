@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>Open Source Java Function Plotter (Version 1.1) - VASE Lab</title>
+<link rel="stylesheet" type="text/css" href="../../new-vase.css" />
+
+<style type="text/css">
+    code {font-size: 11pt;}
+</style>
+
+<!--#include virtual="../../header.html" -->
+
+<h1>New in Version 1.1</h1>
+
+<p>
+    20th November 2007
+</p>
+
+<p>    
+    <ul>
+        <li>You can now explore your graph with the InteractiveGraphPanel</li>
+        <li>You can now plot multiple functions on a single graph</li>
+        <li>All graph settings are now stored in a separate, sharable, object</li>
+        <li>Lines from graphs no longer spill outside of the chart area</li>
+        <li>Line graph plotting is now more accurate.</li>
+        <li>Grid is no longer fixed and is always in the correct position</li>
+        <li>Fixed a bug where the scale changes in certain plot areas</li>
+        <li>Fixed a bug where the axis can appear outside the chart area</li>
+    </ul>
+</p>
+
+<p>
+<a href="index.shtml">Back to Java Function Plotter</a>
+</p>
+
+<!--#include virtual="../../footer.html" -->

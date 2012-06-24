@@ -1,0 +1,105 @@
+<html>
+<head>
+<title>ContinuousFunctionPlotter.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { }
+.s2 { color: rgb(128,128,128); font-style: italic; }
+.s3 { color: rgb(128,128,128); font-style: italic; }
+.s4 { color: rgb(128,128,128); font-weight: bold; font-style: italic; }
+.s5 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+ContinuousFunctionPlotter.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<a name="l1"><span class="s0">package </span><span class="s1">ac.essex.graphing.plotting; 
+<a name="l2"> 
+<a name="l3"></span><span class="s0">import <a href="Plotter.java.html">ac.essex.graphing.plotting.Plotter</a></span><span class="s1">; 
+<a name="l4"></span><span class="s0">import <a href="Graph.java.html">ac.essex.graphing.plotting.Graph</a></span><span class="s1">; 
+<a name="l5"> 
+<a name="l6"></span><span class="s0">import </span><span class="s1">java.awt.*; 
+<a name="l7"> 
+<a name="l8"></span><span class="s2">/** 
+<a name="l9"> * 
+<a name="l10"> * Graphable Function 
+<a name="l11"> * Basic interface allowing mathematical functions to talk to the Graph renderer. 
+<a name="l12"> * 
+<a name="l13"> * </span><span class="s3">&lt;p&gt;</span><span class="s2"> 
+<a name="l14"> * This program is free software; you can redistribute it and/or 
+<a name="l15"> * modify it under the terms of the GNU General Public License 
+<a name="l16"> * as published by the Free Software Foundation; either version 2 
+<a name="l17"> * of the License, or (at your option) any later version, 
+<a name="l18"> * provided that any use properly credits the author. 
+<a name="l19"> * This program is distributed in the hope that it will be useful, 
+<a name="l20"> * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+<a name="l21"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+<a name="l22"> * GNU General Public License for more details at http://www.gnu.org 
+<a name="l23"> * </span><span class="s3">&lt;/p&gt;</span><span class="s2"> 
+<a name="l24"> * 
+<a name="l25"> </span><span class="s4">@author </span><span class="s2">Olly Oechsle, University of Essex 
+<a name="l26"> </span><span class="s4">@version </span><span class="s2">1.0 
+<a name="l27">*/</span><span class="s1"> 
+<a name="l28"></span><span class="s0">public abstract class </span><span class="s1">ContinuousFunctionPlotter </span><span class="s0">extends <a href="Plotter.java.html">Plotter</a> </span><span class="s1">{ 
+<a name="l29"> 
+<a name="l30">    </span><span class="s0">public abstract double </span><span class="s1">getY(</span><span class="s0">double </span><span class="s1">x); 
+<a name="l31"> 
+<a name="l32">    </span><span class="s0">public void </span><span class="s1">plot(<a href="Graph.java.html">Graph</a> graph, Graphics g, </span><span class="s0">int </span><span class="s1">chartWidth, </span><span class="s0">int </span><span class="s1">chartHeight) { 
+<a name="l33"> 
+<a name="l34">        </span><span class="s2">/** 
+<a name="l35">         * Record the last two points. Plotting works by drawing lines between consecutive points 
+<a name="l36">         * This ensures there are no gaps. 
+<a name="l37">         */</span><span class="s1"> 
+<a name="l38">        </span><span class="s0">double </span><span class="s1">prevX = </span><span class="s5">0</span><span class="s1">, prevY = </span><span class="s5">0</span><span class="s1">; 
+<a name="l39"> 
+<a name="l40">        </span><span class="s2">/** 
+<a name="l41">         * Flag to make sure the first point is not drawn (there is not previous point to connect the dots to) 
+<a name="l42">         */</span><span class="s1"> 
+<a name="l43">        </span><span class="s0">boolean </span><span class="s1">first = </span><span class="s0">true</span><span class="s1">; 
+<a name="l44"> 
+<a name="l45">        </span><span class="s0">double </span><span class="s1">xRange = graph.plotSettings.getRangeX(); 
+<a name="l46"> 
+<a name="l47">        </span><span class="s2">/** 
+<a name="l48">         * Plot for every pixel going across the chart 
+<a name="l49">         */</span><span class="s1"> 
+<a name="l50">        </span><span class="s0">for </span><span class="s1">(</span><span class="s0">int </span><span class="s1">ax = </span><span class="s5">0</span><span class="s1">; ax &lt; chartWidth; ax++) { 
+<a name="l51"> 
+<a name="l52">            </span><span class="s2">// figure out what X is</span><span class="s1"> 
+<a name="l53">            </span><span class="s0">double </span><span class="s1">x = graph.plotSettings.getMinX() + ((ax / (</span><span class="s0">double</span><span class="s1">) chartWidth) * xRange); 
+<a name="l54"> 
+<a name="l55">            </span><span class="s2">/** 
+<a name="l56">             * For this value of X, get the value of Y (via the abstract method) 
+<a name="l57">             */</span><span class="s1"> 
+<a name="l58">            </span><span class="s0">double </span><span class="s1">y = getY(x); 
+<a name="l59"> 
+<a name="l60">            </span><span class="s2">/** 
+<a name="l61">             * Draw a line between two points 
+<a name="l62">             */</span><span class="s1"> 
+<a name="l63">            </span><span class="s0">if </span><span class="s1">(!first &amp;&amp; y &lt;= graph.plotSettings.getMaxY() &amp;&amp; y &gt;= graph.plotSettings.getMinY()) graph.drawLine(g, prevX, prevY, x, y); 
+<a name="l64"> 
+<a name="l65">            </span><span class="s2">/** 
+<a name="l66">             * Remember the last two values 
+<a name="l67">             */</span><span class="s1"> 
+<a name="l68">            prevX = x; 
+<a name="l69">            prevY = y; 
+<a name="l70"> 
+<a name="l71">            </span><span class="s2">/** 
+<a name="l72">             * To stop the first point being drawn 
+<a name="l73">             */</span><span class="s1"> 
+<a name="l74">            first = </span><span class="s0">false</span><span class="s1">; 
+<a name="l75"> 
+<a name="l76">        } 
+<a name="l77"> 
+<a name="l78">    } 
+<a name="l79"> 
+<a name="l80">} 
+<a name="l81"></span></pre>
+</body>
+</html>

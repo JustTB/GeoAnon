@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>Open Source Java Function Plotter - VASE Lab</title>
+<link rel="stylesheet" type="text/css" href="../../new-vase.css" />
+
+    <style type="text/css">
+        code {font-size: 11pt;}
+
+        .download {
+            border: 2px solid #b8b9b8;
+            background: #e2e5e1;
+            width: 320px;
+            padding-left: 10px;
+        }
+
+        #right {
+            float: right;
+            width: 320px;
+            padding-left: 20px;
+        }
+
+        font {
+            color: green;
+            font-weight: bold;
+        }
+
+    </style>
+
+<!--#include virtual="../../header.html" -->
+
+<h1>Java Function Plotter 1.1</h1>
+
+<div id="right">
+<div class="download">
+
+<strong>Download</strong>
+
+<p>The source code, along with compiled classes and JAR file are available here:</p>
+
+<a class="bullet" href="java_plotter_1.1_build9.tar">java_plotter_1.1_build8.tar</a><br />
+<a class="bullet" href="java_plotter_1.1_build9.zip">java_plotter_1.1_build8.zip</a><br />
+<a class="bullet" target="_BLANK" href="code/">Browse Source</a><br />
+
+<p>
+<a href="version1.1.shtml">Version 1.1</a>, 21st November 2007
+</p>
+
+</div>
+
+<br />    
+
+<div class="download">
+
+<strong>Online Demo</strong>
+
+<p>
+<a href="applet.shtml">Run as Java Applet</a>
+</p>
+
+</div>
+
+<p>
+<img align="right" alt="Java Function Plotter - Here plotting a two functions" src="graph.png" />
+</p>
+
+<p>
+<img align="right" alt="Java Function Plotter - Plotting a bar chart with high / low / mean" src="barchart.png" />
+</p>
+
+</div>
+
+<p>
+This Java program allows you to plot mathematical functions or basic charts. You supply a formula and the program will
+draw it for you on a line graph. I wrote this to make sure that the Gaussian Probability function I was writing
+was outputting the correct results.
+</p>
+
+<p>
+The <a href="code/ac/essex/graphing/swing/GraphPanel.java.html">GraphPanel</a> object allows you to add these graphs into your Java Swing applicationa easily. The <a href="code/ac/essex/graphing/swing/InteractiveGraphPanel.java.html">InteractiveGraphPanel</a>
+ is an extention to GraphPanel, which allows the user to move around the graph by dragging the mouse, and zoom in and out
+with the scroll wheel.
+</p>
+
+<p>
+You should note that this is not fully tested software - it works well for my purposes by it may not work for yours!
+Nonetheless, you may find it of use, and indeed you may like to have a starting point for making graphing software of your own.
+If you need more serious graphing software for Java, you may want to look at <a target="_blank" href="http://www.jfree.org/jfreechart/">jfreechart</a>
+</p>
+
+<p>
+    Features
+</p>
+<ul>
+    <li>Plot continuous mathematical functions</li>
+    <li>Plot discrete functions using Bar Charts or CandleStick Plots</li>
+    <li>Add these charts to your Swing Applications easily</li>
+    <li>Create interactive charts using the InteractiveGraphPanel object <font>(NEW)</font></li>
+    <li>Save charts to popular image formats easily</li>
+    <li>Demo Swing GUI</li>
+    <li>Control the settings and appearance of your graph via the PlotSettings object <font>(NEW)</font></li>
+</ul>
+
+
+<p>
+<h2>More Information</h2>
+
+Have a look at the following code files to see how to use it: <a href="code/ac/essex/graphing/Demo.java.html">Demo.java</a> shows how to create
+a simple graph. <a href="code/ac/essex/graphing/swing/GraphApplication.java.html">GraphApplication</a> shows how it can be implemented into a Java SWING application.
+The classes <a href="code/ac/essex/graphing/charts/continuous/SineWave.java.html">SineWave.java</a> and <a href="code/ac/essex/graphing/charts/continuous/Gaussian.java.html">Gaussian.java</a> show Java implementations
+of Sine Wave and Gaussian Probability Functions respectively.
+
+</p>
+
+<p>
+A simple way to visualise a mathematical function:
+<ul>
+<li>Write a class extending <a href="code/ac/essex/graphing/plotting/ContinuousFunctionPlotter.java.html">ContinuousFunctionPlotter</a> and implementing the <code>getY()</code> method</li>
+<li>Use <a href="code/ac/essex/graphing/Demo.java.html">Demo.java</a> to display the results of your function</li>
+</ul>
+</p>
+
+<p>
+Graph rendering code is in <a href="code/ac/essex/graphing/plotting/Graph.java.html">Graph.java</a>, have a look if you want to.
+</p>
+
+<p>
+Please feel free to extend it and me your updates!
+</p>
+
+<p>
+<h2>Contact Me</h2>
+ooechs {at} essex {dot} ac {dot} uk
+</p>
+
+<!--#include virtual="../../footer.html" -->

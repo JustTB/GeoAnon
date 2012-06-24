@@ -1,0 +1,173 @@
+<html>
+<head>
+<title>GraphApplication.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { }
+.s2 { color: rgb(128,128,128); font-style: italic; }
+.s3 { color: rgb(128,128,128); font-weight: bold; font-style: italic; }
+.s4 { color: rgb(0,128,0); font-weight: bold; }
+.s5 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+GraphApplication.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<a name="l1"><span class="s0">package </span><span class="s1">ac.essex.graphing.swing; 
+<a name="l2"> 
+<a name="l3"></span><span class="s0">import <a href="../../../../ac/essex/graphing/plotting/Graph.java.html">ac.essex.graphing.plotting.Graph</a></span><span class="s1">; 
+<a name="l4"></span><span class="s0">import <a href="../../../../ac/essex/graphing/plotting/PlotSettings.java.html">ac.essex.graphing.plotting.PlotSettings</a></span><span class="s1">; 
+<a name="l5"> 
+<a name="l6"></span><span class="s0">import </span><span class="s1">javax.swing.*; 
+<a name="l7"></span><span class="s0">import </span><span class="s1">javax.swing.filechooser.FileFilter; 
+<a name="l8"></span><span class="s0">import </span><span class="s1">java.awt.*; 
+<a name="l9"></span><span class="s0">import </span><span class="s1">java.awt.event.WindowAdapter; 
+<a name="l10"></span><span class="s0">import </span><span class="s1">java.awt.event.WindowEvent; 
+<a name="l11"></span><span class="s0">import </span><span class="s1">java.awt.event.ActionListener; 
+<a name="l12"></span><span class="s0">import </span><span class="s1">java.awt.event.ActionEvent; 
+<a name="l13"></span><span class="s0">import </span><span class="s1">java.io.File; 
+<a name="l14"></span><span class="s0">import </span><span class="s1">java.io.IOException; 
+<a name="l15"></span><span class="s0">import </span><span class="s1">java.util.Vector; 
+<a name="l16"> 
+<a name="l17"></span><span class="s2">/** 
+<a name="l18"> * Small application demonstrating the use of the graph panel in a swing gui. 
+<a name="l19"> * 
+<a name="l20"> * </span><span class="s3">@author </span><span class="s2">Olly Oechsle, University of Essex, Date: 05-Jun-2007 
+<a name="l21"> * </span><span class="s3">@version </span><span class="s2">1.01 - Added suport for the Interactive Graph Panel. 
+<a name="l22"> */</span><span class="s1"> 
+<a name="l23"></span><span class="s0">public class </span><span class="s1">GraphApplication </span><span class="s0">extends </span><span class="s1">JFrame </span><span class="s0">implements </span><span class="s1">ActionListener, <a href="SettingsUpdateListener.java.html">SettingsUpdateListener</a> { 
+<a name="l24"> 
+<a name="l25">    </span><span class="s0">protected </span><span class="s1">JButton save, exit, update; 
+<a name="l26">    </span><span class="s0">protected </span><span class="s1">JTextField minX, minY, maxX, maxY; 
+<a name="l27"> 
+<a name="l28">    </span><span class="s0">protected <a href="GraphPanel.java.html">GraphPanel</a> </span><span class="s1">graphPanel; 
+<a name="l29"> 
+<a name="l30">    </span><span class="s0">public </span><span class="s1">GraphApplication(<a href="../../../../ac/essex/graphing/plotting/Graph.java.html">Graph</a> graph) { 
+<a name="l31"> 
+<a name="l32"> 
+<a name="l33">        save = </span><span class="s0">new </span><span class="s1">JButton(</span><span class="s4">&quot;Save&quot;</span><span class="s1">); 
+<a name="l34">        save.addActionListener(</span><span class="s0">this</span><span class="s1">); 
+<a name="l35"> 
+<a name="l36">        exit = </span><span class="s0">new </span><span class="s1">JButton(</span><span class="s4">&quot;Exit&quot;</span><span class="s1">); 
+<a name="l37">        exit.addActionListener(</span><span class="s0">this</span><span class="s1">); 
+<a name="l38"> 
+<a name="l39">        JPanel toolbar = </span><span class="s0">new </span><span class="s1">JPanel(</span><span class="s0">new </span><span class="s1">FlowLayout(FlowLayout.RIGHT)); 
+<a name="l40"> 
+<a name="l41">        minX = </span><span class="s0">new </span><span class="s1">JTextField(String.valueOf(graph.plotSettings.getMinX())); 
+<a name="l42">        minY = </span><span class="s0">new </span><span class="s1">JTextField(String.valueOf(graph.plotSettings.getMinY())); 
+<a name="l43">        maxX = </span><span class="s0">new </span><span class="s1">JTextField(String.valueOf(graph.plotSettings.getMaxX())); 
+<a name="l44">        maxY = </span><span class="s0">new </span><span class="s1">JTextField(String.valueOf(graph.plotSettings.getMaxY())); 
+<a name="l45"> 
+<a name="l46">        toolbar.add(</span><span class="s0">new </span><span class="s1">JLabel(</span><span class="s4">&quot;X: &quot;</span><span class="s1">)); 
+<a name="l47">        toolbar.add(minX); 
+<a name="l48">        toolbar.add(</span><span class="s0">new </span><span class="s1">JLabel(</span><span class="s4">&quot;-&quot;</span><span class="s1">)); 
+<a name="l49">        toolbar.add(maxX); 
+<a name="l50">        toolbar.add(</span><span class="s0">new </span><span class="s1">JLabel(</span><span class="s4">&quot;, Y:&quot;</span><span class="s1">)); 
+<a name="l51">        toolbar.add(minY); 
+<a name="l52">        toolbar.add(</span><span class="s0">new </span><span class="s1">JLabel(</span><span class="s4">&quot;-&quot;</span><span class="s1">)); 
+<a name="l53">        toolbar.add(maxY); 
+<a name="l54"> 
+<a name="l55">        update = </span><span class="s0">new </span><span class="s1">JButton(</span><span class="s4">&quot;Update&quot;</span><span class="s1">); 
+<a name="l56">        update.addActionListener(</span><span class="s0">this</span><span class="s1">); 
+<a name="l57">        toolbar.add(update); 
+<a name="l58"> 
+<a name="l59">        toolbar.add(save); 
+<a name="l60">        toolbar.add(exit); 
+<a name="l61"> 
+<a name="l62">        </span><span class="s2">// add the panel to the middle of the BorderLayout, it will fill the window.</span><span class="s1"> 
+<a name="l63">        graphPanel = </span><span class="s0">new <a href="InteractiveGraphPanel.java.html">InteractiveGraphPanel</a></span><span class="s1">(</span><span class="s0">this</span><span class="s1">); 
+<a name="l64"> 
+<a name="l65">        </span><span class="s2">// Make sure Java Exits when the close button is clicked</span><span class="s1"> 
+<a name="l66">        addWindowListener(</span><span class="s0">new </span><span class="s1">WindowAdapter() { 
+<a name="l67">            </span><span class="s0">public void </span><span class="s1">windowClosing(WindowEvent e) { 
+<a name="l68">                System.exit(</span><span class="s5">0</span><span class="s1">); 
+<a name="l69">            } 
+<a name="l70">        } 
+<a name="l71">        ); 
+<a name="l72"> 
+<a name="l73">        </span><span class="s2">// Add the toolbar and graph to the frame</span><span class="s1"> 
+<a name="l74">        Container c = getContentPane(); 
+<a name="l75">        c.add(toolbar, BorderLayout.SOUTH); 
+<a name="l76">        c.add(graphPanel, BorderLayout.CENTER); 
+<a name="l77"> 
+<a name="l78">        </span><span class="s2">// default size of the window, the Graph Panel will be slightly smaller.</span><span class="s1"> 
+<a name="l79">        setSize(</span><span class="s5">640</span><span class="s1">, </span><span class="s5">480</span><span class="s1">);       
+<a name="l80"> 
+<a name="l81">        </span><span class="s2">// window title</span><span class="s1"> 
+<a name="l82">        setTitle(<a href="../../../../ac/essex/graphing/plotting/Graph.java.html">Graph</a>.VERSION); 
+<a name="l83"> 
+<a name="l84">        </span><span class="s2">// show the Window</span><span class="s1"> 
+<a name="l85">        setVisible(</span><span class="s0">true</span><span class="s1">); 
+<a name="l86"> 
+<a name="l87">        graphPanel.setGraph(graph); 
+<a name="l88"> 
+<a name="l89">    } 
+<a name="l90"> 
+<a name="l91"> 
+<a name="l92">    </span><span class="s0">public void </span><span class="s1">graphUpdated(<a href="../../../../ac/essex/graphing/plotting/PlotSettings.java.html">PlotSettings</a> settings) { 
+<a name="l93">        minX.setText(String.valueOf(settings.getMinX())); 
+<a name="l94">        minY.setText(String.valueOf(settings.getMinY())); 
+<a name="l95">        maxX.setText(String.valueOf(settings.getMaxX())); 
+<a name="l96">        maxY.setText(String.valueOf(settings.getMaxY())); 
+<a name="l97">    } 
+<a name="l98"> 
+<a name="l99">    </span><span class="s0">public void </span><span class="s1">actionPerformed(ActionEvent e) { 
+<a name="l100"> 
+<a name="l101">        </span><span class="s0">if </span><span class="s1">(e.getSource() == update) { 
+<a name="l102">            <a href="../../../../ac/essex/graphing/plotting/Graph.java.html">Graph</a> g = graphPanel.getGraph(); 
+<a name="l103">            g.plotSettings.setMinX(Double.parseDouble(minX.getText())); 
+<a name="l104">            g.plotSettings.setMaxX(Double.parseDouble(maxX.getText())); 
+<a name="l105">            g.plotSettings.setMinY(Double.parseDouble(minY.getText())); 
+<a name="l106">            g.plotSettings.setMaxY(Double.parseDouble(maxY.getText())); 
+<a name="l107">            graphPanel.repaint(); 
+<a name="l108">        } 
+<a name="l109"> 
+<a name="l110">        </span><span class="s2">// Saves an image of the graph to disk.</span><span class="s1"> 
+<a name="l111">        </span><span class="s0">if </span><span class="s1">(e.getSource() == save) { 
+<a name="l112">            JFileChooser filechooser = </span><span class="s0">new </span><span class="s1">JFileChooser(System.getProperty(</span><span class="s4">&quot;user.home&quot;</span><span class="s1">)); 
+<a name="l113">            filechooser.setDialogTitle(</span><span class="s4">&quot;Save Graph Image&quot;</span><span class="s1">); 
+<a name="l114">            filechooser.setSelectedFile(</span><span class="s0">new </span><span class="s1">File(filechooser.getCurrentDirectory(), </span><span class="s4">&quot;graph.png&quot;</span><span class="s1">)); 
+<a name="l115">            filechooser.setFileFilter(</span><span class="s0">new </span><span class="s1">FileFilter() { 
+<a name="l116">                </span><span class="s0">public boolean </span><span class="s1">accept(File f) { 
+<a name="l117">                    String extension = f.getName().substring(f.getName().lastIndexOf(</span><span class="s4">'.'</span><span class="s1">) + </span><span class="s5">1</span><span class="s1">).toLowerCase(); 
+<a name="l118">                    </span><span class="s0">if </span><span class="s1">(f.isDirectory()) </span><span class="s0">return true</span><span class="s1">; 
+<a name="l119">                    </span><span class="s0">if </span><span class="s1">(extension.equals(</span><span class="s4">&quot;bmp&quot;</span><span class="s1">)) </span><span class="s0">return true</span><span class="s1">; 
+<a name="l120">                    </span><span class="s0">if </span><span class="s1">(extension.equals(</span><span class="s4">&quot;jpg&quot;</span><span class="s1">)) </span><span class="s0">return true</span><span class="s1">; 
+<a name="l121">                    </span><span class="s0">if </span><span class="s1">(extension.equals(</span><span class="s4">&quot;png&quot;</span><span class="s1">)) </span><span class="s0">return true</span><span class="s1">; 
+<a name="l122">                    </span><span class="s0">return false</span><span class="s1">; 
+<a name="l123">                } 
+<a name="l124"> 
+<a name="l125">                </span><span class="s0">public </span><span class="s1">String getDescription() { 
+<a name="l126">                    </span><span class="s0">return </span><span class="s4">&quot;Image Files: jpg, png, bmp&quot;</span><span class="s1">; 
+<a name="l127">                } 
+<a name="l128">            }); 
+<a name="l129">            </span><span class="s0">int </span><span class="s1">action = filechooser.showSaveDialog(</span><span class="s0">this</span><span class="s1">); 
+<a name="l130">            </span><span class="s0">if </span><span class="s1">(action == JFileChooser.APPROVE_OPTION) { 
+<a name="l131">                File f = filechooser.getSelectedFile(); 
+<a name="l132">                </span><span class="s0">try </span><span class="s1">{ 
+<a name="l133">                    String extension = f.getName().substring(f.getName().lastIndexOf(</span><span class="s4">&quot;.&quot;</span><span class="s1">) + </span><span class="s5">1</span><span class="s1">); 
+<a name="l134">                    javax.imageio.ImageIO.write(graphPanel.getImage(), extension, f); 
+<a name="l135">                } </span><span class="s0">catch </span><span class="s1">(IOException err) { 
+<a name="l136">                    JOptionPane.showMessageDialog(</span><span class="s0">this</span><span class="s1">, </span><span class="s4">&quot;Could not save image: &quot; </span><span class="s1">+ err.getMessage()); 
+<a name="l137">                } 
+<a name="l138">            } 
+<a name="l139">        } 
+<a name="l140"> 
+<a name="l141">        </span><span class="s2">// Exits the program.</span><span class="s1"> 
+<a name="l142">        </span><span class="s0">if </span><span class="s1">(e.getSource() == exit) { 
+<a name="l143">            System.exit(</span><span class="s5">0</span><span class="s1">); 
+<a name="l144">        } 
+<a name="l145"> 
+<a name="l146">    } 
+<a name="l147"> 
+<a name="l148">} 
+<a name="l149"></span></pre>
+</body>
+</html>

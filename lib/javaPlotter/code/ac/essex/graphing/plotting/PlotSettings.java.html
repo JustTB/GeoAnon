@@ -1,0 +1,351 @@
+<html>
+<head>
+<title>PlotSettings.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { }
+.s2 { color: rgb(128,128,128); font-style: italic; }
+.s3 { color: rgb(128,128,128); font-style: italic; }
+.s4 { color: rgb(128,128,128); font-weight: bold; font-style: italic; }
+.s5 { color: rgb(0,0,255); }
+.s6 { color: rgb(0,128,0); font-weight: bold; }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+PlotSettings.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<a name="l1"><span class="s0">package </span><span class="s1">ac.essex.graphing.plotting; 
+<a name="l2"> 
+<a name="l3"></span><span class="s0">import </span><span class="s1">java.awt.*; 
+<a name="l4"></span><span class="s0">import </span><span class="s1">java.text.Format; 
+<a name="l5"></span><span class="s0">import </span><span class="s1">java.text.DecimalFormat; 
+<a name="l6"></span><span class="s0">import </span><span class="s1">java.io.Serializable; 
+<a name="l7"> 
+<a name="l8"></span><span class="s2">/** 
+<a name="l9"> * 
+<a name="l10"> * </span><span class="s3">&lt;p&gt;</span><span class="s2"> 
+<a name="l11"> * Determines the area that will be plotted, and all the appearance 
+<a name="l12"> * parameters of the graph. 
+<a name="l13"> * </span><span class="s3">&lt;/p&gt;</span><span class="s2"> 
+<a name="l14"> * 
+<a name="l15"> * </span><span class="s3">&lt;p/&gt;</span><span class="s2"> 
+<a name="l16"> * This program is free software; you can redistribute it and/or 
+<a name="l17"> * modify it under the terms of the GNU General Public License 
+<a name="l18"> * as published by the Free Software Foundation; either version 2 
+<a name="l19"> * of the License, or (at your option) any later version, 
+<a name="l20"> * provided that any use properly credits the author. 
+<a name="l21"> * This program is distributed in the hope that it will be useful, 
+<a name="l22"> * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+<a name="l23"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+<a name="l24"> * GNU General Public License for more details at http://www.gnu.org 
+<a name="l25"> * </span><span class="s3">&lt;/p&gt;</span><span class="s2"> 
+<a name="l26"> * 
+<a name="l27"> * </span><span class="s4">@author </span><span class="s2">Olly Oechsle, University of Essex, Date: 20-Nov-2007 
+<a name="l28"> * </span><span class="s4">@version </span><span class="s2">1.0 
+<a name="l29"> */</span><span class="s1"> 
+<a name="l30"></span><span class="s0">public class </span><span class="s1">PlotSettings </span><span class="s0">implements </span><span class="s1">Serializable { 
+<a name="l31"> 
+<a name="l32">    </span><span class="s2">/** 
+<a name="l33">     * Area Parameters 
+<a name="l34">     */</span><span class="s1"> 
+<a name="l35">    </span><span class="s0">protected double </span><span class="s1">minX = -</span><span class="s5">5</span><span class="s1">, maxX = </span><span class="s5">5</span><span class="s1">, minY = -</span><span class="s5">5</span><span class="s1">, maxY = </span><span class="s5">5</span><span class="s1">; 
+<a name="l36"> 
+<a name="l37">    </span><span class="s2">/** 
+<a name="l38">     * Margin 
+<a name="l39">     */</span><span class="s1"> 
+<a name="l40">    </span><span class="s0">protected int </span><span class="s1">marginTop = </span><span class="s5">10</span><span class="s1">, marginBottom = </span><span class="s5">50</span><span class="s1">, marginLeft = </span><span class="s5">50</span><span class="s1">, marginRight = </span><span class="s5">20</span><span class="s1">; 
+<a name="l41"> 
+<a name="l42">    </span><span class="s2">/** 
+<a name="l43">     * The colour of the axes 
+<a name="l44">     */</span><span class="s1"> 
+<a name="l45">    </span><span class="s0">protected </span><span class="s1">Color axisColor = Color.BLACK; 
+<a name="l46"> 
+<a name="l47">    </span><span class="s2">/** 
+<a name="l48">     * The colour of line graphs 
+<a name="l49">     */</span><span class="s1"> 
+<a name="l50">    </span><span class="s0">protected </span><span class="s1">Color plotColor = Color.BLACK; 
+<a name="l51"> 
+<a name="l52">    </span><span class="s2">/** 
+<a name="l53">     * The colour of the background 
+<a name="l54">     */</span><span class="s1"> 
+<a name="l55">    </span><span class="s0">protected </span><span class="s1">Color backgroundColor = Color.WHITE; 
+<a name="l56"> 
+<a name="l57">    </span><span class="s2">/** 
+<a name="l58">     * The colour of the grid 
+<a name="l59">     */</span><span class="s1"> 
+<a name="l60">    </span><span class="s0">protected </span><span class="s1">Color gridColor = Color.LIGHT_GRAY; 
+<a name="l61"> 
+<a name="l62">    </span><span class="s2">/** 
+<a name="l63">     * The font colour (title and labels) 
+<a name="l64">     */</span><span class="s1"> 
+<a name="l65">    </span><span class="s0">protected </span><span class="s1">Color fontColor = Color.BLACK; 
+<a name="l66"> 
+<a name="l67">    </span><span class="s2">/** 
+<a name="l68">     * The length (in pixels) of each noch on the horizontal and vertical axes 
+<a name="l69">     */</span><span class="s1"> 
+<a name="l70">    </span><span class="s0">protected int </span><span class="s1">notchLength = </span><span class="s5">4</span><span class="s1">; 
+<a name="l71"> 
+<a name="l72">    </span><span class="s2">/** 
+<a name="l73">     * The distance in pixels between the end of a notch and the corresponding label. 
+<a name="l74">     * Increase this value to move text further away from the notch. 
+<a name="l75">     */</span><span class="s1"> 
+<a name="l76">    </span><span class="s0">protected int </span><span class="s1">notchGap = </span><span class="s5">4</span><span class="s1">; 
+<a name="l77"> 
+<a name="l78">    </span><span class="s2">/** 
+<a name="l79">     * Display the horizontal grid? 
+<a name="l80">     */</span><span class="s1"> 
+<a name="l81">    </span><span class="s0">protected boolean </span><span class="s1">horizontalGridVisible = </span><span class="s0">true</span><span class="s1">; 
+<a name="l82"> 
+<a name="l83">    </span><span class="s2">/** 
+<a name="l84">     * Display the vertical grid? 
+<a name="l85">     */</span><span class="s1"> 
+<a name="l86">    </span><span class="s0">protected boolean </span><span class="s1">verticalGridVisible = </span><span class="s0">true</span><span class="s1">; 
+<a name="l87"> 
+<a name="l88">    </span><span class="s2">/** 
+<a name="l89">     * Formats the numbers displayed beneath each notch. 
+<a name="l90">     */</span><span class="s1"> 
+<a name="l91">    </span><span class="s0">protected </span><span class="s1">Format numberFormatter = </span><span class="s0">new </span><span class="s1">DecimalFormat(</span><span class="s6">&quot;0.00&quot;</span><span class="s1">); 
+<a name="l92"> 
+<a name="l93">    </span><span class="s2">/** 
+<a name="l94">     * How many notches in the X direction 
+<a name="l95">     */</span><span class="s1"> 
+<a name="l96">    </span><span class="s0">protected double </span><span class="s1">gridSpacingX = </span><span class="s5">0.25</span><span class="s1">; 
+<a name="l97"> 
+<a name="l98">    </span><span class="s2">/** 
+<a name="l99">     * How many notches in the Y direction 
+<a name="l100">     */</span><span class="s1"> 
+<a name="l101">    </span><span class="s0">protected double </span><span class="s1">gridSpacingY = </span><span class="s5">0.25</span><span class="s1">; 
+<a name="l102"> 
+<a name="l103">    </span><span class="s2">/** 
+<a name="l104">     * The title of the graph 
+<a name="l105">     */</span><span class="s1"> 
+<a name="l106">    </span><span class="s0">protected </span><span class="s1">String title = </span><span class="s0">null</span><span class="s1">; 
+<a name="l107"> 
+<a name="l108">    </span><span class="s0">public </span><span class="s1">PlotSettings() { 
+<a name="l109">        </span><span class="s2">// use defaults.</span><span class="s1"> 
+<a name="l110">    } 
+<a name="l111"> 
+<a name="l112">    </span><span class="s0">public </span><span class="s1">PlotSettings(</span><span class="s0">double </span><span class="s1">xMin, </span><span class="s0">double </span><span class="s1">xMax, </span><span class="s0">double </span><span class="s1">yMin, </span><span class="s0">double </span><span class="s1">yMax) { 
+<a name="l113">       </span><span class="s0">this</span><span class="s1">.minX = xMin; 
+<a name="l114">       </span><span class="s0">this</span><span class="s1">.maxX = xMax; 
+<a name="l115">       </span><span class="s0">this</span><span class="s1">.minY = yMin; 
+<a name="l116">       </span><span class="s0">this</span><span class="s1">.maxY = yMax; 
+<a name="l117">    } 
+<a name="l118"> 
+<a name="l119">    </span><span class="s2">/** 
+<a name="l120">     * Gets the minimum X value for plotting 
+<a name="l121">     */</span><span class="s1"> 
+<a name="l122">    </span><span class="s0">public double </span><span class="s1">getMinX() { 
+<a name="l123">        </span><span class="s0">return </span><span class="s1">minX; 
+<a name="l124">    } 
+<a name="l125"> 
+<a name="l126">    </span><span class="s2">/** 
+<a name="l127">     * Sets the minimum X value for plotting. 
+<a name="l128">     */</span><span class="s1"> 
+<a name="l129">    </span><span class="s0">public void </span><span class="s1">setMinX(</span><span class="s0">double </span><span class="s1">minX) { 
+<a name="l130">        </span><span class="s0">this</span><span class="s1">.minX = minX; 
+<a name="l131">    } 
+<a name="l132"> 
+<a name="l133">    </span><span class="s2">/** 
+<a name="l134">     * Gets the maximum X value for plotting. 
+<a name="l135">     */</span><span class="s1"> 
+<a name="l136">    </span><span class="s0">public double </span><span class="s1">getMaxX() { 
+<a name="l137">        </span><span class="s0">return </span><span class="s1">maxX; 
+<a name="l138">    } 
+<a name="l139"> 
+<a name="l140">    </span><span class="s2">/** 
+<a name="l141">     * Sets the maximum X value for plotting. 
+<a name="l142">     */</span><span class="s1"> 
+<a name="l143">    </span><span class="s0">public void </span><span class="s1">setMaxX(</span><span class="s0">double </span><span class="s1">maxX) { 
+<a name="l144">        </span><span class="s0">this</span><span class="s1">.maxX = maxX; 
+<a name="l145">    } 
+<a name="l146"> 
+<a name="l147">    </span><span class="s2">/** 
+<a name="l148">     * Gets the minimum Y value for plotting 
+<a name="l149">     */</span><span class="s1"> 
+<a name="l150">    </span><span class="s0">public double </span><span class="s1">getMinY() { 
+<a name="l151">        </span><span class="s0">return </span><span class="s1">minY; 
+<a name="l152">    } 
+<a name="l153"> 
+<a name="l154">    </span><span class="s2">/** 
+<a name="l155">     * Sets the minimum Y value for plotting 
+<a name="l156">     */</span><span class="s1"> 
+<a name="l157">    </span><span class="s0">public void </span><span class="s1">setMinY(</span><span class="s0">double </span><span class="s1">minY) { 
+<a name="l158">        </span><span class="s0">this</span><span class="s1">.minY = minY; 
+<a name="l159">    } 
+<a name="l160"> 
+<a name="l161">    </span><span class="s2">/** 
+<a name="l162">     * Gets the maximum Y value for plotting 
+<a name="l163">     */</span><span class="s1"> 
+<a name="l164">    </span><span class="s0">public double </span><span class="s1">getMaxY() { 
+<a name="l165">        </span><span class="s0">return </span><span class="s1">maxY; 
+<a name="l166">    } 
+<a name="l167"> 
+<a name="l168">    </span><span class="s2">/** 
+<a name="l169">     * Sets the maximum Y value for plotting 
+<a name="l170">     */</span><span class="s1"> 
+<a name="l171">    </span><span class="s0">public void </span><span class="s1">setMaxY(</span><span class="s0">double </span><span class="s1">maxY) { 
+<a name="l172">        </span><span class="s0">this</span><span class="s1">.maxY = maxY; 
+<a name="l173">    } 
+<a name="l174"> 
+<a name="l175">    </span><span class="s0">public double </span><span class="s1">getRangeX() { 
+<a name="l176">        </span><span class="s0">return </span><span class="s1">maxX - minX; 
+<a name="l177">    } 
+<a name="l178"> 
+<a name="l179">    </span><span class="s0">public double </span><span class="s1">getRangeY() { 
+<a name="l180">        </span><span class="s0">return </span><span class="s1">maxY - minY; 
+<a name="l181">    } 
+<a name="l182"> 
+<a name="l183">    </span><span class="s2">/** 
+<a name="l184">     * Gets the top margin 
+<a name="l185">     */</span><span class="s1"> 
+<a name="l186">    </span><span class="s0">public int </span><span class="s1">getMarginTop() { 
+<a name="l187">        </span><span class="s0">return </span><span class="s1">marginTop; 
+<a name="l188">    } 
+<a name="l189"> 
+<a name="l190">    </span><span class="s2">/** 
+<a name="l191">     * Sets the top margin. 
+<a name="l192">     */</span><span class="s1"> 
+<a name="l193">    </span><span class="s0">public void </span><span class="s1">setMarginTop(</span><span class="s0">int </span><span class="s1">marginTop) { 
+<a name="l194">        </span><span class="s0">this</span><span class="s1">.marginTop = marginTop; 
+<a name="l195">    } 
+<a name="l196"> 
+<a name="l197">    </span><span class="s0">public int </span><span class="s1">getMarginBottom() { 
+<a name="l198">        </span><span class="s0">return </span><span class="s1">marginBottom; 
+<a name="l199">    } 
+<a name="l200"> 
+<a name="l201">    </span><span class="s0">public void </span><span class="s1">setMarginBottom(</span><span class="s0">int </span><span class="s1">marginBottom) { 
+<a name="l202">        </span><span class="s0">this</span><span class="s1">.marginBottom = marginBottom; 
+<a name="l203">    } 
+<a name="l204"> 
+<a name="l205">    </span><span class="s0">public int </span><span class="s1">getMarginLeft() { 
+<a name="l206">        </span><span class="s0">return </span><span class="s1">marginLeft; 
+<a name="l207">    } 
+<a name="l208"> 
+<a name="l209">    </span><span class="s0">public void </span><span class="s1">setMarginLeft(</span><span class="s0">int </span><span class="s1">marginLeft) { 
+<a name="l210">        </span><span class="s0">this</span><span class="s1">.marginLeft = marginLeft; 
+<a name="l211">    } 
+<a name="l212"> 
+<a name="l213">    </span><span class="s0">public int </span><span class="s1">getMarginRight() { 
+<a name="l214">        </span><span class="s0">return </span><span class="s1">marginRight; 
+<a name="l215">    } 
+<a name="l216"> 
+<a name="l217">    </span><span class="s0">public void </span><span class="s1">setMarginRight(</span><span class="s0">int </span><span class="s1">marginRight) { 
+<a name="l218">        </span><span class="s0">this</span><span class="s1">.marginRight = marginRight; 
+<a name="l219">    } 
+<a name="l220"> 
+<a name="l221">    </span><span class="s0">public </span><span class="s1">Color getAxisColor() { 
+<a name="l222">        </span><span class="s0">return </span><span class="s1">axisColor; 
+<a name="l223">    } 
+<a name="l224"> 
+<a name="l225">    </span><span class="s0">public void </span><span class="s1">setAxisColor(Color axisColor) { 
+<a name="l226">        </span><span class="s0">this</span><span class="s1">.axisColor = axisColor; 
+<a name="l227">    } 
+<a name="l228"> 
+<a name="l229">    </span><span class="s0">public </span><span class="s1">Color getFontColor() { 
+<a name="l230">        </span><span class="s0">return </span><span class="s1">fontColor; 
+<a name="l231">    } 
+<a name="l232"> 
+<a name="l233">    </span><span class="s0">public void </span><span class="s1">setFontColor(Color fontColor) { 
+<a name="l234">        </span><span class="s0">this</span><span class="s1">.fontColor = fontColor; 
+<a name="l235">    } 
+<a name="l236"> 
+<a name="l237">    </span><span class="s0">public </span><span class="s1">Color getBackgroundColor() { 
+<a name="l238">        </span><span class="s0">return </span><span class="s1">backgroundColor; 
+<a name="l239">    } 
+<a name="l240"> 
+<a name="l241">    </span><span class="s0">public void </span><span class="s1">setBackgroundColor(Color backgroundColor) { 
+<a name="l242">        </span><span class="s0">this</span><span class="s1">.backgroundColor = backgroundColor; 
+<a name="l243">    } 
+<a name="l244"> 
+<a name="l245">    </span><span class="s0">public </span><span class="s1">Color getPlotColor() { 
+<a name="l246">        </span><span class="s0">return </span><span class="s1">plotColor; 
+<a name="l247">    } 
+<a name="l248"> 
+<a name="l249">    </span><span class="s0">public void </span><span class="s1">setPlotColor(Color plotColor) { 
+<a name="l250">        </span><span class="s0">this</span><span class="s1">.plotColor = plotColor; 
+<a name="l251">    } 
+<a name="l252"> 
+<a name="l253">    </span><span class="s0">public </span><span class="s1">Color getGridColor() { 
+<a name="l254">        </span><span class="s0">return </span><span class="s1">gridColor; 
+<a name="l255">    } 
+<a name="l256"> 
+<a name="l257">    </span><span class="s0">public void </span><span class="s1">setGridColor(Color gridColor) { 
+<a name="l258">        </span><span class="s0">this</span><span class="s1">.gridColor = gridColor; 
+<a name="l259">    } 
+<a name="l260"> 
+<a name="l261">    </span><span class="s0">public int </span><span class="s1">getNotchLength() { 
+<a name="l262">        </span><span class="s0">return </span><span class="s1">notchLength; 
+<a name="l263">    } 
+<a name="l264"> 
+<a name="l265">    </span><span class="s0">public void </span><span class="s1">setNotchLength(</span><span class="s0">int </span><span class="s1">notchLength) { 
+<a name="l266">        </span><span class="s0">this</span><span class="s1">.notchLength = notchLength; 
+<a name="l267">    } 
+<a name="l268"> 
+<a name="l269">    </span><span class="s0">public int </span><span class="s1">getNotchGap() { 
+<a name="l270">        </span><span class="s0">return </span><span class="s1">notchGap; 
+<a name="l271">    } 
+<a name="l272"> 
+<a name="l273">    </span><span class="s0">public void </span><span class="s1">setNotchGap(</span><span class="s0">int </span><span class="s1">notchGap) { 
+<a name="l274">        </span><span class="s0">this</span><span class="s1">.notchGap = notchGap; 
+<a name="l275">    } 
+<a name="l276"> 
+<a name="l277">    </span><span class="s0">public boolean </span><span class="s1">isHorizontalGridVisible() { 
+<a name="l278">        </span><span class="s0">return </span><span class="s1">horizontalGridVisible; 
+<a name="l279">    } 
+<a name="l280"> 
+<a name="l281">    </span><span class="s0">public void </span><span class="s1">setHorizontalGridVisible(</span><span class="s0">boolean </span><span class="s1">horizontalGridVisible) { 
+<a name="l282">        </span><span class="s0">this</span><span class="s1">.horizontalGridVisible = horizontalGridVisible; 
+<a name="l283">    } 
+<a name="l284"> 
+<a name="l285">    </span><span class="s0">public boolean </span><span class="s1">isVerticalGridVisible() { 
+<a name="l286">        </span><span class="s0">return </span><span class="s1">verticalGridVisible; 
+<a name="l287">    } 
+<a name="l288"> 
+<a name="l289">    </span><span class="s0">public void </span><span class="s1">setVerticalGridVisible(</span><span class="s0">boolean </span><span class="s1">verticalGridVisible) { 
+<a name="l290">        </span><span class="s0">this</span><span class="s1">.verticalGridVisible = verticalGridVisible; 
+<a name="l291">    } 
+<a name="l292"> 
+<a name="l293">    </span><span class="s0">public </span><span class="s1">Format getNumberFormatter() { 
+<a name="l294">        </span><span class="s0">return </span><span class="s1">numberFormatter; 
+<a name="l295">    } 
+<a name="l296"> 
+<a name="l297">    </span><span class="s0">public void </span><span class="s1">setNumberFormatter(Format numberFormatter) { 
+<a name="l298">        </span><span class="s0">this</span><span class="s1">.numberFormatter = numberFormatter; 
+<a name="l299">    } 
+<a name="l300"> 
+<a name="l301">    </span><span class="s0">public double </span><span class="s1">getGridSpacingX() { 
+<a name="l302">        </span><span class="s0">return </span><span class="s1">gridSpacingX; 
+<a name="l303">    } 
+<a name="l304"> 
+<a name="l305">    </span><span class="s0">public void </span><span class="s1">setGridSpacingX(</span><span class="s0">double </span><span class="s1">gridSpacingX) { 
+<a name="l306">        </span><span class="s0">this</span><span class="s1">.gridSpacingX = gridSpacingX; 
+<a name="l307">    } 
+<a name="l308"> 
+<a name="l309">    </span><span class="s0">public double </span><span class="s1">getGridSpacingY() { 
+<a name="l310">        </span><span class="s0">return </span><span class="s1">gridSpacingY; 
+<a name="l311">    } 
+<a name="l312"> 
+<a name="l313">    </span><span class="s0">public void </span><span class="s1">setGridSpacingY(</span><span class="s0">double </span><span class="s1">gridSpacingY) { 
+<a name="l314">        </span><span class="s0">this</span><span class="s1">.gridSpacingY = gridSpacingY; 
+<a name="l315">    } 
+<a name="l316"> 
+<a name="l317">    </span><span class="s0">public </span><span class="s1">String getTitle() { 
+<a name="l318">        </span><span class="s0">return </span><span class="s1">title; 
+<a name="l319">    } 
+<a name="l320"> 
+<a name="l321">    </span><span class="s0">public void </span><span class="s1">setTitle(String title) { 
+<a name="l322">        </span><span class="s0">this</span><span class="s1">.title = title; 
+<a name="l323">    } 
+<a name="l324"> 
+<a name="l325">} 
+<a name="l326"></span></pre>
+</body>
+</html>

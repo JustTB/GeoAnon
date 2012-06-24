@@ -290,4 +290,10 @@ public class Statistician implements Serializable{
 			this.neighborGrade.put(grade, 1);
 		}
 	}
+	public HashMap<Integer, Integer> getMergedWayPointGrade() {
+		return mergedWaypointGrade;
+	}
+	public HashMap<Integer, Integer> getNeighborGrade() {
+		return neighborGrade;
+	}
 }

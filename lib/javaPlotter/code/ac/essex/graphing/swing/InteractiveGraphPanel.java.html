@@ -1,0 +1,138 @@
+<html>
+<head>
+<title>InteractiveGraphPanel.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { }
+.s2 { color: rgb(128,128,128); font-style: italic; }
+.s3 { color: rgb(128,128,128); font-style: italic; }
+.s4 { color: rgb(128,128,128); font-weight: bold; font-style: italic; }
+.s5 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+InteractiveGraphPanel.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<a name="l1"><span class="s0">package </span><span class="s1">ac.essex.graphing.swing; 
+<a name="l2"> 
+<a name="l3"></span><span class="s0">import <a href="../../../../ac/essex/graphing/plotting/PlotSettings.java.html">ac.essex.graphing.plotting.PlotSettings</a></span><span class="s1">; 
+<a name="l4"> 
+<a name="l5"></span><span class="s0">import </span><span class="s1">java.awt.event.*; 
+<a name="l6"> 
+<a name="l7"></span><span class="s2">/** 
+<a name="l8"> * </span><span class="s3">&lt;p&gt;</span><span class="s2"> 
+<a name="l9"> * An improvement to the graph panel, which allows the user to 
+<a name="l10"> * interactively drag the panel around to explore the graph 
+<a name="l11"> * easily. 
+<a name="l12"> * </span><span class="s3">&lt;/p&gt;</span><span class="s2"> 
+<a name="l13"> * 
+<a name="l14"> * </span><span class="s3">&lt;p&gt;</span><span class="s2"> 
+<a name="l15"> * Easy to replace the standard Graph panel, just make sure your 
+<a name="l16"> * GUI implements SettingsUpdateListener (called after the graph panel updates) 
+<a name="l17"> * This allows your GUI to be informed when the plotSettings object changes its values. 
+<a name="l18"> * </span><span class="s3">&lt;/p&gt;</span><span class="s2"> 
+<a name="l19"> * 
+<a name="l20"> * </span><span class="s4">@author </span><span class="s2">Olly Oechsle, University of Essex, Date: 20-Nov-2007 
+<a name="l21"> * </span><span class="s4">@version </span><span class="s2">1.0 
+<a name="l22"> */</span><span class="s1"> 
+<a name="l23"></span><span class="s0">public class </span><span class="s1">InteractiveGraphPanel </span><span class="s0">extends <a href="GraphPanel.java.html">GraphPanel</a> </span><span class="s1">{ 
+<a name="l24"> 
+<a name="l25">    </span><span class="s0">protected int </span><span class="s1">mouseDownX, mouseDownY; 
+<a name="l26">    </span><span class="s0">protected double </span><span class="s1">minX, maxX, minY, maxY; 
+<a name="l27">    </span><span class="s0">protected boolean </span><span class="s1">mouseDown; 
+<a name="l28"> 
+<a name="l29">    </span><span class="s0">public </span><span class="s1">InteractiveGraphPanel(</span><span class="s0">final <a href="SettingsUpdateListener.java.html">SettingsUpdateListener</a> </span><span class="s1">listener) { 
+<a name="l30"> 
+<a name="l31">        addMouseListener(</span><span class="s0">new </span><span class="s1">MouseAdapter() { 
+<a name="l32"> 
+<a name="l33">            </span><span class="s0">public void </span><span class="s1">mousePressed(MouseEvent e) { 
+<a name="l34">                </span><span class="s0">if </span><span class="s1">(graph != </span><span class="s0">null</span><span class="s1">) { 
+<a name="l35">                    <a href="../../../../ac/essex/graphing/plotting/PlotSettings.java.html">PlotSettings</a> p = graph.plotSettings; 
+<a name="l36">                    mouseDownX = e.getX(); 
+<a name="l37">                    mouseDownY = e.getY(); 
+<a name="l38">                    minX = p.getMinX(); 
+<a name="l39">                    minY = p.getMinY(); 
+<a name="l40">                    maxX = p.getMaxX(); 
+<a name="l41">                    maxY = p.getMaxY(); 
+<a name="l42">                } 
+<a name="l43">                mouseDown = </span><span class="s0">true</span><span class="s1">; 
+<a name="l44">            } 
+<a name="l45"> 
+<a name="l46">            </span><span class="s0">public void </span><span class="s1">mouseReleased(MouseEvent e) { 
+<a name="l47">                mouseDown = </span><span class="s0">false</span><span class="s1">; 
+<a name="l48">                listener.graphUpdated(graph.plotSettings); 
+<a name="l49">            } 
+<a name="l50"> 
+<a name="l51">        }); 
+<a name="l52"> 
+<a name="l53">        addMouseMotionListener(</span><span class="s0">new </span><span class="s1">MouseMotionAdapter() { 
+<a name="l54"> 
+<a name="l55">            </span><span class="s0">public void </span><span class="s1">mouseDragged(MouseEvent e) { 
+<a name="l56"> 
+<a name="l57">                </span><span class="s0">if </span><span class="s1">(graph != </span><span class="s0">null</span><span class="s1">) { 
+<a name="l58"> 
+<a name="l59">                    <a href="../../../../ac/essex/graphing/plotting/PlotSettings.java.html">PlotSettings</a> p = graph.plotSettings; 
+<a name="l60"> 
+<a name="l61">                    </span><span class="s0">double </span><span class="s1">movementX = graph.getPlotWidth(e.getX() - mouseDownX); 
+<a name="l62">                    </span><span class="s0">double </span><span class="s1">movementY = graph.getPlotHeight(e.getY() - mouseDownY); 
+<a name="l63"> 
+<a name="l64">                    p.setMinX(minX-movementX); 
+<a name="l65">                    p.setMaxX(maxX-movementX); 
+<a name="l66">                    p.setMinY(minY+movementY); 
+<a name="l67">                    p.setMaxY(maxY+movementY); 
+<a name="l68">                    
+<a name="l69">                    repaint(); 
+<a name="l70"> 
+<a name="l71">                } 
+<a name="l72"> 
+<a name="l73">            } 
+<a name="l74"> 
+<a name="l75">        }); 
+<a name="l76"> 
+<a name="l77">        addMouseWheelListener(</span><span class="s0">new </span><span class="s1">MouseWheelListener() { 
+<a name="l78"> 
+<a name="l79">            </span><span class="s0">public void </span><span class="s1">mouseWheelMoved(MouseWheelEvent e) { 
+<a name="l80">                </span><span class="s0">if </span><span class="s1">(graph != </span><span class="s0">null </span><span class="s1">&amp;&amp; !mouseDown)  { 
+<a name="l81"> 
+<a name="l82">                    <a href="../../../../ac/essex/graphing/plotting/PlotSettings.java.html">PlotSettings</a> p = graph.plotSettings; 
+<a name="l83"> 
+<a name="l84">                    </span><span class="s0">double </span><span class="s1">multiplier; 
+<a name="l85"> 
+<a name="l86">                    </span><span class="s0">if </span><span class="s1">(e.getWheelRotation() &lt; </span><span class="s5">0</span><span class="s1">)  { 
+<a name="l87">                        </span><span class="s2">// zoom in</span><span class="s1"> 
+<a name="l88">                        multiplier = </span><span class="s5">0.1</span><span class="s1">; 
+<a name="l89">                    } </span><span class="s0">else </span><span class="s1">{ 
+<a name="l90">                        </span><span class="s2">// zoom out</span><span class="s1"> 
+<a name="l91">                        multiplier = -</span><span class="s5">0.1</span><span class="s1">; 
+<a name="l92">                    } 
+<a name="l93"> 
+<a name="l94">                    </span><span class="s0">double </span><span class="s1">xDiff = p.getRangeX() * multiplier; 
+<a name="l95">                    </span><span class="s0">double </span><span class="s1">yDiff = p.getRangeY() * multiplier; 
+<a name="l96"> 
+<a name="l97">                    p.setMinX(p.getMinX() + xDiff); 
+<a name="l98">                    p.setMaxX(p.getMaxX() - xDiff); 
+<a name="l99"> 
+<a name="l100">                    p.setMinY(p.getMinY() + yDiff); 
+<a name="l101">                    p.setMaxY(p.getMaxY() - yDiff); 
+<a name="l102"> 
+<a name="l103">                    listener.graphUpdated(graph.plotSettings); 
+<a name="l104">                    repaint(); 
+<a name="l105">                     
+<a name="l106">                } 
+<a name="l107">            } 
+<a name="l108"> 
+<a name="l109">        }); 
+<a name="l110"> 
+<a name="l111">    } 
+<a name="l112"> 
+<a name="l113">} 
+<a name="l114"></span></pre>
+</body>
+</html>

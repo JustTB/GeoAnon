@@ -1,0 +1,77 @@
+<html>
+<head>
+<title>GraphPanel.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { }
+.s2 { color: rgb(128,128,128); font-style: italic; }
+.s3 { color: rgb(128,128,128); font-weight: bold; font-style: italic; }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+GraphPanel.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<a name="l1"><span class="s0">package </span><span class="s1">ac.essex.graphing.swing; 
+<a name="l2"> 
+<a name="l3"></span><span class="s0">import <a href="../../../../ac/essex/graphing/plotting/Graph.java.html">ac.essex.graphing.plotting.Graph</a></span><span class="s1">; 
+<a name="l4"> 
+<a name="l5"></span><span class="s0">import </span><span class="s1">javax.swing.*; 
+<a name="l6"></span><span class="s0">import </span><span class="s1">java.awt.*; 
+<a name="l7"></span><span class="s0">import </span><span class="s1">java.awt.image.BufferedImage; 
+<a name="l8"> 
+<a name="l9"></span><span class="s2">/** 
+<a name="l10"> * Wraps around the graph object making it easy to integrate 
+<a name="l11"> * into Java Swing applications. 
+<a name="l12"> * 
+<a name="l13"> * </span><span class="s3">@author </span><span class="s2">Olly Oechsle, University of Essex, Date: 13-Jun-2007 
+<a name="l14"> * </span><span class="s3">@version </span><span class="s2">1.00 
+<a name="l15"> */</span><span class="s1"> 
+<a name="l16"></span><span class="s0">public class </span><span class="s1">GraphPanel </span><span class="s0">extends </span><span class="s1">JPanel { 
+<a name="l17"> 
+<a name="l18">    </span><span class="s2">/** 
+<a name="l19">     * The graph object renders charts and graphs. 
+<a name="l20">     */</span><span class="s1"> 
+<a name="l21">    </span><span class="s0">protected <a href="../../../../ac/essex/graphing/plotting/Graph.java.html">Graph</a> </span><span class="s1">graph; 
+<a name="l22"> 
+<a name="l23">    </span><span class="s2">/** 
+<a name="l24">     * Initialises the panel with a graph object 
+<a name="l25">     */</span><span class="s1"> 
+<a name="l26">    </span><span class="s0">public void </span><span class="s1">setGraph(<a href="../../../../ac/essex/graphing/plotting/Graph.java.html">Graph</a> graph) { 
+<a name="l27">        </span><span class="s0">this</span><span class="s1">.graph = graph; 
+<a name="l28">        repaint(); 
+<a name="l29">    } 
+<a name="l30"> 
+<a name="l31">    </span><span class="s2">/** 
+<a name="l32">     * Draws the graph directly onto the JPanel 
+<a name="l33">     */</span><span class="s1"> 
+<a name="l34">    </span><span class="s0">public void </span><span class="s1">paintComponent(Graphics g) { 
+<a name="l35">       </span><span class="s0">super</span><span class="s1">.paintComponent(g); 
+<a name="l36">       </span><span class="s0">if </span><span class="s1">(graph != </span><span class="s0">null</span><span class="s1">) graph.draw(g, getWidth(), getHeight()); 
+<a name="l37">    } 
+<a name="l38"> 
+<a name="l39">    </span><span class="s2">/** 
+<a name="l40">     * Returns an image of the graph which can be saved to disk. 
+<a name="l41">     */</span><span class="s1"> 
+<a name="l42">    </span><span class="s0">public </span><span class="s1">BufferedImage getImage() { 
+<a name="l43">       </span><span class="s0">return </span><span class="s1">graph != </span><span class="s0">null</span><span class="s1">? graph.getImage(getWidth(), getHeight()) : </span><span class="s0">null</span><span class="s1">; 
+<a name="l44">    } 
+<a name="l45"> 
+<a name="l46">    </span><span class="s2">/** 
+<a name="l47">     * Provides access to the graph object. 
+<a name="l48">     * </span><span class="s3">@return</span><span class="s2"> 
+<a name="l49">     */</span><span class="s1"> 
+<a name="l50">    </span><span class="s0">public <a href="../../../../ac/essex/graphing/plotting/Graph.java.html">Graph</a> </span><span class="s1">getGraph() { 
+<a name="l51">        </span><span class="s0">return </span><span class="s1">graph; 
+<a name="l52">    } 
+<a name="l53"> 
+<a name="l54">} 
+<a name="l55"></span></pre>
+</body>
+</html>

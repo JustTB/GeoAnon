@@ -1,0 +1,77 @@
+<html>
+<head>
+<title>BarChartPlot.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { }
+.s2 { color: rgb(128,128,128); font-style: italic; }
+.s3 { color: rgb(128,128,128); font-style: italic; }
+.s4 { color: rgb(128,128,128); font-weight: bold; font-style: italic; }
+.s5 { color: rgb(0,0,255); }
+.s6 { color: rgb(0,128,0); font-weight: bold; }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+BarChartPlot.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<a name="l1"><span class="s0">package </span><span class="s1">ac.essex.graphing.charts.discrete; 
+<a name="l2"> 
+<a name="l3"></span><span class="s0">import <a href="../../../../../ac/essex/graphing/plotting/Graph.java.html">ac.essex.graphing.plotting.Graph</a></span><span class="s1">; 
+<a name="l4"></span><span class="s0">import <a href="../../../../../ac/essex/graphing/plotting/DiscreteFunctionPlotter.java.html">ac.essex.graphing.plotting.DiscreteFunctionPlotter</a></span><span class="s1">; 
+<a name="l5"> 
+<a name="l6"></span><span class="s0">import </span><span class="s1">java.awt.*; 
+<a name="l7"> 
+<a name="l8"></span><span class="s2">/** 
+<a name="l9"> * </span><span class="s3">&lt;p/&gt;</span><span class="s2"> 
+<a name="l10"> * This program is free software; you can redistribute it and/or 
+<a name="l11"> * modify it under the terms of the GNU General Public License 
+<a name="l12"> * as published by the Free Software Foundation; either version 2 
+<a name="l13"> * of the License, or (at your option) any later version, 
+<a name="l14"> * provided that any use properly credits the author. 
+<a name="l15"> * This program is distributed in the hope that it will be useful, 
+<a name="l16"> * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+<a name="l17"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+<a name="l18"> * GNU General Public License for more details at http://www.gnu.org 
+<a name="l19"> * </span><span class="s3">&lt;/p&gt;</span><span class="s2"> 
+<a name="l20"> * 
+<a name="l21"> * </span><span class="s4">@author </span><span class="s2">Olly Oechsle, University of Essex, Date: 13-Jun-2007 
+<a name="l22"> * </span><span class="s4">@version </span><span class="s2">1.0 
+<a name="l23"> */</span><span class="s1"> 
+<a name="l24"></span><span class="s0">public class </span><span class="s1">BarChartPlot </span><span class="s0">extends <a href="../../../../../ac/essex/graphing/plotting/DiscreteFunctionPlotter.java.html">DiscreteFunctionPlotter</a> </span><span class="s1">{ 
+<a name="l25"> 
+<a name="l26">    </span><span class="s0">public static double </span><span class="s1">COLUMN_WIDTH = </span><span class="s5">1</span><span class="s1">; 
+<a name="l27"> 
+<a name="l28">    </span><span class="s0">public </span><span class="s1">BarChartPlot(String[] labels, </span><span class="s0">double</span><span class="s1">[] highs, </span><span class="s0">double</span><span class="s1">[] lows, </span><span class="s0">double</span><span class="s1">[] means) { 
+<a name="l29">        </span><span class="s0">super</span><span class="s1">(labels, highs, lows, means); 
+<a name="l30">    } 
+<a name="l31"> 
+<a name="l32">    </span><span class="s0">public </span><span class="s1">String getName() { 
+<a name="l33">        </span><span class="s0">return </span><span class="s6">&quot;Bar Chart&quot;</span><span class="s1">; 
+<a name="l34">    } 
+<a name="l35"> 
+<a name="l36">    </span><span class="s0">public void </span><span class="s1">plot(<a href="../../../../../ac/essex/graphing/plotting/Graph.java.html">Graph</a> p, Graphics g, </span><span class="s0">int </span><span class="s1">chartWidth, </span><span class="s0">int </span><span class="s1">chartHeight) { 
+<a name="l37"> 
+<a name="l38">        </span><span class="s2">/** 
+<a name="l39">         * Go through each X pixel on the screen from left to right 
+<a name="l40">         */</span><span class="s1"> 
+<a name="l41">        </span><span class="s0">for </span><span class="s1">(</span><span class="s0">int </span><span class="s1">x = </span><span class="s5">0</span><span class="s1">; x &lt; getColumnCount(); x++) { 
+<a name="l42"> 
+<a name="l43">            p.drawBar(g, COLUMN_WIDTH, x, getHigh(x), Color.RED); 
+<a name="l44"> 
+<a name="l45">            p.drawBar(g, COLUMN_WIDTH, x, getLow(x), Color.BLUE); 
+<a name="l46"> 
+<a name="l47">        } 
+<a name="l48"> 
+<a name="l49">    } 
+<a name="l50"> 
+<a name="l51">} 
+<a name="l52"></span></pre>
+</body>
+</html>

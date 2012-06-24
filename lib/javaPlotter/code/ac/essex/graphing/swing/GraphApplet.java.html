@@ -1,0 +1,100 @@
+<html>
+<head>
+<title>GraphApplet.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { }
+.s2 { color: rgb(128,128,128); font-style: italic; }
+.s3 { color: rgb(128,128,128); font-weight: bold; font-style: italic; }
+.s4 { color: rgb(0,128,0); font-weight: bold; }
+.s5 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+GraphApplet.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<a name="l1"><span class="s0">package </span><span class="s1">ac.essex.graphing.swing; 
+<a name="l2"> 
+<a name="l3"></span><span class="s0">import <a href="../../../../ac/essex/graphing/plotting/Graph.java.html">ac.essex.graphing.plotting.Graph</a></span><span class="s1">; 
+<a name="l4"></span><span class="s0">import <a href="../../../../ac/essex/graphing/plotting/PlotSettings.java.html">ac.essex.graphing.plotting.PlotSettings</a></span><span class="s1">; 
+<a name="l5"></span><span class="s0">import <a href="../../../../ac/essex/graphing/Demo.java.html">ac.essex.graphing.Demo</a></span><span class="s1">; 
+<a name="l6"> 
+<a name="l7"></span><span class="s0">import </span><span class="s1">javax.swing.*; 
+<a name="l8"></span><span class="s0">import </span><span class="s1">javax.swing.filechooser.FileFilter; 
+<a name="l9"></span><span class="s0">import </span><span class="s1">java.awt.event.ActionListener; 
+<a name="l10"></span><span class="s0">import </span><span class="s1">java.awt.event.ActionEvent; 
+<a name="l11"></span><span class="s0">import </span><span class="s1">java.awt.*; 
+<a name="l12"></span><span class="s0">import </span><span class="s1">java.io.File; 
+<a name="l13"></span><span class="s0">import </span><span class="s1">java.io.IOException; 
+<a name="l14"></span><span class="s0">import </span><span class="s1">java.text.DecimalFormat; 
+<a name="l15"> 
+<a name="l16"></span><span class="s2">/** 
+<a name="l17"> * Small application demonstrating the use of the graph panel in a swing gui. 
+<a name="l18"> * 
+<a name="l19"> * </span><span class="s3">@author </span><span class="s2">Olly Oechsle, University of Essex, Date: 05-Jun-2007 
+<a name="l20"> * </span><span class="s3">@version </span><span class="s2">1.01 - Added suport for the Interactive Graph Panel. 
+<a name="l21"> */</span><span class="s1"> 
+<a name="l22"></span><span class="s0">public class </span><span class="s1">GraphApplet </span><span class="s0">extends </span><span class="s1">JApplet </span><span class="s0">implements <a href="SettingsUpdateListener.java.html">SettingsUpdateListener</a> </span><span class="s1">{ 
+<a name="l23"> 
+<a name="l24">    </span><span class="s0">protected </span><span class="s1">JLabel minX, minY, maxX, maxY; 
+<a name="l25"> 
+<a name="l26">    </span><span class="s0">protected <a href="GraphPanel.java.html">GraphPanel</a> </span><span class="s1">graphPanel; 
+<a name="l27">     
+<a name="l28">    </span><span class="s0">protected </span><span class="s1">DecimalFormat f = </span><span class="s0">new </span><span class="s1">DecimalFormat(</span><span class="s4">&quot;0.000&quot;</span><span class="s1">);     
+<a name="l29"> 
+<a name="l30">    </span><span class="s0">public </span><span class="s1">GraphApplet() { 
+<a name="l31"> 
+<a name="l32">        <a href="../../../../ac/essex/graphing/plotting/Graph.java.html">Graph</a> graph = <a href="../../../../ac/essex/graphing/Demo.java.html">Demo</a>.getExampleGraph2(); 
+<a name="l33">         
+<a name="l34">        JPanel statusBar = </span><span class="s0">new </span><span class="s1">JPanel(</span><span class="s0">new </span><span class="s1">FlowLayout(FlowLayout.RIGHT)); 
+<a name="l35"> 
+<a name="l36">        minX = </span><span class="s0">new </span><span class="s1">JLabel(f.format(graph.plotSettings.getMinX())); 
+<a name="l37">        minY = </span><span class="s0">new </span><span class="s1">JLabel(f.format(graph.plotSettings.getMinY())); 
+<a name="l38">        maxX = </span><span class="s0">new </span><span class="s1">JLabel(f.format(graph.plotSettings.getMaxX())); 
+<a name="l39">        maxY = </span><span class="s0">new </span><span class="s1">JLabel(f.format(graph.plotSettings.getMaxY())); 
+<a name="l40"> 
+<a name="l41">        statusBar.add(</span><span class="s0">new </span><span class="s1">JLabel(</span><span class="s4">&quot;X: &quot;</span><span class="s1">)); 
+<a name="l42">        statusBar.add(minX); 
+<a name="l43">        statusBar.add(</span><span class="s0">new </span><span class="s1">JLabel(</span><span class="s4">&quot;:&quot;</span><span class="s1">)); 
+<a name="l44">        statusBar.add(maxX); 
+<a name="l45">        statusBar.add(</span><span class="s0">new </span><span class="s1">JLabel(</span><span class="s4">&quot;, Y:&quot;</span><span class="s1">)); 
+<a name="l46">        statusBar.add(minY); 
+<a name="l47">        statusBar.add(</span><span class="s0">new </span><span class="s1">JLabel(</span><span class="s4">&quot;:&quot;</span><span class="s1">)); 
+<a name="l48">        statusBar.add(maxY); 
+<a name="l49"> 
+<a name="l50">        </span><span class="s2">// add the panel to the middle of the BorderLayout, it will fill the window.</span><span class="s1"> 
+<a name="l51">        graphPanel = </span><span class="s0">new <a href="InteractiveGraphPanel.java.html">InteractiveGraphPanel</a></span><span class="s1">(</span><span class="s0">this</span><span class="s1">); 
+<a name="l52"> 
+<a name="l53">        </span><span class="s2">// Add the toolbar and graph to the frame</span><span class="s1"> 
+<a name="l54">        Container c = getContentPane(); 
+<a name="l55">        c.add(statusBar, BorderLayout.SOUTH); 
+<a name="l56">        c.add(graphPanel, BorderLayout.CENTER); 
+<a name="l57"> 
+<a name="l58">        </span><span class="s2">// default size of the window, the Graph Panel will be slightly smaller.</span><span class="s1"> 
+<a name="l59">        setSize(</span><span class="s5">640</span><span class="s1">, </span><span class="s5">480</span><span class="s1">); 
+<a name="l60"> 
+<a name="l61">        </span><span class="s2">// show the Window</span><span class="s1"> 
+<a name="l62">        setVisible(</span><span class="s0">true</span><span class="s1">); 
+<a name="l63"> 
+<a name="l64">        graphPanel.setGraph(graph); 
+<a name="l65"> 
+<a name="l66">    } 
+<a name="l67"> 
+<a name="l68">    </span><span class="s0">public void </span><span class="s1">graphUpdated(<a href="../../../../ac/essex/graphing/plotting/PlotSettings.java.html">PlotSettings</a> settings) { 
+<a name="l69">        minX.setText(f.format(settings.getMinX())); 
+<a name="l70">        minY.setText(f.format(settings.getMinY())); 
+<a name="l71">        maxX.setText(f.format(settings.getMaxX())); 
+<a name="l72">        maxY.setText(f.format(settings.getMaxY())); 
+<a name="l73">    } 
+<a name="l74"> 
+<a name="l75">} 
+<a name="l76"></span></pre>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<html>
+<head>
+<title>Demo.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { }
+.s2 { color: rgb(128,128,128); font-style: italic; }
+.s3 { color: rgb(128,128,128); font-style: italic; }
+.s4 { color: rgb(128,128,128); font-weight: bold; font-style: italic; }
+.s5 { color: rgb(0,128,0); font-weight: bold; }
+.s6 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+Demo.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<a name="l1"><span class="s0">package </span><span class="s1">ac.essex.graphing; 
+<a name="l2"> 
+<a name="l3"></span><span class="s0">import <a href="../../../ac/essex/graphing/plotting/Graph.java.html">ac.essex.graphing.plotting.Graph</a></span><span class="s1">; 
+<a name="l4"></span><span class="s0">import <a href="../../../ac/essex/graphing/plotting/PlotSettings.java.html">ac.essex.graphing.plotting.PlotSettings</a></span><span class="s1">; 
+<a name="l5"></span><span class="s0">import <a href="../../../ac/essex/graphing/swing/GraphApplication.java.html">ac.essex.graphing.swing.GraphApplication</a></span><span class="s1">; 
+<a name="l6"></span><span class="s0">import <a href="../../../ac/essex/graphing/charts/continuous/Circle1.java.html">ac.essex.graphing.charts.continuous.Circle1</a></span><span class="s1">; 
+<a name="l7"></span><span class="s0">import <a href="../../../ac/essex/graphing/charts/continuous/SineWave.java.html">ac.essex.graphing.charts.continuous.SineWave</a></span><span class="s1">; 
+<a name="l8"></span><span class="s0">import <a href="../../../ac/essex/graphing/charts/discrete/CandleStickPlot.java.html">ac.essex.graphing.charts.discrete.CandleStickPlot</a></span><span class="s1">; 
+<a name="l9"></span><span class="s0">import <a href="../../../ac/essex/graphing/charts/discrete/BarChartPlot.java.html">ac.essex.graphing.charts.discrete.BarChartPlot</a></span><span class="s1">; 
+<a name="l10"> 
+<a name="l11"></span><span class="s0">import </span><span class="s1">java.awt.*; 
+<a name="l12"> 
+<a name="l13"></span><span class="s2">/** 
+<a name="l14"> * Demonstrates how to display a graph using JavaPlot. 
+<a name="l15"> * 
+<a name="l16"> * </span><span class="s3">&lt;p&gt;</span><span class="s2"> 
+<a name="l17"> * This program is free software; you can redistribute it and/or 
+<a name="l18"> * modify it under the terms of the GNU General Public License 
+<a name="l19"> * as published by the Free Software Foundation; either version 2 
+<a name="l20"> * of the License, or (at your option) any later version, 
+<a name="l21"> * provided that any use properly credits the author. 
+<a name="l22"> * This program is distributed in the hope that it will be useful, 
+<a name="l23"> * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+<a name="l24"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+<a name="l25"> * GNU General Public License for more details at http://www.gnu.org 
+<a name="l26"> * </span><span class="s3">&lt;/p&gt;</span><span class="s2"> 
+<a name="l27"> * 
+<a name="l28"> </span><span class="s4">@author </span><span class="s2">Olly Oechsle, University of Essex 
+<a name="l29"> </span><span class="s4">@version </span><span class="s2">1.0 
+<a name="l30"> */</span><span class="s1"> 
+<a name="l31"></span><span class="s0">public class </span><span class="s1">Demo { 
+<a name="l32"> 
+<a name="l33">    </span><span class="s0">public static void </span><span class="s1">main(String[] args) { 
+<a name="l34"> 
+<a name="l35">        </span><span class="s2">/** 
+<a name="l36">         * Use the Graph Application to display the data 
+<a name="l37">         */</span><span class="s1"> 
+<a name="l38">        </span><span class="s0">new <a href="../../../ac/essex/graphing/swing/GraphApplication.java.html">GraphApplication</a></span><span class="s1">(getExampleGraph1()); 
+<a name="l39">        </span><span class="s2">//new GraphApplication(getExampleGraph2());</span><span class="s1"> 
+<a name="l40"> 
+<a name="l41">    } 
+<a name="l42"> 
+<a name="l43">    </span><span class="s0">public static <a href="../../../ac/essex/graphing/plotting/Graph.java.html">Graph</a> </span><span class="s1">getExampleGraph1() { 
+<a name="l44"> 
+<a name="l45">        </span><span class="s2">// Create some data</span><span class="s1"> 
+<a name="l46">        String[] labels = </span><span class="s0">new </span><span class="s1">String[]{</span><span class="s5">&quot;Standard GP&quot;</span><span class="s1">, </span><span class="s5">&quot;SGGP&quot;</span><span class="s1">, </span><span class="s5">&quot;1 Layer MLP&quot;</span><span class="s1">, </span><span class="s5">&quot;2 Layer MLP&quot;</span><span class="s1">, </span><span class="s5">&quot;3 Layer MLP&quot;</span><span class="s1">, </span><span class="s5">&quot;K-NN&quot;</span><span class="s1">, </span><span class="s5">&quot;Adaboosted GA&quot;</span><span class="s1">, </span><span class="s5">&quot;Kohonen NN&quot;</span><span class="s1">}; 
+<a name="l47">        </span><span class="s0">double</span><span class="s1">[] lows = </span><span class="s0">new double</span><span class="s1">[]{</span><span class="s6">31.7</span><span class="s1">,</span><span class="s6">76.7</span><span class="s1">,</span><span class="s6">64.1</span><span class="s1">,</span><span class="s6">63.3</span><span class="s1">,</span><span class="s6">63.3</span><span class="s1">,</span><span class="s6">43.3</span><span class="s1">,</span><span class="s6">63.3</span><span class="s1">,</span><span class="s6">40.8</span><span class="s1">}; 
+<a name="l48">        </span><span class="s0">double</span><span class="s1">[] high = </span><span class="s0">new double</span><span class="s1">[]{</span><span class="s6">75.8</span><span class="s1">,</span><span class="s6">85.8</span><span class="s1">,</span><span class="s6">68.3</span><span class="s1">,</span><span class="s6">68.3</span><span class="s1">,</span><span class="s6">67.5</span><span class="s1">,</span><span class="s6">55.8</span><span class="s1">,</span><span class="s6">70.8</span><span class="s1">,</span><span class="s6">53.3</span><span class="s1">}; 
+<a name="l49">        </span><span class="s0">double</span><span class="s1">[] means = </span><span class="s0">new double</span><span class="s1">[]{</span><span class="s6">60.84</span><span class="s1">,</span><span class="s6">81.66</span><span class="s1">,</span><span class="s6">66.62</span><span class="s1">,</span><span class="s6">65.8</span><span class="s1">,</span><span class="s6">65.5</span><span class="s1">,</span><span class="s6">50.5</span><span class="s1">,</span><span class="s6">68.3</span><span class="s1">,</span><span class="s6">48.8</span><span class="s1">}; 
+<a name="l50"> 
+<a name="l51">        </span><span class="s2">// All the graph settings are stored in this object.</span><span class="s1"> 
+<a name="l52">        <a href="../../../ac/essex/graphing/plotting/PlotSettings.java.html">PlotSettings</a> p = </span><span class="s0">new <a href="../../../ac/essex/graphing/plotting/PlotSettings.java.html">PlotSettings</a></span><span class="s1">(); 
+<a name="l53">         
+<a name="l54">        p.setMinX(</span><span class="s6">0</span><span class="s1">); 
+<a name="l55">        p.setMinY(</span><span class="s6">0</span><span class="s1">); 
+<a name="l56"> 
+<a name="l57">        p.setMaxX(labels.length); 
+<a name="l58">        p.setMaxY(</span><span class="s6">100</span><span class="s1">); 
+<a name="l59"> 
+<a name="l60">        p.setGridSpacingX(</span><span class="s6">1</span><span class="s1">); 
+<a name="l61">        p.setGridSpacingY(</span><span class="s6">10</span><span class="s1">); 
+<a name="l62"> 
+<a name="l63">        </span><span class="s2">// Set the title</span><span class="s1"> 
+<a name="l64">        p.setTitle(</span><span class="s5">&quot;Performance Comparison for the Pasta Experiment&quot;</span><span class="s1">); 
+<a name="l65"> 
+<a name="l66">        </span><span class="s2">// Create the graph object</span><span class="s1"> 
+<a name="l67">        <a href="../../../ac/essex/graphing/plotting/Graph.java.html">Graph</a> graph = </span><span class="s0">new <a href="../../../ac/essex/graphing/plotting/Graph.java.html">Graph</a></span><span class="s1">(p); 
+<a name="l68"> 
+<a name="l69">        </span><span class="s2">// Add a CandleStick plot to the graph's function list</span><span class="s1"> 
+<a name="l70">        graph.functions.add(</span><span class="s0">new <a href="../../../ac/essex/graphing/charts/discrete/BarChartPlot.java.html">BarChartPlot</a></span><span class="s1">(labels, high, means, lows)); 
+<a name="l71">        </span><span class="s2">//graph.functions.add(new CandleStickPlot(labels, high, means, lows));</span><span class="s1"> 
+<a name="l72"> 
+<a name="l73">        </span><span class="s0">return </span><span class="s1">graph; 
+<a name="l74"> 
+<a name="l75">    } 
+<a name="l76"> 
+<a name="l77">    </span><span class="s0">public static <a href="../../../ac/essex/graphing/plotting/Graph.java.html">Graph</a> </span><span class="s1">getExampleGraph2() { 
+<a name="l78"> 
+<a name="l79">        <a href="../../../ac/essex/graphing/plotting/PlotSettings.java.html">PlotSettings</a> p = </span><span class="s0">new <a href="../../../ac/essex/graphing/plotting/PlotSettings.java.html">PlotSettings</a></span><span class="s1">(-</span><span class="s6">2</span><span class="s1">, </span><span class="s6">2</span><span class="s1">, -</span><span class="s6">1</span><span class="s1">, </span><span class="s6">1</span><span class="s1">); 
+<a name="l80">        p.setPlotColor(Color.RED); 
+<a name="l81">        p.setGridSpacingX(</span><span class="s6">0.5</span><span class="s1">); 
+<a name="l82">        p.setGridSpacingY(</span><span class="s6">0.5</span><span class="s1">); 
+<a name="l83">        p.setTitle(</span><span class="s5">&quot;Two functions being rendered together&quot;</span><span class="s1">); 
+<a name="l84">        <a href="../../../ac/essex/graphing/plotting/Graph.java.html">Graph</a> graph = </span><span class="s0">new <a href="../../../ac/essex/graphing/plotting/Graph.java.html">Graph</a></span><span class="s1">(p); 
+<a name="l85">        graph.functions.add(</span><span class="s0">new <a href="../../../ac/essex/graphing/charts/continuous/Circle1.java.html">Circle1</a></span><span class="s1">()); 
+<a name="l86">        graph.functions.add(</span><span class="s0">new <a href="../../../ac/essex/graphing/charts/continuous/SineWave.java.html">SineWave</a></span><span class="s1">()); 
+<a name="l87"> 
+<a name="l88">        </span><span class="s0">return </span><span class="s1">graph; 
+<a name="l89">    } 
+<a name="l90"> 
+<a name="l91">} 
+<a name="l92"></span></pre>
+</body>
+</html>
