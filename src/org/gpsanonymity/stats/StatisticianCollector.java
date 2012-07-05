@@ -1,4 +1,4 @@
-package org.gpsanonymity.data;
+package org.gpsanonymity.stats;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.CloseAction;
 
 import org.gpsanonymity.Main;
+import org.gpsanonymity.data.methods.MinimalAreaCloud;
 import org.gpsanonymity.io.Importer;
 import org.openstreetmap.josm.actions.NewAction;
 

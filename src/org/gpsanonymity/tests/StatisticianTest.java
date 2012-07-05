@@ -2,7 +2,7 @@ package org.gpsanonymity.tests;
 
 import java.io.FileNotFoundException;
 
-import org.gpsanonymity.data.Statistician;
+import org.gpsanonymity.stats.Statistician;
 import org.junit.Test;
 
 public class StatisticianTest {

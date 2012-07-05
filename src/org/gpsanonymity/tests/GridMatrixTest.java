@@ -1,6 +1,6 @@
 package org.gpsanonymity.tests;
 
-import org.gpsanonymity.data.GridMatrix;
+import org.gpsanonymity.data.methods.GridMatrix;
 import org.gpsanonymity.merge.MergeGPS;
 import org.junit.Test;
 import org.openstreetmap.josm.data.coor.LatLon;

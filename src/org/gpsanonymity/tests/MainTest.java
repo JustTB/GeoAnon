@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.gpsanonymity.Main;
-import org.gpsanonymity.data.Statistician;
 import org.gpsanonymity.io.IOFunctions;
+import org.gpsanonymity.stats.Statistician;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openstreetmap.josm.data.coor.LatLon;

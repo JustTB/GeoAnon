@@ -1,4 +1,4 @@
-package org.gpsanonymity.data;
+package org.gpsanonymity.stats;
 
 import java.awt.Color;
 import java.awt.Graphics;

@@ -1,4 +1,4 @@
-package org.gpsanonymity.data;
+package org.gpsanonymity.stats;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import org.gpsanonymity.data.MergedWayPoint;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.WayPoint;
