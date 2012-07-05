@@ -229,8 +229,30 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 			Bounds correctedResult,result= getValue(w, h);
 			if(!result.contains(wp.getCoor())){
 				correctedResult=getValue(w+1, h);
+				if(correctedResult.contains(wp.getCoor())){
+					return correctedResult;
+				}
+				correctedResult=getValue(w+2, h);
+				if(correctedResult.contains(wp.getCoor())){
+					return correctedResult;
+				}
+				correctedResult=getValue(w+3, h);
+				if(correctedResult.contains(wp.getCoor())){
+					return correctedResult;
+				}
+				correctedResult=getValue(w+4, h);
+				if(correctedResult.contains(wp.getCoor())){
+					return correctedResult;
+				}
+				correctedResult=getValue(w+5, h);
+				if(correctedResult.contains(wp.getCoor())){
+					return correctedResult;
+				}
+				
 				if(!correctedResult.contains(wp.getCoor())){
 					correctedResult=findFieldSimple(wp);
+					Tupel<Integer> coor =getKey(correctedResult);
+					System.out.println();
 				}
 				return correctedResult;
 			} 

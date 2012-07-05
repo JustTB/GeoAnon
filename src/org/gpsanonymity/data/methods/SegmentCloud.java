@@ -144,9 +144,9 @@ public class SegmentCloud extends Cloud{
 									)
 							)
 //						&& MergeGPS.haveNotTheSamePoints(seg,seg2)
-						&& (MergeGPS.calculateAngle(seg, seg2)<angelAllowance *(0.5*Math.PI)//90°*angelAllowance 
-								|| (MergeGPS.calculateAngle(seg, seg2)>(1-angelAllowance)*Math.PI
-										&& ignoreDirection)) //90*(1-angelAllowance) if ignoreDirection==true
+//						&& (MergeGPS.calculateAngle(seg, seg2)<angelAllowance *(0.5*Math.PI)//90°*angelAllowance 
+//								|| (MergeGPS.calculateAngle(seg, seg2)>(1-angelAllowance)*Math.PI
+//										&& ignoreDirection)) //90*(1-angelAllowance) if ignoreDirection==true
 						&& haveNoTrackInCommon(seg,seg2)
 						){
 					Double distance = getDistance(seg, seg2);
