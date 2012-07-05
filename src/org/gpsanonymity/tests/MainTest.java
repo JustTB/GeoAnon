@@ -44,12 +44,17 @@ public class MainTest {
 	}
 	@Test
 	public void testMergeTracksOnGrid(){
-		Statistician statistician = new Statistician();
-		IOFunctions.exportTracks(
-				Main.mergingTracksOnGrid(
-						Main.importTracks("input/Berlin/Berlin23_20.gpx"),
-						3, 4.0,0.5, statistician).getTracks(),
-				"output/GPXMergeTracksOnGrid_1_2_0.5.gpx");
+		int k=3;
+		double gridsize=2;
+		for (String file : getSimpleTestData()) {
+			System.out.println("File: "+file);
+			Statistician statistician = new Statistician();
+			IOFunctions.exportTracks(
+					Main.mergingTracksOnGrid(
+							Main.importTracks(file),
+							k, gridsize,0.5, statistician).getTracks(),
+					"output/GPXGridMerge"+file.substring(file.lastIndexOf('/')+1,file.lastIndexOf('.'))+"_"+k+"_"+gridsize+".gpx");
+		}
 	}
 	@Test
 	public void testMergeTracksKMeansCloud(){
@@ -86,7 +91,7 @@ public class MainTest {
 		}
 	}
 	@Test
-	public void testMergeTracks(){
+	public void testSegmentCloudMerge(){
 		int k=3;
 		int segmentLenght=2;
 		double pointDensity=5;
