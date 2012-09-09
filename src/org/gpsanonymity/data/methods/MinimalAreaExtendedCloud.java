@@ -1,9 +1,11 @@
-package org.gpsanonymity.data;
+package org.gpsanonymity.data.methods;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.gpsanonymity.data.MergedWayPoint;
+import org.gpsanonymity.data.Statistician;
 import org.gpsanonymity.merge.MergeGPS;
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;

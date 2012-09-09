@@ -6,6 +6,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.gpsanonymity.data.Statistician;
+import org.gpsanonymity.data.methods.GridMatrix;
+import org.gpsanonymity.data.methods.KMeansCloud;
+import org.gpsanonymity.data.methods.MinimalAreaCloud;
+import org.gpsanonymity.data.methods.MinimalAreaExtendedCloud;
+import org.gpsanonymity.data.methods.SegmentCloud;
+import org.gpsanonymity.data.methods.SegmentClusterCloud;
 import org.gpsanonymity.io.IOFunctions;
 import org.gpsanonymity.io.Importer;
 import org.gpsanonymity.merge.MergeGPS;
@@ -72,13 +78,13 @@ public class Main {
 		intoleranceList.add(3);
 		intoleranceList.add(4);
 		intoleranceList.add(5);
-		intoleranceList.add(10);
+		//intoleranceList.add(10);
 		minimalAreaDistanceList=new LinkedList<Double>();
 		minimalAreaDistanceList.add(0.0);
-/*		minimalAreaDistanceList.add(1.0);
+		minimalAreaDistanceList.add(1.0);
 		minimalAreaDistanceList.add(2.0);
 		minimalAreaDistanceList.add(4.0);
-		minimalAreaDistanceList.add(8.0);*/
+		minimalAreaDistanceList.add(8.0);
 		inputFileList = new LinkedList<String>();
 		inputFileList.add("output/Berlin.dat");
 		inputFileList.add("output/McPomm.dat");

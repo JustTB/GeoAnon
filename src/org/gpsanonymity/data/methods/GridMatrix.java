@@ -1,9 +1,13 @@
-package org.gpsanonymity.data;
+package org.gpsanonymity.data.methods;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.gpsanonymity.data.BiMap;
+import org.gpsanonymity.data.Matrix;
+import org.gpsanonymity.data.MergedWayPoint;
+import org.gpsanonymity.data.Statistician;
 import org.gpsanonymity.merge.MergeGPS;
 import org.openstreetmap.josm.data.Bounds;
 import org.openstreetmap.josm.data.coor.LatLon;
@@ -95,9 +99,7 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	public void generateTracks(int k) {
 		connectPoints(k);
 		tracks=MergeGPS.buildTracks(new LinkedList<MergedWayPoint>(mergedWaypoints.values()),k);
-		for(MergedWayPoint mwp : mergedWaypoints.valueKey.keySet()){
-			mwp.unmarkAllConnections();
-		}	
+		
 	}
 	public List<GpxTrack> getTracks() {
 		return tracks;
