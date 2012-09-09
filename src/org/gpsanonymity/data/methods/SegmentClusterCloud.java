@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.gpsanonymity.data.MergedWayPoint;
+import org.gpsanonymity.data.Statistician;
 import org.gpsanonymity.merge.MergeGPS;
-import org.gpsanonymity.stats.Statistician;
 import org.openstreetmap.josm.data.gpx.GpxTrack;
 import org.openstreetmap.josm.data.gpx.GpxTrackSegment;
 import org.openstreetmap.josm.data.gpx.WayPoint;
