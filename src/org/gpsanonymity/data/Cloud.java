@@ -80,6 +80,13 @@ public abstract class Cloud {
 
 	protected void buildTracks() {
 		tracks=MergeGPS.buildTracks(mergedWaypoints , k);
+		unmarkMergedWaypoints();
+	}
+
+	protected void unmarkMergedWaypoints() {
+		for(MergedWayPoint mwp : mergedWaypoints){
+			mwp.unmarkAllConnections();
+		}
 	}
 
 	protected void updateMergedWaypoints() {
