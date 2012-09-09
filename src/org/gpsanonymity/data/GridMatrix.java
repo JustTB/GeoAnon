@@ -95,7 +95,9 @@ public class GridMatrix extends Matrix<Integer, Bounds> {
 	public void generateTracks(int k) {
 		connectPoints(k);
 		tracks=MergeGPS.buildTracks(new LinkedList<MergedWayPoint>(mergedWaypoints.values()),k);
-		
+		for(MergedWayPoint mwp : mergedWaypoints.valueKey.keySet()){
+			mwp.unmarkAllConnections();
+		}	
 	}
 	public List<GpxTrack> getTracks() {
 		return tracks;

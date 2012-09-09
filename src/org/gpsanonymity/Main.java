@@ -5,12 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.gpsanonymity.data.MinimalAreaCloud;
-import org.gpsanonymity.data.MinimalAreaExtendedCloud;
-import org.gpsanonymity.data.GridMatrix;
-import org.gpsanonymity.data.KMeansCloud;
-import org.gpsanonymity.data.SegmentCloud;
-import org.gpsanonymity.data.SegmentClusterCloud;
 import org.gpsanonymity.data.Statistician;
 import org.gpsanonymity.io.IOFunctions;
 import org.gpsanonymity.io.Importer;
@@ -50,7 +44,7 @@ public class Main {
 		kList.add(100);
 		kList.add(200);
 		distanceList=new LinkedList<Double>();
-		distanceList.add(0.5);
+		//distanceList.add(0.5);
 		distanceList.add(1.0);
 		distanceList.add(2.0);
 		distanceList.add(4.0);
@@ -72,6 +66,7 @@ public class Main {
 		angelAllowanceList.add(0.75);
 		angelAllowanceList.add(1.0);
 		intoleranceList= new LinkedList<Integer>();
+		intoleranceList.add(0);
 		intoleranceList.add(1);
 		intoleranceList.add(2);
 		intoleranceList.add(3);
@@ -80,15 +75,15 @@ public class Main {
 		intoleranceList.add(10);
 		minimalAreaDistanceList=new LinkedList<Double>();
 		minimalAreaDistanceList.add(0.0);
-		minimalAreaDistanceList.add(1.0);
+/*		minimalAreaDistanceList.add(1.0);
 		minimalAreaDistanceList.add(2.0);
 		minimalAreaDistanceList.add(4.0);
-		minimalAreaDistanceList.add(8.0);
+		minimalAreaDistanceList.add(8.0);*/
 		inputFileList = new LinkedList<String>();
-		inputFileList.add("output/Belluno.dat");
 		inputFileList.add("output/Berlin.dat");
 		inputFileList.add("output/McPomm.dat");
-		//////////////////////Bounds and Filenames ///////////////////////////
+		inputFileList.add("output/Belluno.dat");
+		//////////////////////Bounds and Filenames ///////////////////////////*/
 		boundsAndFilenames = new HashMap<Bounds, String>();
 		//Belluno
 		double minLat=45.940;
@@ -97,7 +92,7 @@ public class Main {
 		double maxLon=12.328;
 		Bounds bounds = new Bounds(new LatLon(minLat,minLon),new LatLon(maxLat,maxLon));
 		String filename= "input/Belluno/Belluno.gpx";
-		boundsAndFilenames.put(bounds, filename);
+		//boundsAndFilenames.put(bounds, filename);
 		//Berlin
 		minLat=52.286;
 		minLon=12.914;
@@ -106,21 +101,13 @@ public class Main {
 		bounds = new Bounds(new LatLon(minLat,minLon),new LatLon(maxLat,maxLon));
 		filename= "input/Berlin/Berlin.gpx";
 		boundsAndFilenames.put(bounds, filename);
-		//South of Cairo
-		minLat=27.595;
-		minLon=30.333;
-		maxLat=29.907;
-		maxLon=31.508;
-		bounds = new Bounds(new LatLon(minLat,minLon),new LatLon(maxLat,maxLon));
-		filename= "input/SoCairo/SoCairo.gpx";
-		boundsAndFilenames.put(bounds, filename);
 	}
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		initialize();
-		//downloadData();
+		downloadData();
 		simulateTrackSegmentCloudMerge();
 		simulateTrackGridMerge();
 		simulateTrackCliqueCloakMerge();
@@ -189,7 +176,8 @@ public class Main {
 						if(pointDensity>7 || pointDensity==0){
 							KMeansCloud kMeansCloud=null;
 							Statistician statistician = new Statistician();
-							for(Integer k: kList){
+							for(int i=kList.size()-1;i>=0;i--){
+								Integer k = kList.get(i);
 								String statisticianPath = "output/stats/"
 										+ "KMeansMerge"
 										+ path.substring(path.lastIndexOf("/")+1).replace(".dat", "")
@@ -225,7 +213,7 @@ public class Main {
 								SegmentCloud segmentCloud=null;
 								Statistician statistician = new Statistician();
 								for(Integer k: kList){
-									if(trackDistance<pointDensity && pointDensity>=2){
+									if(trackDistance<pointDensity && pointDensity>=2 || pointDensity==0.0){
 										String statisticianPath = "output/stats/"
 												+ "SegmentCloudMerge"
 												+ path.substring(path.lastIndexOf("/")+1).replace(".dat", "")
@@ -246,7 +234,7 @@ public class Main {
 												+".ps";
 										if(!(new File(statisticianPath)).exists()){
 											System.out.println(statisticianPath);
-											if(kList.get(0)==k){
+											if(segmentCloud==null){
 												segmentCloud=mergingTracksWithSegmentCloud(importer.current(), k,pointDensity, trackDistance, true,angelAllowance,statistician);
 											}else{
 												segmentCloud.initAgainWithHigherK(k, statistician);

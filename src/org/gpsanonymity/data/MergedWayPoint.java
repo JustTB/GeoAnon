@@ -429,6 +429,12 @@ public class MergedWayPoint extends org.openstreetmap.josm.data.gpx.WayPoint{
 	public Collection<WayPoint> getWayPoints() {
 		return sourceWaypoints;
 	}
+
+	public void unmarkAllConnections() {
+		for(MergedWayPoint mwp :connections.keySet()){
+			connections.put(mwp,false);
+		}
+	}
 	
 
 }
